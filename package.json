@@ -1,5 +1,5 @@
 {
-  "name": "simap-mcp",
+  "name": "@digilac/simap-mcp",
   "version": "1.0.0",
   "description": "MCP server for SIMAP.ch - Swiss public procurement platform",
   "type": "module",
