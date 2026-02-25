@@ -58,23 +58,34 @@ npm test
 
 ## Development Workflow
 
-### 1. Create a Branch
+### 1. Fork and Clone
+
+1. Fork the repository on GitHub
+2. Clone your fork locally:
+
+```bash
+git clone https://github.com/<your-username>/simap-mcp.git
+cd simap-mcp
+git remote add upstream https://github.com/Digilac/simap-mcp.git
+```
+
+### 2. Create a Branch
 
 ```bash
 git checkout main
-git pull origin main
+git pull upstream main
 git checkout -b feature/my-feature
 # or
 git checkout -b fix/my-fix
 ```
 
-### 2. Develop
+### 3. Develop
 
 - Follow the structure in [ARCHITECTURE.md](./ARCHITECTURE.md)
 - Write tests for your code
 - Commit regularly with clear messages
 
-### 3. Verify Before Pushing
+### 4. Verify Before Pushing
 
 ```bash
 npm run lint
@@ -83,13 +94,13 @@ npm run build
 npm test
 ```
 
-### 4. Push and Open a PR
+### 5. Push and Open a PR
 
 ```bash
 git push origin feature/my-feature
 ```
 
-Then create a Pull Request on GitHub.
+Then open a Pull Request from your fork to the `main` branch of `Digilac/simap-mcp`.
 
 ## Adding a New Tool
 
