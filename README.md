@@ -1,8 +1,7 @@
 # SIMAP MCP Server
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Node.js](https://img.shields.io/badge/Node.js-20%2B-green.svg)](https://nodejs.org/)
-[![MCP](https://img.shields.io/badge/MCP-Compatible-purple.svg)](https://modelcontextprotocol.io/)
+[![npm](https://img.shields.io/npm/v/@digilac/simap-mcp)](https://www.npmjs.com/package/@digilac/simap-mcp)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 
 An [MCP](https://modelcontextprotocol.io/) (Model Context Protocol) server for interacting with [SIMAP.ch](https://simap.ch), Switzerland's public procurement platform.
 
@@ -31,23 +30,11 @@ Developed by [Digilac](https://www.digilac.ch/).
 
 ## Installation
 
-### Prerequisites
+### Quick start with npx (recommended)
 
-- Node.js 20+
-- npm
+No installation needed — just configure your MCP client to use `npx`:
 
-### Build
-
-```bash
-git clone https://github.com/Digilac/simap-mcp.git
-cd simap-mcp
-npm install
-npm run build
-```
-
-## Configuration
-
-### Claude Code (CLI)
+#### Claude Code (CLI)
 
 Add to `~/.claude/settings.json`:
 
@@ -55,16 +42,54 @@ Add to `~/.claude/settings.json`:
 {
   "mcpServers": {
     "simap": {
-      "command": "node",
-      "args": ["/absolute/path/to/simap-mcp/dist/index.js"]
+      "command": "npx",
+      "args": ["-y", "@digilac/simap-mcp"]
     }
   }
 }
 ```
 
-### Claude Desktop
+#### Claude Desktop
 
 Add to your Claude Desktop configuration file:
+
+```json
+{
+  "mcpServers": {
+    "simap": {
+      "command": "npx",
+      "args": ["-y", "@digilac/simap-mcp"]
+    }
+  }
+}
+```
+
+### Global install
+
+```bash
+npm install -g @digilac/simap-mcp
+```
+
+Then configure with the direct command:
+
+```json
+{
+  "mcpServers": {
+    "simap": {
+      "command": "simap-mcp"
+    }
+  }
+}
+```
+
+### From source
+
+```bash
+git clone https://github.com/Digilac/simap-mcp.git
+cd simap-mcp
+npm install
+npm run build
+```
 
 ```json
 {
