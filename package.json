@@ -1,11 +1,11 @@
 {
   "name": "@digilac/simap-mcp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "MCP server for SIMAP.ch - Swiss public procurement platform",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "simap-mcp": "./dist/index.js"
+    "simap-mcp": "dist/index.js"
   },
   "scripts": {
     "build": "tsc",
