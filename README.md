@@ -4,6 +4,7 @@
 [![NPM Version](https://img.shields.io/npm/v/%40digilac%2Fsimap-mcp?style=for-the-badge)](https://www.npmjs.com/package/@digilac/simap-mcp)
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Digilac/simap-mcp/publish.yml?style=for-the-badge)](https://github.com/Digilac/simap-mcp/actions/workflows/publish.yml)
 ![NPM Downloads](https://img.shields.io/npm/dw/%40digilac%2Fsimap-mcp?style=for-the-badge)
+[![MCP Badge](https://lobehub.com/badge/mcp/digilac-simap-mcp?style=for-the-badge)](https://lobehub.com/mcp/digilac-simap-mcp)
 
 An [MCP](https://modelcontextprotocol.io/) (Model Context Protocol) server for interacting with [SIMAP.ch](https://simap.ch), Switzerland's public procurement platform.
 

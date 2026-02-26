@@ -1,6 +1,7 @@
 {
   "name": "@digilac/simap-mcp",
-  "version": "1.0.3",
+  "version": "1.0.4",
+  "mcpName" : "io.github.Digilac/simap-mcp",
   "description": "MCP server for SIMAP.ch - Swiss public procurement platform",
   "type": "module",
   "main": "dist/index.js",
