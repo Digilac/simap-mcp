@@ -1,7 +1,9 @@
 # SIMAP MCP Server
 
-[![npm](https://img.shields.io/npm/v/@digilac/simap-mcp)](https://www.npmjs.com/package/@digilac/simap-mcp)
-[![MIT License](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
+[![GitHub License](https://img.shields.io/github/license/Digilac/simap-mcp?style=for-the-badge)](./LICENSE)
+[![NPM Version](https://img.shields.io/npm/v/%40digilac%2Fsimap-mcp?style=for-the-badge)](https://www.npmjs.com/package/@digilac/simap-mcp)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Digilac/simap-mcp/publish.yml?style=for-the-badge)](https://github.com/Digilac/simap-mcp/actions/workflows/publish.yml)
+![NPM Downloads](https://img.shields.io/npm/dw/%40digilac%2Fsimap-mcp?style=for-the-badge)
 
 An [MCP](https://modelcontextprotocol.io/) (Model Context Protocol) server for interacting with [SIMAP.ch](https://simap.ch), Switzerland's public procurement platform.
 
