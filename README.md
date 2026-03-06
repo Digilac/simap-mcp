@@ -1,10 +1,11 @@
 # SIMAP MCP Server
 
-[![GitHub License](https://img.shields.io/github/license/Digilac/simap-mcp?style=for-the-badge)](./LICENSE)
-[![NPM Version](https://img.shields.io/npm/v/%40digilac%2Fsimap-mcp?style=for-the-badge)](https://www.npmjs.com/package/@digilac/simap-mcp)
-[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Digilac/simap-mcp/publish.yml?style=for-the-badge)](https://github.com/Digilac/simap-mcp/actions/workflows/publish.yml)
-![NPM Downloads](https://img.shields.io/npm/dw/%40digilac%2Fsimap-mcp?style=for-the-badge)
-[![MCP Badge](https://lobehub.com/badge/mcp/digilac-simap-mcp?style=for-the-badge)](https://lobehub.com/mcp/digilac-simap-mcp)
+[![GitHub License](https://img.shields.io/github/license/Digilac/simap-mcp)](./LICENSE)
+[![NPM Version](https://img.shields.io/npm/v/%40digilac%2Fsimap-mcp)](https://www.npmjs.com/package/@digilac/simap-mcp)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Digilac/simap-mcp/publish.yml)](https://github.com/Digilac/simap-mcp/actions/workflows/publish.yml)
+![NPM Downloads](https://img.shields.io/npm/dw/%40digilac%2Fsimap-mcp)
+[![MCP Badge](https://lobehub.com/badge/mcp/digilac-simap-mcp)](https://lobehub.com/mcp/digilac-simap-mcp)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Digilac/simap-mcp)
 
 An [MCP](https://modelcontextprotocol.io/) (Model Context Protocol) server for interacting with [SIMAP.ch](https://simap.ch), Switzerland's public procurement platform.
 
@@ -313,6 +314,15 @@ simap-mcp/
 ├── dist/                         # Compiled output
 └── package.json
 ```
+
+## Listed on
+
+* [Official MCP Registry](https://registry.modelcontextprotocol.io/?q=io.github.Digilac%2Fsimap-mcp)
+* [Awesome MCP Servers](https://mcpservers.org/servers/digilac/simap-mcp)
+* [LobeHub](https://lobehub.com/mcp/digilac-simap-mcp)
+* [MCP.so](https://mcp.so/server/simap-mcp-server/Digilac)
+* [MCP Market](https://mcpmarket.com/server/simap)
+* [MCP Marketplace](https://mcp-marketplace.io/server/io-github-digilac-simap-mcp)
 
 ## Contributing
 
