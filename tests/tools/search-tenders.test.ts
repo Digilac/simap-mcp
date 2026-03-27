@@ -128,6 +128,36 @@ describe("search_tenders schema validation", () => {
       const result = schema.safeParse({ issuedByOrganizations: uuids });
       expect(result.success).toBe(false);
     });
+
+    it("should reject projectSubTypes exceeding max length", () => {
+      const types = Array.from({ length: 11 }, () => "construction");
+      const result = schema.safeParse({ projectSubTypes: types });
+      expect(result.success).toBe(false);
+    });
+
+    it("should reject processTypes exceeding max length", () => {
+      const types = Array.from({ length: 6 }, () => "open");
+      const result = schema.safeParse({ processTypes: types });
+      expect(result.success).toBe(false);
+    });
+
+    it("should reject pubTypes exceeding max length", () => {
+      const types = Array.from({ length: 15 }, () => "tender");
+      const result = schema.safeParse({ pubTypes: types });
+      expect(result.success).toBe(false);
+    });
+
+    it("should reject bkpCodes exceeding max length", () => {
+      const codes = Array.from({ length: 51 }, (_, i) => String(i + 1));
+      const result = schema.safeParse({ bkpCodes: codes });
+      expect(result.success).toBe(false);
+    });
+
+    it("should reject cantons exceeding max length", () => {
+      const cantons = Array.from({ length: 27 }, () => "ZH");
+      const result = schema.safeParse({ cantons: cantons });
+      expect(result.success).toBe(false);
+    });
   });
 
   describe("processTypes parameter", () => {
