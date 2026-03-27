@@ -31,14 +31,13 @@ export class SimapClient {
    * Simple sliding window rate limiter.
    */
   private async checkRateLimit(): Promise<void> {
-    const now = Date.now();
+    let now = Date.now();
     this.requestTimestamps = this.requestTimestamps.filter((t) => now - t < 60000);
-    if (this.requestTimestamps.length >= this.maxRequestsPerMinute) {
+    while (this.requestTimestamps.length >= this.maxRequestsPerMinute) {
       const waitTime = 60000 - (now - this.requestTimestamps[0]);
       await new Promise((resolve) => setTimeout(resolve, waitTime));
-      this.requestTimestamps = this.requestTimestamps.filter(
-        (t) => Date.now() - t < 60000
-      );
+      now = Date.now();
+      this.requestTimestamps = this.requestTimestamps.filter((t) => now - t < 60000);
     }
     this.requestTimestamps.push(Date.now());
   }
