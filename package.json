@@ -1,6 +1,6 @@
 {
   "name": "@digilac/simap-mcp",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "mcpName" : "io.github.Digilac/simap-mcp",
   "description": "MCP server for SIMAP.ch - Swiss public procurement platform",
   "type": "module",
@@ -49,7 +49,7 @@
   },
   "homepage": "https://github.com/Digilac/simap-mcp#readme",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.27.1",
+    "@modelcontextprotocol/sdk": "^1.28.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -59,6 +59,6 @@
     "prettier": "^3.8.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.2",
-    "vitest": "^4.1.1"
+    "vitest": "^4.1.2"
   }
 }
