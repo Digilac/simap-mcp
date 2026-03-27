@@ -9,6 +9,7 @@ import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
 import type { ProcOfficesPublicResponse, ProcOfficeType } from "../../types/api.js";
 import { ProcOfficesPublicResponseSchema } from "../../types/schemas.js";
+import { escapeInlineCode } from "../../utils/formatting.js";
 
 /**
  * Schema for search_proc_offices parameters.
@@ -81,7 +82,7 @@ async function handler(params: { search?: string; institutionId?: string }) {
     });
 
     if (!data.procOffices || data.procOffices.length === 0) {
-      const searchDesc = search ? ` for \`${search}\`` : "";
+      const searchDesc = search ? ` for \`${escapeInlineCode(search)}\`` : "";
       return {
         content: [
           {
@@ -93,7 +94,7 @@ async function handler(params: { search?: string; institutionId?: string }) {
     }
 
     let result = search
-      ? `# Procurement Offices for \`${search}\`\n\n`
+      ? `# Procurement Offices for \`${escapeInlineCode(search)}\`\n\n`
       : `# Procurement Offices\n\n`;
 
     result += `${data.procOffices.length} office(s) found.\n\n`;

@@ -11,6 +11,7 @@ import type { InstitutionsResponse, Institution } from "../../types/api.js";
 import { InstitutionsResponseSchema } from "../../types/schemas.js";
 import type { Language } from "../../types/common.js";
 import { getTranslation } from "../../utils/translation.js";
+import { escapeInlineCode } from "../../utils/formatting.js";
 
 /**
  * Schema for list_institutions parameters.
@@ -80,14 +81,14 @@ async function handler(params: { search?: string; lang: Language }) {
         content: [
           {
             type: "text" as const,
-            text: `No institutions found for \`${search}\`.`,
+            text: `No institutions found for \`${escapeInlineCode(search!)}\`.`,
           },
         ],
       };
     }
 
     let result = search
-      ? `# Public Institutions for \`${search}\`\n\n`
+      ? `# Public Institutions for \`${escapeInlineCode(search)}\`\n\n`
       : `# Public Institutions\n\n`;
 
     result += `${institutions.length} institution(s) found.\n\n`;
