@@ -48,7 +48,12 @@ const SWISS_CANTONS = [
  * Schema for search_tenders parameters.
  */
 const schema = {
-  search: z.string().max(500).optional().describe("Search text (min 3 characters)"),
+  search: z
+    .string()
+    .min(3)
+    .max(500)
+    .optional()
+    .describe("Search text (min 3 characters)"),
   publicationFrom: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Must be YYYY-MM-DD format")
@@ -170,7 +175,7 @@ async function handler(params: {
   // Build query parameters
   const queryParams: Record<string, string | string[] | undefined> = {};
 
-  if (search && search.length >= 3) {
+  if (search) {
     queryParams.search = search;
   }
 
