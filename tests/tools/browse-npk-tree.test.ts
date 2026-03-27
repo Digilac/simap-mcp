@@ -7,7 +7,7 @@ import { z } from "zod";
 
 // Schema definition (mirrors the one in browse-npk-tree.ts)
 const schema = z.object({
-  parentCode: z.string().optional(),
+  parentCode: z.string().regex(/^[0-9]{1,10}$/).optional(),
   lang: z.enum(["de", "fr", "it", "en"]).default("fr"),
 });
 
@@ -19,7 +19,7 @@ describe("browse_npk_tree schema validation", () => {
     });
 
     it("should accept multi-digit codes", () => {
-      const result = schema.safeParse({ parentCode: "123.45" });
+      const result = schema.safeParse({ parentCode: "12345" });
       expect(result.success).toBe(true);
     });
 
@@ -32,6 +32,16 @@ describe("browse_npk_tree schema validation", () => {
       const result = schema.safeParse({});
       expect(result.success).toBe(true);
       expect(result.data?.parentCode).toBeUndefined();
+    });
+
+    it("should reject non-numeric codes", () => {
+      const result = schema.safeParse({ parentCode: "abc" });
+      expect(result.success).toBe(false);
+    });
+
+    it("should reject codes with decimal points", () => {
+      const result = schema.safeParse({ parentCode: "123.45" });
+      expect(result.success).toBe(false);
     });
   });
 

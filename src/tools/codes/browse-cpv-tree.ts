@@ -8,6 +8,7 @@ import { z } from "zod";
 import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
 import type { CPVCode, CPVSearchResponse } from "../../types/api.js";
+import { CPVSearchResponseSchema } from "../../types/schemas.js";
 import type { Language } from "../../types/common.js";
 import { getTranslation } from "../../utils/translation.js";
 
@@ -44,11 +45,12 @@ async function handler(params: { parentCode?: string; lang: Language }) {
 
     const data = await simap.get<CPVSearchResponse>(ENDPOINTS.CPV_LIST, {
       params: queryParams,
+      schema: CPVSearchResponseSchema,
     });
 
     if (!data.codes || data.codes.length === 0) {
       const message = parentCode
-        ? `No subcategories found for code ${parentCode}.`
+        ? `No subcategories found for code \`${parentCode}\`.`
         : `No root CPV categories found.`;
       return {
         content: [
@@ -63,7 +65,7 @@ async function handler(params: { parentCode?: string; lang: Language }) {
     const codes = getDirectChildren(data.codes);
 
     let result = parentCode
-      ? `# CPV Subcategories of ${parentCode}\n\n`
+      ? `# CPV Subcategories of \`${parentCode}\`\n\n`
       : `# Root CPV Categories\n\n`;
 
     result += `${codes.length} category(ies) found.\n\n`;
@@ -80,11 +82,12 @@ async function handler(params: { parentCode?: string; lang: Language }) {
       content: [{ type: "text" as const, text: result }],
     };
   } catch (error) {
+    console.error("browse_cpv_tree error:", error);
     return {
       content: [
         {
           type: "text" as const,
-          text: `CPV navigation error: ${error instanceof Error ? error.message : String(error)}`,
+          text: "An error occurred while browsing CPV codes. Please try again.",
         },
       ],
       isError: true,

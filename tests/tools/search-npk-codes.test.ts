@@ -7,7 +7,7 @@ import { z } from "zod";
 
 // Schema definition (mirrors the one in search-npk-codes.ts)
 const schema = z.object({
-  query: z.string().min(1),
+  query: z.string().min(1).max(500),
   lang: z.enum(["de", "fr", "it", "en"]).default("fr"),
 });
 
@@ -35,6 +35,11 @@ describe("search_npk_codes schema validation", () => {
 
     it("should require query parameter", () => {
       const result = schema.safeParse({});
+      expect(result.success).toBe(false);
+    });
+
+    it("should reject query exceeding max length", () => {
+      const result = schema.safeParse({ query: "a".repeat(501) });
       expect(result.success).toBe(false);
     });
   });

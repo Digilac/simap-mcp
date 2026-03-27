@@ -8,6 +8,7 @@ import { z } from "zod";
 import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
 import type { CodeSearchResponse } from "../../types/api.js";
+import { CodeSearchResponseSchema } from "../../types/schemas.js";
 import type { Language } from "../../types/common.js";
 import { getTranslation } from "../../utils/translation.js";
 
@@ -15,7 +16,7 @@ import { getTranslation } from "../../utils/translation.js";
  * Schema for search_bkp_codes parameters.
  */
 const schema = {
-  query: z.string().min(1).describe("Search term (keyword or code number)"),
+  query: z.string().min(1).max(500).describe("Search term (keyword or code number)"),
   lang: z.enum(["de", "fr", "it", "en"]).default("en").describe("Search language"),
 };
 
@@ -31,6 +32,7 @@ async function handler(params: { query: string; lang: Language }) {
         query,
         language: lang,
       },
+      schema: CodeSearchResponseSchema,
     });
 
     if (!data.codes || data.codes.length === 0) {
@@ -38,13 +40,13 @@ async function handler(params: { query: string; lang: Language }) {
         content: [
           {
             type: "text" as const,
-            text: `No BKP codes found for "${query}".`,
+            text: `No BKP codes found for \`${query}\`.`,
           },
         ],
       };
     }
 
-    let result = `# BKP Codes for "${query}"\n\n`;
+    let result = `# BKP Codes for \`${query}\`\n\n`;
     result += `${data.codes.length} result(s) found.\n\n`;
 
     for (const item of data.codes) {
@@ -58,11 +60,12 @@ async function handler(params: { query: string; lang: Language }) {
       content: [{ type: "text" as const, text: result }],
     };
   } catch (error) {
+    console.error("search_bkp_codes error:", error);
     return {
       content: [
         {
           type: "text" as const,
-          text: `BKP search error: ${error instanceof Error ? error.message : String(error)}`,
+          text: "An error occurred while searching BKP codes. Please try again.",
         },
       ],
       isError: true,

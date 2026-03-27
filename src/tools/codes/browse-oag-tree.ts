@@ -8,6 +8,7 @@ import { z } from "zod";
 import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
 import type { CodeEntry, CodeSearchResponse } from "../../types/api.js";
+import { CodeTreeResponseSchema } from "../../types/schemas.js";
 import type { Language } from "../../types/common.js";
 import { getTranslation } from "../../utils/translation.js";
 
@@ -17,6 +18,7 @@ import { getTranslation } from "../../utils/translation.js";
 const schema = {
   parentCode: z
     .string()
+    .regex(/^[0-9]{1,10}$/)
     .optional()
     .describe("Parent OAG code. If omitted, shows root categories"),
   lang: z.enum(["de", "fr", "it", "en"]).default("en").describe("Display language"),
@@ -43,11 +45,11 @@ async function handler(params: { parentCode?: string; lang: Language }) {
 
     const data = await simap.get<
       CodeSearchResponse & { codes: (CodeEntry & { codes?: CodeEntry[] })[] }
-    >(ENDPOINTS.OAG_LIST, { params: queryParams });
+    >(ENDPOINTS.OAG_LIST, { params: queryParams, schema: CodeTreeResponseSchema });
 
     if (!data.codes || data.codes.length === 0) {
       const message = parentCode
-        ? `No OAG subcategories found for code ${parentCode}.`
+        ? `No OAG subcategories found for code \`${parentCode}\`.`
         : `No root OAG categories found.`;
       return {
         content: [
@@ -60,7 +62,7 @@ async function handler(params: { parentCode?: string; lang: Language }) {
     }
 
     let result = parentCode
-      ? `# OAG Subcategories of ${parentCode}\n\n`
+      ? `# OAG Subcategories of \`${parentCode}\`\n\n`
       : `# Root OAG Categories\n\n`;
 
     result += `${data.codes.length} category(ies) found.\n\n`;
@@ -77,11 +79,12 @@ async function handler(params: { parentCode?: string; lang: Language }) {
       content: [{ type: "text" as const, text: result }],
     };
   } catch (error) {
+    console.error("browse_oag_tree error:", error);
     return {
       content: [
         {
           type: "text" as const,
-          text: `OAG navigation error: ${error instanceof Error ? error.message : String(error)}`,
+          text: "An error occurred while browsing OAG codes. Please try again.",
         },
       ],
       isError: true,

@@ -8,6 +8,7 @@ import { z } from "zod";
 import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
 import type { CPVCode, CPVSearchResponse } from "../../types/api.js";
+import { CPVSearchResponseSchema } from "../../types/schemas.js";
 import type { Language } from "../../types/common.js";
 import { getTranslation } from "../../utils/translation.js";
 
@@ -15,7 +16,7 @@ import { getTranslation } from "../../utils/translation.js";
  * Schema for search_cpv_codes parameters.
  */
 const schema = {
-  query: z.string().min(1).describe("Search term (keyword or code prefix)"),
+  query: z.string().min(1).max(500).describe("Search term (keyword or code prefix)"),
   lang: z.enum(["de", "fr", "it", "en"]).default("en").describe("Search language"),
 };
 
@@ -44,6 +45,7 @@ async function handler(params: { query: string; lang: Language }) {
         query,
         language: lang,
       },
+      schema: CPVSearchResponseSchema,
     });
 
     if (!data.codes || data.codes.length === 0) {
@@ -51,7 +53,7 @@ async function handler(params: { query: string; lang: Language }) {
         content: [
           {
             type: "text" as const,
-            text: `No CPV codes found for "${query}".`,
+            text: `No CPV codes found for \`${query}\`.`,
           },
         ],
       };
@@ -60,7 +62,7 @@ async function handler(params: { query: string; lang: Language }) {
     // Flatten nested structure
     const flatCodes = flattenCodes(data.codes);
 
-    let result = `# CPV Codes for "${query}"\n\n`;
+    let result = `# CPV Codes for \`${query}\`\n\n`;
     result += `${flatCodes.length} result(s) found.\n\n`;
 
     for (const item of flatCodes) {
@@ -74,11 +76,12 @@ async function handler(params: { query: string; lang: Language }) {
       content: [{ type: "text" as const, text: result }],
     };
   } catch (error) {
+    console.error("search_cpv_codes error:", error);
     return {
       content: [
         {
           type: "text" as const,
-          text: `CPV search error: ${error instanceof Error ? error.message : String(error)}`,
+          text: "An error occurred while searching CPV codes. Please try again.",
         },
       ],
       isError: true,

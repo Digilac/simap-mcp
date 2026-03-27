@@ -5,11 +5,18 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { z } from "zod";
 
+// Valid Swiss canton codes
+const SWISS_CANTONS = [
+  "AG", "AI", "AR", "BE", "BL", "BS", "FR", "GE", "GL", "GR",
+  "JU", "LU", "NE", "NW", "OW", "SG", "SH", "SO", "SZ", "TG",
+  "TI", "UR", "VD", "VS", "ZG", "ZH",
+] as const;
+
 // Schema definition (mirrors the one in search-tenders.ts)
 const schema = z.object({
-  search: z.string().optional(),
-  publicationFrom: z.string().optional(),
-  publicationUntil: z.string().optional(),
+  search: z.string().max(500).optional(),
+  publicationFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Must be YYYY-MM-DD format").optional(),
+  publicationUntil: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Must be YYYY-MM-DD format").optional(),
   projectSubTypes: z
     .array(
       z.enum([
@@ -25,10 +32,12 @@ const schema = z.object({
         "request_for_information",
       ])
     )
+    .max(10)
     .optional(),
-  cantons: z.array(z.string()).optional(),
+  cantons: z.array(z.enum(SWISS_CANTONS)).max(26).optional(),
   processTypes: z
     .array(z.enum(["open", "selective", "invitation", "direct", "no_process"]))
+    .max(5)
     .optional(),
   pubTypes: z
     .array(
@@ -49,15 +58,78 @@ const schema = z.object({
         "abandonment",
       ])
     )
+    .max(14)
     .optional(),
-  cpvCodes: z.array(z.string().regex(/^[0-9]{8}$/)).optional(),
-  bkpCodes: z.array(z.string().regex(/^[0-9]{1,3}(\.[0-9])?$/)).optional(),
-  issuedByOrganizations: z.array(z.string().uuid()).optional(),
-  lastItem: z.string().optional(),
+  cpvCodes: z.array(z.string().regex(/^[0-9]{8}$/)).max(50).optional(),
+  bkpCodes: z.array(z.string().regex(/^[0-9]{1,3}(\.[0-9])?$/)).max(50).optional(),
+  issuedByOrganizations: z.array(z.string().uuid()).max(50).optional(),
+  lastItem: z.string().regex(/^\d{8}\|.+$/, "Invalid pagination token format").optional(),
   lang: z.enum(["de", "fr", "it", "en"]).default("fr"),
 });
 
 describe("search_tenders schema validation", () => {
+  describe("search parameter", () => {
+    it("should accept valid search strings", () => {
+      const result = schema.safeParse({ search: "informatique" });
+      expect(result.success).toBe(true);
+    });
+
+    it("should reject strings exceeding max length", () => {
+      const result = schema.safeParse({ search: "a".repeat(501) });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe("publicationFrom parameter", () => {
+    it("should accept valid YYYY-MM-DD dates", () => {
+      const result = schema.safeParse({ publicationFrom: "2026-01-15" });
+      expect(result.success).toBe(true);
+    });
+
+    it("should reject invalid date formats", () => {
+      expect(schema.safeParse({ publicationFrom: "2026/01/15" }).success).toBe(false);
+      expect(schema.safeParse({ publicationFrom: "not-a-date" }).success).toBe(false);
+      expect(schema.safeParse({ publicationFrom: "20260115" }).success).toBe(false);
+    });
+  });
+
+  describe("publicationUntil parameter", () => {
+    it("should accept valid YYYY-MM-DD dates", () => {
+      const result = schema.safeParse({ publicationUntil: "2026-12-31" });
+      expect(result.success).toBe(true);
+    });
+
+    it("should reject invalid date formats", () => {
+      expect(schema.safeParse({ publicationUntil: "31-12-2026" }).success).toBe(false);
+    });
+  });
+
+  describe("cantons parameter", () => {
+    it("should accept valid Swiss canton codes", () => {
+      const result = schema.safeParse({ cantons: ["VD", "GE", "ZH"] });
+      expect(result.success).toBe(true);
+    });
+
+    it("should reject invalid canton codes", () => {
+      const result = schema.safeParse({ cantons: ["XX"] });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe("array length limits", () => {
+    it("should reject cpvCodes exceeding max length", () => {
+      const codes = Array.from({ length: 51 }, (_, i) => String(i).padStart(8, "0"));
+      const result = schema.safeParse({ cpvCodes: codes });
+      expect(result.success).toBe(false);
+    });
+
+    it("should reject issuedByOrganizations exceeding max length", () => {
+      const uuids = Array.from({ length: 51 }, () => "123e4567-e89b-12d3-a456-426614174000");
+      const result = schema.safeParse({ issuedByOrganizations: uuids });
+      expect(result.success).toBe(false);
+    });
+  });
+
   describe("processTypes parameter", () => {
     it("should accept valid process types", () => {
       const result = schema.safeParse({
@@ -153,11 +225,17 @@ describe("search_tenders schema validation", () => {
   });
 
   describe("lastItem parameter", () => {
-    it("should accept pagination token", () => {
+    it("should accept valid pagination token", () => {
       const result = schema.safeParse({
         lastItem: "20260204|24568",
       });
       expect(result.success).toBe(true);
+    });
+
+    it("should reject malformed pagination tokens", () => {
+      expect(schema.safeParse({ lastItem: "invalid" }).success).toBe(false);
+      expect(schema.safeParse({ lastItem: "2026-02-04|24568" }).success).toBe(false);
+      expect(schema.safeParse({ lastItem: "12345|" }).success).toBe(false);
     });
   });
 

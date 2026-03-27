@@ -7,6 +7,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
 import type { CantonsResponse } from "../../types/api.js";
+import { CantonsResponseSchema } from "../../types/schemas.js";
 
 /**
  * Canton names mapping (API only returns codes).
@@ -45,7 +46,9 @@ const CANTON_NAMES: Record<string, string> = {
  */
 async function handler() {
   try {
-    const data = await simap.get<CantonsResponse>(ENDPOINTS.CANTONS);
+    const data = await simap.get<CantonsResponse>(ENDPOINTS.CANTONS, {
+      schema: CantonsResponseSchema,
+    });
 
     if (!data.cantons || data.cantons.length === 0) {
       return {
@@ -72,11 +75,12 @@ async function handler() {
       content: [{ type: "text" as const, text: result }],
     };
   } catch (error) {
+    console.error("list_cantons error:", error);
     return {
       content: [
         {
           type: "text" as const,
-          text: `Error retrieving cantons: ${error instanceof Error ? error.message : String(error)}`,
+          text: "An error occurred while retrieving cantons. Please try again.",
         },
       ],
       isError: true,

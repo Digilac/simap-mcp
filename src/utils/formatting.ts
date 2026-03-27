@@ -199,5 +199,10 @@ export function formatJsonPreview(data: unknown, maxLength = 3000): string {
   if (json.length <= maxLength) {
     return json;
   }
-  return json.substring(0, maxLength) + "\n... (truncated)";
+  const truncated = json.substring(0, maxLength);
+  const lastNewline = truncated.lastIndexOf("\n");
+  return (
+    (lastNewline > 0 ? truncated.substring(0, lastNewline) : truncated) +
+    "\n... (truncated)"
+  );
 }

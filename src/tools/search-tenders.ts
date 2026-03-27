@@ -8,20 +8,55 @@ import { z } from "zod";
 import { simap } from "../api/client.js";
 import { ENDPOINTS } from "../api/endpoints.js";
 import type { ProjectsSearchResponse } from "../types/api.js";
+import { ProjectsSearchResponseSchema } from "../types/schemas.js";
 import type { Language } from "../types/common.js";
 import { formatProject, formatHeader } from "../utils/formatting.js";
+
+/**
+ * Valid Swiss canton codes.
+ */
+const SWISS_CANTONS = [
+  "AG",
+  "AI",
+  "AR",
+  "BE",
+  "BL",
+  "BS",
+  "FR",
+  "GE",
+  "GL",
+  "GR",
+  "JU",
+  "LU",
+  "NE",
+  "NW",
+  "OW",
+  "SG",
+  "SH",
+  "SO",
+  "SZ",
+  "TG",
+  "TI",
+  "UR",
+  "VD",
+  "VS",
+  "ZG",
+  "ZH",
+] as const;
 
 /**
  * Schema for search_tenders parameters.
  */
 const schema = {
-  search: z.string().optional().describe("Search text (min 3 characters)"),
+  search: z.string().max(500).optional().describe("Search text (min 3 characters)"),
   publicationFrom: z
     .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Must be YYYY-MM-DD format")
     .optional()
     .describe("Publication start date (format YYYY-MM-DD)"),
   publicationUntil: z
     .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Must be YYYY-MM-DD format")
     .optional()
     .describe("Publication end date (format YYYY-MM-DD)"),
   projectSubTypes: z
@@ -39,14 +74,17 @@ const schema = {
         "request_for_information",
       ])
     )
+    .max(10)
     .optional()
     .describe("Project types to filter"),
   cantons: z
-    .array(z.string())
+    .array(z.enum(SWISS_CANTONS))
+    .max(26)
     .optional()
     .describe("Swiss cantons (e.g., BE, VD, GE, ZH)"),
   processTypes: z
     .array(z.enum(["open", "selective", "invitation", "direct", "no_process"]))
+    .max(5)
     .optional()
     .describe("Process types (open, selective, invitation, direct, no_process)"),
   pubTypes: z
@@ -68,22 +106,27 @@ const schema = {
         "abandonment",
       ])
     )
+    .max(14)
     .optional()
     .describe("Publication types (tender, award_tender, correction, etc.)"),
   cpvCodes: z
     .array(z.string().regex(/^[0-9]{8}$/))
+    .max(50)
     .optional()
     .describe("CPV codes (8 digits, e.g., 72000000 for IT services)"),
   bkpCodes: z
     .array(z.string().regex(/^[0-9]{1,3}(\.[0-9])?$/))
+    .max(50)
     .optional()
     .describe("BKP codes for construction (e.g., 211 for masonry)"),
   issuedByOrganizations: z
     .array(z.string().uuid())
+    .max(50)
     .optional()
     .describe("UUIDs of issuing organizations"),
   lastItem: z
     .string()
+    .regex(/^\d{8}\|.+$/, "Invalid pagination token format")
     .optional()
     .describe("Pagination token (format: date|projectNumber) to retrieve the next page"),
   lang: z
@@ -180,6 +223,7 @@ async function handler(params: {
   try {
     const data = await simap.get<ProjectsSearchResponse>(ENDPOINTS.PROJECT_SEARCH, {
       params: queryParams,
+      schema: ProjectsSearchResponseSchema,
     });
 
     if (data.projects.length === 0) {
@@ -210,11 +254,12 @@ async function handler(params: {
       content: [{ type: "text" as const, text: result }],
     };
   } catch (error) {
+    console.error("search_tenders error:", error);
     return {
       content: [
         {
           type: "text" as const,
-          text: `Search error: ${error instanceof Error ? error.message : String(error)}`,
+          text: "An error occurred while searching tenders. Please try again.",
         },
       ],
       isError: true,

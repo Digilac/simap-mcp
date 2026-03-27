@@ -2,15 +2,17 @@
  * HTTP client for SIMAP API.
  */
 
+import { type ZodType } from "zod";
 import { SIMAP_API_BASE } from "./endpoints.js";
 import { SimapApiError } from "../types/api.js";
 
 /**
  * Request options for the SIMAP client.
  */
-export interface RequestOptions {
+export interface RequestOptions<T = unknown> {
   params?: Record<string, string | string[] | undefined>;
   timeout?: number;
+  schema?: ZodType<T>;
 }
 
 /**
@@ -18,16 +20,38 @@ export interface RequestOptions {
  */
 export class SimapClient {
   private readonly baseUrl: string;
+  private requestTimestamps: number[] = [];
+  private readonly maxRequestsPerMinute = 60;
 
   constructor(baseUrl: string = SIMAP_API_BASE) {
     this.baseUrl = baseUrl;
   }
 
   /**
+   * Simple sliding window rate limiter.
+   */
+  private async checkRateLimit(): Promise<void> {
+    const now = Date.now();
+    this.requestTimestamps = this.requestTimestamps.filter((t) => now - t < 60000);
+    if (this.requestTimestamps.length >= this.maxRequestsPerMinute) {
+      const waitTime = 60000 - (now - this.requestTimestamps[0]);
+      await new Promise((resolve) => setTimeout(resolve, waitTime));
+      this.requestTimestamps = this.requestTimestamps.filter(
+        (t) => Date.now() - t < 60000
+      );
+    }
+    this.requestTimestamps.push(Date.now());
+  }
+
+  /**
    * Performs a GET request to the SIMAP API.
    */
-  async get<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+  async get<T>(endpoint: string, options: RequestOptions<T> = {}): Promise<T> {
+    await this.checkRateLimit();
+
     const url = this.buildUrl(endpoint, options.params);
+
+    console.error(`[${new Date().toISOString()}] GET ${endpoint}`);
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), options.timeout ?? 30000);
@@ -49,7 +73,11 @@ export class SimapClient {
         );
       }
 
-      return (await response.json()) as T;
+      const json = await response.json();
+      if (options.schema) {
+        return options.schema.parse(json);
+      }
+      return json as T;
     } finally {
       clearTimeout(timeoutId);
     }
@@ -62,10 +90,8 @@ export class SimapClient {
     endpoint: string,
     params?: Record<string, string | string[] | undefined>
   ): string {
-    // Concatenate baseUrl and endpoint properly
-    // (new URL with absolute path would replace the entire path)
-    const fullUrl = this.baseUrl.replace(/\/$/, "") + endpoint;
-    const url = new URL(fullUrl);
+    const url = new URL(this.baseUrl);
+    url.pathname = url.pathname.replace(/\/$/, "") + endpoint;
 
     if (params) {
       for (const [key, value] of Object.entries(params)) {
