@@ -40,8 +40,13 @@ export function formatProject(project: ProjectSearchEntry, lang: Language): stri
 
   if (project.orderAddress) {
     const addr = project.orderAddress;
-    if (addr.city || addr.canton) {
-      result += `- **Location:** ${[addr.city, addr.canton].filter(Boolean).join(", ")}\n`;
+    const city =
+      typeof addr.city === "object" && addr.city !== null
+        ? getTranslation(addr.city, lang)
+        : addr.city;
+    const canton = addr.cantonId || addr.canton;
+    if (city || canton) {
+      result += `- **Location:** ${[city, canton].filter(Boolean).join(", ")}\n`;
     }
   }
 

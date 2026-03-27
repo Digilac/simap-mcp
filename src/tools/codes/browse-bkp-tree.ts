@@ -27,7 +27,7 @@ const schema = {
 /**
  * Check if a code entry has children (nested codes).
  */
-function hasChildren(item: CodeEntry & { codes?: CodeEntry[] }): boolean {
+function hasChildren(item: CodeEntry & { codes?: CodeEntry[] | null }): boolean {
   return !!(item.codes && item.codes.length > 0);
 }
 
@@ -44,7 +44,7 @@ async function handler(params: { parentCode?: string; lang: Language }) {
     }
 
     const data = await simap.get<
-      CodeSearchResponse & { codes: (CodeEntry & { codes?: CodeEntry[] })[] }
+      CodeSearchResponse & { codes: (CodeEntry & { codes?: CodeEntry[] | null })[] }
     >(ENDPOINTS.BKP_LIST, { params: queryParams, schema: CodeTreeResponseSchema });
 
     if (!data.codes || data.codes.length === 0) {

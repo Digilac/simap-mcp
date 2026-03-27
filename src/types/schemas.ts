@@ -7,15 +7,15 @@ import { z } from "zod";
 // --- Common schemas ---
 
 export const TranslationSchema = z.object({
-  de: z.string().optional(),
-  fr: z.string().optional(),
-  it: z.string().optional(),
-  en: z.string().optional(),
+  de: z.string().nullish(),
+  fr: z.string().nullish(),
+  it: z.string().nullish(),
+  en: z.string().nullish(),
 });
 
 export const PaginationSchema = z.object({
-  lastItem: z.string().optional(),
-  itemsPerPage: z.number().optional(),
+  lastItem: z.string().nullish(),
+  itemsPerPage: z.number().nullish(),
 });
 
 // --- Code schemas ---
@@ -26,11 +26,11 @@ const CPVCodeBaseSchema = z.object({
 });
 
 type CPVCodeSchema = z.infer<typeof CPVCodeBaseSchema> & {
-  codes?: CPVCodeSchema[];
+  codes?: CPVCodeSchema[] | null;
 };
 
 export const CPVCodeSchema: z.ZodType<CPVCodeSchema> = CPVCodeBaseSchema.extend({
-  codes: z.lazy(() => z.array(CPVCodeSchema)).optional(),
+  codes: z.lazy(() => z.array(CPVCodeSchema)).nullish(),
 });
 
 export const CPVSearchResponseSchema = z.object({
@@ -47,7 +47,7 @@ export const CodeSearchResponseSchema = z.object({
 });
 
 const CodeEntryWithChildrenSchema = CodeEntrySchema.extend({
-  codes: z.array(CodeEntrySchema).optional(),
+  codes: z.array(CodeEntrySchema).nullish(),
 });
 
 export const CodeTreeResponseSchema = z.object({
@@ -70,7 +70,7 @@ export const CantonsResponseSchema = z.object({
 export const InstitutionSchema = z.object({
   id: z.string(),
   name: TranslationSchema,
-  parentInstitutionId: z.string().nullable().optional(),
+  parentInstitutionId: z.string().nullish(),
 });
 
 export const InstitutionsResponseSchema = z.object({
@@ -79,11 +79,17 @@ export const InstitutionsResponseSchema = z.object({
 
 // --- Project search schemas ---
 
-export const OrderAddressSchema = z.object({
-  city: z.string().optional(),
-  canton: z.string().optional(),
-  country: z.string().optional(),
-});
+export const OrderAddressSchema = z
+  .object({
+    city: z.union([z.string(), TranslationSchema]).nullish(),
+    cantonId: z.string().nullish(),
+    countryId: z.string().nullish(),
+    postalCode: z.string().nullish(),
+    // Keep old field names for backward compatibility
+    canton: z.string().nullish(),
+    country: z.string().nullish(),
+  })
+  .passthrough();
 
 export const LotEntrySchema = z.object({
   lotId: z.string(),
@@ -107,8 +113,8 @@ export const ProjectSearchEntrySchema = z.object({
   pubType: z.string(),
   corrected: z.boolean(),
   procOfficeName: TranslationSchema,
-  orderAddress: OrderAddressSchema.optional(),
-  lots: z.array(LotEntrySchema).optional(),
+  orderAddress: OrderAddressSchema.nullish(),
+  lots: z.array(LotEntrySchema).nullish(),
 });
 
 export const ProjectsSearchResponseSchema = z.object({
@@ -119,17 +125,17 @@ export const ProjectsSearchResponseSchema = z.object({
 // --- Project header schemas ---
 
 export const ProjectHeaderSchema = z.object({
-  projectNumber: z.string().optional(),
-  title: TranslationSchema.optional(),
-  projectSubType: z.string().optional(),
-  processType: z.string().optional(),
+  projectNumber: z.string().nullish(),
+  title: TranslationSchema.nullish(),
+  projectSubType: z.string().nullish(),
+  processType: z.string().nullish(),
   latestPublication: z
     .object({
-      publicationDate: z.string().optional(),
-      publicationNumber: z.string().optional(),
-      pubType: z.string().optional(),
+      publicationDate: z.string().nullish(),
+      publicationNumber: z.string().nullish(),
+      pubType: z.string().nullish(),
     })
-    .optional(),
+    .nullish(),
   lots: z
     .array(
       z.object({
@@ -137,69 +143,69 @@ export const ProjectHeaderSchema = z.object({
         lotTitle: TranslationSchema,
         latestPublication: z
           .object({
-            publicationNumber: z.string().optional(),
-            publicationDate: z.string().optional(),
+            publicationNumber: z.string().nullish(),
+            publicationDate: z.string().nullish(),
           })
-          .optional(),
+          .nullish(),
       })
     )
-    .optional(),
+    .nullish(),
 });
 
 // --- Publication details schemas ---
 
 export const PublicationDetailsSchema = z
   .object({
-    type: z.string().optional(),
+    type: z.string().nullish(),
     "project-info": z
       .object({
-        title: TranslationSchema.optional(),
-        description: TranslationSchema.optional(),
+        title: TranslationSchema.nullish(),
+        description: TranslationSchema.nullish(),
       })
-      .optional(),
+      .nullish(),
     procurement: z
       .object({
         estimatedValue: z
           .object({
             value: z.number(),
-            currency: z.string().optional(),
+            currency: z.string().nullish(),
           })
-          .optional(),
-        cpvCodes: z.array(z.string()).optional(),
+          .nullish(),
+        cpvCodes: z.array(z.string()).nullish(),
       })
-      .optional(),
+      .nullish(),
     deadlines: z
       .object({
-        offerDeadline: z.string().optional(),
-        questionDeadline: z.string().optional(),
+        offerDeadline: z.string().nullish(),
+        questionDeadline: z.string().nullish(),
       })
-      .optional(),
+      .nullish(),
     contact: z
       .object({
-        organization: TranslationSchema.optional(),
-        contactPerson: z.string().optional(),
-        email: z.string().optional(),
-        phone: z.string().optional(),
+        organization: TranslationSchema.nullish(),
+        contactPerson: z.string().nullish(),
+        email: z.string().nullish(),
+        phone: z.string().nullish(),
       })
-      .optional(),
+      .nullish(),
     decision: z
       .object({
         awardees: z
           .array(
             z.object({
-              name: z.string().optional(),
-              organization: TranslationSchema.optional(),
+              name: z.string().nullish(),
+              organization: TranslationSchema.nullish(),
               price: z
                 .object({
                   value: z.number(),
-                  currency: z.string().optional(),
+                  currency: z.string().nullish(),
                 })
-                .optional(),
+                .nullish(),
             })
           )
-          .optional(),
+          .nullish(),
       })
-      .optional(),
+      .nullish(),
   })
   .passthrough();
 
@@ -208,7 +214,7 @@ export const PublicationDetailsSchema = z
 export const PastPublicationEntrySchema = z.object({
   id: z.string(),
   publicationDate: z.string(),
-  lotNumber: z.number().nullable().optional(),
+  lotNumber: z.number().nullish(),
   projectType: z.string(),
   projectSubType: z.string(),
   processType: z.string(),
