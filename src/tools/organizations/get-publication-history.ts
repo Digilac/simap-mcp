@@ -7,7 +7,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { simap } from "../../api/client.js";
 import { ENDPOINTS, SIMAP_API_BASE } from "../../api/endpoints.js";
-import type { PastPublicationsResponse } from "../../types/api.js";
+import { SimapApiError, type PastPublicationsResponse } from "../../types/api.js";
 import { PastPublicationsResponseSchema } from "../../types/schemas.js";
 
 /**
@@ -102,7 +102,7 @@ async function handler(params: { publicationId: string; lotId?: string }) {
     console.error("get_publication_history error:", error);
 
     // API returns 400 when no history is available
-    if (error instanceof Error && error.message.includes("400")) {
+    if (error instanceof SimapApiError && error.statusCode === 400) {
       return {
         content: [
           {
