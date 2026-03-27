@@ -11,6 +11,7 @@ import type { CodeSearchResponse } from "../../types/api.js";
 import { CodeSearchResponseSchema } from "../../types/schemas.js";
 import type { Language } from "../../types/common.js";
 import { getTranslation } from "../../utils/translation.js";
+import { escapeInlineCode } from "../../utils/formatting.js";
 
 /**
  * Schema for search_npk_codes parameters.
@@ -40,13 +41,13 @@ async function handler(params: { query: string; lang: Language }) {
         content: [
           {
             type: "text" as const,
-            text: `No NPK codes found for \`${query}\`.`,
+            text: `No NPK codes found for \`${escapeInlineCode(query)}\`.`,
           },
         ],
       };
     }
 
-    let result = `# NPK Codes for \`${query}\`\n\n`;
+    let result = `# NPK Codes for \`${escapeInlineCode(query)}\`\n\n`;
     result += `${data.codes.length} result(s) found.\n\n`;
 
     for (const item of data.codes) {

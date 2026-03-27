@@ -13,6 +13,14 @@ import { getTranslation } from "./translation.js";
 const SIMAP_BASE_URL = "https://www.simap.ch";
 
 /**
+ * Escapes user input for safe embedding in inline Markdown code spans.
+ * Strips newlines and escapes backticks.
+ */
+export function escapeInlineCode(value: string): string {
+  return value.replace(/[`]/g, "\\`").replace(/[\r\n]+/g, " ");
+}
+
+/**
  * Builds the SIMAP.ch URL for a project.
  */
 export function buildSimapUrl(projectId: string, lang: Language): string {

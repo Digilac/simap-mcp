@@ -11,6 +11,7 @@ import type { CodeSearchResponse } from "../../types/api.js";
 import { CodeSearchResponseSchema } from "../../types/schemas.js";
 import type { Language } from "../../types/common.js";
 import { getTranslation } from "../../utils/translation.js";
+import { escapeInlineCode } from "../../utils/formatting.js";
 
 /**
  * Schema for search_bkp_codes parameters.
@@ -40,13 +41,13 @@ async function handler(params: { query: string; lang: Language }) {
         content: [
           {
             type: "text" as const,
-            text: `No BKP codes found for \`${query}\`.`,
+            text: `No BKP codes found for \`${escapeInlineCode(query)}\`.`,
           },
         ],
       };
     }
 
-    let result = `# BKP Codes for \`${query}\`\n\n`;
+    let result = `# BKP Codes for \`${escapeInlineCode(query)}\`\n\n`;
     result += `${data.codes.length} result(s) found.\n\n`;
 
     for (const item of data.codes) {
