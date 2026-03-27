@@ -7,7 +7,9 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { simap } from "../api/client.js";
 import { ENDPOINTS } from "../api/endpoints.js";
+import { SimapApiError } from "../types/api.js";
 import type { ProjectHeader, PublicationDetails } from "../types/api.js";
+import { ProjectHeaderSchema, PublicationDetailsSchema } from "../types/schemas.js";
 import type { Language } from "../types/common.js";
 import {
   formatProjectHeader,
@@ -25,6 +27,21 @@ const schema = {
 };
 
 /**
+ * Fetches data, returning null only for 404 (not found).
+ * Re-throws all other errors.
+ */
+async function fetchOrNull<T>(promise: Promise<T>): Promise<T | null> {
+  try {
+    return await promise;
+  } catch (error) {
+    if (error instanceof SimapApiError && error.statusCode === 404) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+/**
  * Handler for get_tender_details.
  */
 async function handler(params: {
@@ -37,10 +54,17 @@ async function handler(params: {
   try {
     // Fetch both the header and the publication details in parallel
     const [header, details] = await Promise.all([
-      simap.get<ProjectHeader>(ENDPOINTS.PROJECT_HEADER(projectId)).catch(() => null),
-      simap
-        .get<PublicationDetails>(ENDPOINTS.PUBLICATION_DETAILS(projectId, publicationId))
-        .catch(() => null),
+      fetchOrNull(
+        simap.get<ProjectHeader>(ENDPOINTS.PROJECT_HEADER(projectId), {
+          schema: ProjectHeaderSchema,
+        })
+      ),
+      fetchOrNull(
+        simap.get<PublicationDetails>(
+          ENDPOINTS.PUBLICATION_DETAILS(projectId, publicationId),
+          { schema: PublicationDetailsSchema }
+        )
+      ),
     ]);
 
     if (!header && !details) {
@@ -69,11 +93,12 @@ async function handler(params: {
       content: [{ type: "text" as const, text: result }],
     };
   } catch (error) {
+    console.error("get_tender_details error:", error);
     return {
       content: [
         {
           type: "text" as const,
-          text: `Error retrieving details: ${error instanceof Error ? error.message : String(error)}`,
+          text: "An error occurred while retrieving tender details. Please try again.",
         },
       ],
       isError: true,

@@ -13,7 +13,7 @@ import type { Translation, Language } from "../types/index.js";
  * @returns Translated text or empty string
  */
 export function getTranslation(
-  t: Translation | undefined,
+  t: Translation | null | undefined,
   preferredLang: Language = "fr"
 ): string {
   if (!t) return "";

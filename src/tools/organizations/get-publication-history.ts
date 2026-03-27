@@ -7,7 +7,8 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { simap } from "../../api/client.js";
 import { ENDPOINTS, SIMAP_API_BASE } from "../../api/endpoints.js";
-import type { PastPublicationsResponse } from "../../types/api.js";
+import { SimapApiError, type PastPublicationsResponse } from "../../types/api.js";
+import { PastPublicationsResponseSchema } from "../../types/schemas.js";
 
 /**
  * Schema for get_publication_history parameters.
@@ -54,7 +55,7 @@ async function handler(params: { publicationId: string; lotId?: string }) {
 
     const data = await simap.get<PastPublicationsResponse>(
       ENDPOINTS.PAST_PUBLICATIONS(publicationId),
-      { params: queryParams }
+      { params: queryParams, schema: PastPublicationsResponseSchema }
     );
 
     if (!data.pastPublications || data.pastPublications.length === 0) {
@@ -98,10 +99,10 @@ async function handler(params: { publicationId: string; lotId?: string }) {
       content: [{ type: "text" as const, text: result }],
     };
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("get_publication_history error:", error);
 
     // API returns 400 when no history is available
-    if (errorMessage.includes("400")) {
+    if (error instanceof SimapApiError && error.statusCode === 400) {
       return {
         content: [
           {
@@ -116,7 +117,7 @@ async function handler(params: { publicationId: string; lotId?: string }) {
       content: [
         {
           type: "text" as const,
-          text: `Error retrieving history: ${errorMessage}`,
+          text: "An error occurred while retrieving publication history. Please try again.",
         },
       ],
       isError: true,

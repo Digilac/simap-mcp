@@ -25,8 +25,20 @@ jobs:
       - run: npm publish
 
       - name: Install mcp-publisher
+        shell: bash
         run: |
-          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+          set -euo pipefail
+          MCP_PUBLISHER_VERSION="1.5.0"
+          ASSET="mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz"
+          curl -fSL -o "$ASSET" "https://github.com/modelcontextprotocol/registry/releases/download/v${MCP_PUBLISHER_VERSION}/${ASSET}"
+          curl -fSL -o checksums.txt "https://github.com/modelcontextprotocol/registry/releases/download/v${MCP_PUBLISHER_VERSION}/registry_${MCP_PUBLISHER_VERSION}_checksums.txt"
+          if ! grep -q "  ${ASSET}$" checksums.txt; then
+            echo "::error::Checksum entry for ${ASSET} not found in checksums.txt"
+            exit 1
+          fi
+          grep "  ${ASSET}$" checksums.txt | sha256sum -c -
+          tar xzf "$ASSET" mcp-publisher
+          rm "$ASSET" checksums.txt
 
       - name: Authenticate to MCP Registry
         run: ./mcp-publisher login github-oidc

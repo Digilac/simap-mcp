@@ -13,6 +13,14 @@ import { getTranslation } from "./translation.js";
 const SIMAP_BASE_URL = "https://www.simap.ch";
 
 /**
+ * Escapes user input for safe embedding in inline Markdown code spans.
+ * Strips newlines and escapes backticks.
+ */
+export function escapeInlineCode(value: string): string {
+  return value.replace(/[`]/g, "\\`").replace(/[\r\n]+/g, " ");
+}
+
+/**
  * Builds the SIMAP.ch URL for a project.
  */
 export function buildSimapUrl(projectId: string, lang: Language): string {
@@ -40,8 +48,13 @@ export function formatProject(project: ProjectSearchEntry, lang: Language): stri
 
   if (project.orderAddress) {
     const addr = project.orderAddress;
-    if (addr.city || addr.canton) {
-      result += `- **Location:** ${[addr.city, addr.canton].filter(Boolean).join(", ")}\n`;
+    const city =
+      typeof addr.city === "object" && addr.city !== null
+        ? getTranslation(addr.city, lang)
+        : addr.city;
+    const canton = addr.cantonId || addr.canton;
+    if (city || canton) {
+      result += `- **Location:** ${[city, canton].filter(Boolean).join(", ")}\n`;
     }
   }
 
@@ -199,5 +212,10 @@ export function formatJsonPreview(data: unknown, maxLength = 3000): string {
   if (json.length <= maxLength) {
     return json;
   }
-  return json.substring(0, maxLength) + "\n... (truncated)";
+  const truncated = json.substring(0, maxLength);
+  const lastNewline = truncated.lastIndexOf("\n");
+  return (
+    (lastNewline > 0 ? truncated.substring(0, lastNewline) : truncated) +
+    "\n... (truncated)"
+  );
 }

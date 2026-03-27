@@ -8,12 +8,19 @@ import { z } from "zod";
 import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
 import type { ProcOfficesPublicResponse, ProcOfficeType } from "../../types/api.js";
+import { ProcOfficesPublicResponseSchema } from "../../types/schemas.js";
+import { escapeInlineCode } from "../../utils/formatting.js";
 
 /**
  * Schema for search_proc_offices parameters.
  */
 const schema = {
-  search: z.string().min(3).optional().describe("Name to search (min 3 characters)"),
+  search: z
+    .string()
+    .min(3)
+    .max(500)
+    .optional()
+    .describe("Name to search (min 3 characters)"),
   institutionId: z
     .string()
     .uuid()
@@ -71,10 +78,11 @@ async function handler(params: { search?: string; institutionId?: string }) {
 
     const data = await simap.get<ProcOfficesPublicResponse>(ENDPOINTS.PROC_OFFICES, {
       params: queryParams,
+      schema: ProcOfficesPublicResponseSchema,
     });
 
     if (!data.procOffices || data.procOffices.length === 0) {
-      const searchDesc = search ? ` for "${search}"` : "";
+      const searchDesc = search ? ` for \`${escapeInlineCode(search)}\`` : "";
       return {
         content: [
           {
@@ -86,7 +94,7 @@ async function handler(params: { search?: string; institutionId?: string }) {
     }
 
     let result = search
-      ? `# Procurement Offices for "${search}"\n\n`
+      ? `# Procurement Offices for \`${escapeInlineCode(search)}\`\n\n`
       : `# Procurement Offices\n\n`;
 
     result += `${data.procOffices.length} office(s) found.\n\n`;
@@ -112,11 +120,12 @@ async function handler(params: { search?: string; institutionId?: string }) {
       content: [{ type: "text" as const, text: result }],
     };
   } catch (error) {
+    console.error("search_proc_offices error:", error);
     return {
       content: [
         {
           type: "text" as const,
-          text: `Procurement offices search error: ${error instanceof Error ? error.message : String(error)}`,
+          text: "An error occurred while searching procurement offices. Please try again.",
         },
       ],
       isError: true,

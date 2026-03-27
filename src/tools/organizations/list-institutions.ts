@@ -8,14 +8,21 @@ import { z } from "zod";
 import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
 import type { InstitutionsResponse, Institution } from "../../types/api.js";
+import { InstitutionsResponseSchema } from "../../types/schemas.js";
 import type { Language } from "../../types/common.js";
 import { getTranslation } from "../../utils/translation.js";
+import { escapeInlineCode } from "../../utils/formatting.js";
 
 /**
  * Schema for list_institutions parameters.
  */
 const schema = {
-  search: z.string().min(3).optional().describe("Filter by name (min 3 characters)"),
+  search: z
+    .string()
+    .min(3)
+    .max(500)
+    .optional()
+    .describe("Filter by name (min 3 characters)"),
   lang: z.enum(["de", "fr", "it", "en"]).default("en").describe("Language for names"),
 };
 
@@ -46,7 +53,9 @@ async function handler(params: { search?: string; lang: Language }) {
   const { search, lang } = params;
 
   try {
-    const data = await simap.get<InstitutionsResponse>(ENDPOINTS.INSTITUTIONS);
+    const data = await simap.get<InstitutionsResponse>(ENDPOINTS.INSTITUTIONS, {
+      schema: InstitutionsResponseSchema,
+    });
 
     if (!data.institutions || data.institutions.length === 0) {
       return {
@@ -72,14 +81,14 @@ async function handler(params: { search?: string; lang: Language }) {
         content: [
           {
             type: "text" as const,
-            text: `No institutions found for "${search}".`,
+            text: `No institutions found for \`${escapeInlineCode(search!)}\`.`,
           },
         ],
       };
     }
 
     let result = search
-      ? `# Public Institutions for "${search}"\n\n`
+      ? `# Public Institutions for \`${escapeInlineCode(search)}\`\n\n`
       : `# Public Institutions\n\n`;
 
     result += `${institutions.length} institution(s) found.\n\n`;
@@ -104,11 +113,12 @@ async function handler(params: { search?: string; lang: Language }) {
       content: [{ type: "text" as const, text: result }],
     };
   } catch (error) {
+    console.error("list_institutions error:", error);
     return {
       content: [
         {
           type: "text" as const,
-          text: `Error retrieving institutions: ${error instanceof Error ? error.message : String(error)}`,
+          text: "An error occurred while retrieving institutions. Please try again.",
         },
       ],
       isError: true,

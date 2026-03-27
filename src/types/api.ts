@@ -33,9 +33,12 @@ export interface LotEntry {
  * Order address information.
  */
 export interface OrderAddress {
-  city?: string;
-  canton?: string;
-  country?: string;
+  city?: string | Translation | null;
+  canton?: string | null;
+  cantonId?: string | null;
+  country?: string | null;
+  countryId?: string | null;
+  postalCode?: string | null;
 }
 
 /**
@@ -55,8 +58,8 @@ export interface ProjectSearchEntry {
   pubType: string;
   corrected: boolean;
   procOfficeName: Translation;
-  orderAddress?: OrderAddress;
-  lots?: LotEntry[];
+  orderAddress?: OrderAddress | null;
+  lots?: LotEntry[] | null;
 }
 
 /**
@@ -71,61 +74,61 @@ export interface ProjectsSearchResponse {
  * Project header information.
  */
 export interface ProjectHeader {
-  projectNumber?: string;
-  title?: Translation;
-  projectSubType?: string;
-  processType?: string;
+  projectNumber?: string | null;
+  title?: Translation | null;
+  projectSubType?: string | null;
+  processType?: string | null;
   latestPublication?: {
-    publicationDate?: string;
-    publicationNumber?: string;
-    pubType?: string;
-  };
+    publicationDate?: string | null;
+    publicationNumber?: string | null;
+    pubType?: string | null;
+  } | null;
   lots?: Array<{
     lotNumber: number;
     lotTitle: Translation;
     latestPublication?: {
-      publicationNumber?: string;
-      publicationDate?: string;
-    };
-  }>;
+      publicationNumber?: string | null;
+      publicationDate?: string | null;
+    } | null;
+  }> | null;
 }
 
 /**
  * Publication details (partial - API returns complex nested structure).
  */
 export interface PublicationDetails {
-  type?: string;
+  type?: string | null;
   "project-info"?: {
-    title?: Translation;
-    description?: Translation;
-  };
+    title?: Translation | null;
+    description?: Translation | null;
+  } | null;
   procurement?: {
     estimatedValue?: {
       value: number;
-      currency?: string;
-    };
-    cpvCodes?: string[];
-  };
+      currency?: string | null;
+    } | null;
+    cpvCodes?: string[] | null;
+  } | null;
   deadlines?: {
-    offerDeadline?: string;
-    questionDeadline?: string;
-  };
+    offerDeadline?: string | null;
+    questionDeadline?: string | null;
+  } | null;
   contact?: {
-    organization?: Translation;
-    contactPerson?: string;
-    email?: string;
-    phone?: string;
-  };
+    organization?: Translation | null;
+    contactPerson?: string | null;
+    email?: string | null;
+    phone?: string | null;
+  } | null;
   decision?: {
     awardees?: Array<{
-      name?: string;
-      organization?: Translation;
+      name?: string | null;
+      organization?: Translation | null;
       price?: {
         value: number;
-        currency?: string;
-      };
-    }>;
-  };
+        currency?: string | null;
+      } | null;
+    }> | null;
+  } | null;
   [key: string]: unknown;
 }
 
@@ -136,7 +139,7 @@ export interface PublicationDetails {
 export interface CPVCode {
   code: string;
   label: Translation;
-  codes?: CPVCode[];
+  codes?: CPVCode[] | null;
 }
 
 /**
