@@ -123,11 +123,35 @@ For each tool, test:
 ## Release Process
 
 1. Update `version` in `package.json` and `server.json` (both root and `packages[0].version`)
-2. Commit and push to `main`
-3. Create a GitHub release with `gh release create v<version>` (this creates the tag and triggers the workflow)
-4. The `publish.yml` workflow will automatically:
+2. Run `npm install` to update `package-lock.json`
+3. Commit and push to `main`
+4. Create a GitHub release with `gh release create v<version>` (this creates the tag and triggers the workflow)
+5. The `publish.yml` workflow will automatically:
    - Publish the package to npm
    - Publish the server metadata to the MCP Registry via `mcp-publisher`
+
+## Release Notes Template
+
+Use this template when creating a GitHub release with `gh release create`:
+
+```markdown
+## <emoji> <Title>
+
+<One-line summary of the release.>
+
+### <Category> (e.g. New Features, Security, Dependency Upgrades, Bug Fixes)
+
+- **Change description** — context or reason for the change
+- **Another change** — details
+
+### Tests
+
+- <N> tests across <N> test files — all passing
+
+**Full Changelog**: https://github.com/Digilac/simap-mcp/compare/v<previous>...v<current>
+```
+
+Emoji conventions: 🚀 New features, 🔒 Security, 📦 Dependencies, 🐛 Bug fixes, ♻️ Refactoring
 
 ## MCP Integration
 
