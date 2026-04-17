@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Existing tool tests import the real Zod schemas from the source modules instead of redefining local copies, eliminating schema drift.
 - TypeScript compilation target raised from ES2022 to ES2023.
 
+### Removed
+
+- Deleted `ROADMAP.md`. Future intent is tracked through GitHub issues / PRs and this changelog; a placeholder roadmap file added no value.
+
 ### Fixed
 
 - `get_tender_details`: when both the project-header and publication-details calls return 404, the tool now throws a typed `SimapApiError(404)` so the user sees the "not found" message instead of a generic error.
@@ -43,11 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added [CHANGELOG.md](./CHANGELOG.md) (this file).
 - Expanded [SECURITY.md](./SECURITY.md) with a "Production Deployment Guidance" section and a "Debug Mode" section.
 - Added a "Parameter Mapping" and "Error Handling" section to [ARCHITECTURE.md](./ARCHITECTURE.md).
-- Refreshed [CLAUDE.md](./CLAUDE.md) to match the current source layout (rate limiter, error helper, exported schemas).
-
-### Removed
-
-- Deleted `ROADMAP.md`. Future intent is tracked through GitHub issues / PRs and this changelog; a placeholder roadmap file added no value.
+- Refreshed [CLAUDE.md](./CLAUDE.md) to match the current source layout (rate limiter, error helper, exported schemas), document Conventional Commits, TypeScript strict-mode / no-`any` rule, and Keep a Changelog usage.
 
 ## [1.0.10] - Previously released
 
