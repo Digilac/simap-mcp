@@ -32,3 +32,6 @@ coverage/
 
 # Model Context Protocol
 .mcpregistry*
+
+# Claude Code worktrees
+.claude/worktrees/
