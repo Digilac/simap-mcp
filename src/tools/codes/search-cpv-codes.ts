@@ -9,17 +9,20 @@ import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
 import type { CPVCode, CPVSearchResponse } from "../../types/api.js";
 import { CPVSearchResponseSchema } from "../../types/schemas.js";
-import type { Language } from "../../types/common.js";
 import { getTranslation } from "../../utils/translation.js";
 import { escapeInlineCode } from "../../utils/formatting.js";
+import { toToolErrorResult } from "../../utils/errors.js";
 
 /**
- * Schema for search_cpv_codes parameters.
+ * Schema (raw shape) for search_cpv_codes parameters.
  */
-const schema = {
+export const searchCpvCodesInputShape = {
   query: z.string().min(1).max(500).describe("Search term (keyword or code prefix)"),
   lang: z.enum(["de", "fr", "it", "en"]).default("en").describe("Search language"),
-};
+} as const;
+
+export const searchCpvCodesInputSchema = z.object(searchCpvCodesInputShape);
+export type SearchCpvCodesInput = z.infer<typeof searchCpvCodesInputSchema>;
 
 /**
  * Flattens nested CPV codes structure into a flat array.
@@ -37,7 +40,7 @@ function flattenCodes(codes: CPVCode[], result: CPVCode[] = []): CPVCode[] {
 /**
  * Handler for search_cpv_codes.
  */
-async function handler(params: { query: string; lang: Language }) {
+async function handler(params: SearchCpvCodesInput) {
   const { query, lang } = params;
 
   try {
@@ -77,16 +80,10 @@ async function handler(params: { query: string; lang: Language }) {
       content: [{ type: "text" as const, text: result }],
     };
   } catch (error) {
-    console.error("search_cpv_codes error:", error);
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: "An error occurred while searching CPV codes. Please try again.",
-        },
-      ],
-      isError: true,
-    };
+    return toToolErrorResult(error, {
+      toolName: "search_cpv_codes",
+      action: "searching CPV codes",
+    });
   }
 }
 
@@ -97,7 +94,7 @@ export function registerSearchCpvCodes(server: McpServer): void {
   server.tool(
     "search_cpv_codes",
     "Search CPV (Common Procurement Vocabulary) codes by keyword or partial code number",
-    schema,
+    searchCpvCodesInputShape,
     handler
   );
 }

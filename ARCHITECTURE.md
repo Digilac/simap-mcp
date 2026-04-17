@@ -66,11 +66,14 @@ src/
 
 ### Tool Registration
 
-Each tool file exports a `register*` function that takes an `McpServer`:
+Each tool file exports a `register*` function that takes an `McpServer`. The third argument is a raw Zod shape (plain object of fields), not a `z.object(...)`; the matching `*InputSchema` is also exported alongside for tests.
 
 ```typescript
+export const searchTendersInputShape = { /* fields */ } as const;
+export const searchTendersInputSchema = z.object(searchTendersInputShape);
+
 export function registerSearchTenders(server: McpServer): void {
-  server.tool("search_tenders", "Description", zodSchema, handler);
+  server.tool("search_tenders", "Description", searchTendersInputShape, handler);
 }
 ```
 
@@ -80,9 +83,47 @@ Tools are grouped by domain (`codes/`, `organizations/`) with an `index.ts` that
 
 `SimapClient` is a singleton (`simap`) that handles URL building, query parameters, timeouts, and error handling. All tools use it instead of calling `fetch` directly.
 
+The client composes a `SlidingWindowRateLimiter` (default: 60 req/min, FIFO-ordered, single outstanding timer). `buildUrl` is exported as a standalone function so it can be unit-tested without instantiating a client.
+
 ### Translation
 
 `getTranslation(t, lang)` extracts text with fallback: requested lang -> de -> fr -> en -> it.
+
+### Error Handling
+
+Tool handlers convert caught errors through `toToolErrorResult()` (`src/utils/errors.ts`), which returns a user-facing message that distinguishes:
+
+- `SimapApiError` with `statusCode === 404` → "not found" message
+- `SimapApiError` 4xx (other than 404) → "SIMAP rejected the request" (HTTP status included)
+- `SimapApiError` 5xx → "SIMAP is currently unavailable"
+- `AbortError` / `fetch failed` / `ECONNREFUSED` / `ETIMEDOUT` → "Network or timeout error"
+- Anything else → generic fallback
+
+The original error is always logged to stderr first for operator debugging.
+
+### Parameter Mapping (search_tenders)
+
+The SIMAP API uses different parameter names than the tool surface. The mapping and default-filter logic live in `src/tools/search-tenders-params.ts` (`SEARCH_TENDERS_PARAM_MAP` constant, `buildTenderSearchQuery()` function), not inline in the handler.
+
+| User-facing | SIMAP API | Transform |
+|---|---|---|
+| `search` | `search` | — |
+| `publicationFrom` | `newestPublicationFrom` | — |
+| `publicationUntil` | `newestPublicationUntil` | — |
+| `projectSubTypes` | `projectSubTypes` | skip empty array |
+| `cantons` | `orderAddressCantons` | `.toUpperCase()` on each |
+| `processTypes` | `processTypes` | skip empty array |
+| `pubTypes` | `newestPubTypes` | skip empty array |
+| `cpvCodes` | `cpvCodes` | skip empty array |
+| `bkpCodes` | `bkpCodes` | skip empty array |
+| `issuedByOrganizations` | `issuedByOrganizations` | skip empty array |
+| `lastItem` | `lastItem` | — |
+
+If no filter is provided, `publicationFrom` defaults to today's date so the API call does not return the full dataset.
+
+### Debug Logging
+
+When `SIMAP_MCP_DEBUG=1` (or `true`), the HTTP client emits verbose stderr logs (full URL, response status, byte size, duration). Default is off — see [SECURITY.md](./SECURITY.md#debug-mode).
 
 ## Naming Conventions
 

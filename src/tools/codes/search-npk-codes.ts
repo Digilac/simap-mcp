@@ -9,22 +9,25 @@ import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
 import type { CodeSearchResponse } from "../../types/api.js";
 import { CodeSearchResponseSchema } from "../../types/schemas.js";
-import type { Language } from "../../types/common.js";
 import { getTranslation } from "../../utils/translation.js";
 import { escapeInlineCode } from "../../utils/formatting.js";
+import { toToolErrorResult } from "../../utils/errors.js";
 
 /**
- * Schema for search_npk_codes parameters.
+ * Schema (raw shape) for search_npk_codes parameters.
  */
-const schema = {
+export const searchNpkCodesInputShape = {
   query: z.string().min(1).max(500).describe("Search term (keyword or code number)"),
   lang: z.enum(["de", "fr", "it", "en"]).default("en").describe("Search language"),
-};
+} as const;
+
+export const searchNpkCodesInputSchema = z.object(searchNpkCodesInputShape);
+export type SearchNpkCodesInput = z.infer<typeof searchNpkCodesInputSchema>;
 
 /**
  * Handler for search_npk_codes.
  */
-async function handler(params: { query: string; lang: Language }) {
+async function handler(params: SearchNpkCodesInput) {
   const { query, lang } = params;
 
   try {
@@ -61,16 +64,10 @@ async function handler(params: { query: string; lang: Language }) {
       content: [{ type: "text" as const, text: result }],
     };
   } catch (error) {
-    console.error("search_npk_codes error:", error);
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: "An error occurred while searching NPK codes. Please try again.",
-        },
-      ],
-      isError: true,
-    };
+    return toToolErrorResult(error, {
+      toolName: "search_npk_codes",
+      action: "searching NPK codes",
+    });
   }
 }
 
@@ -81,7 +78,7 @@ export function registerSearchNpkCodes(server: McpServer): void {
   server.tool(
     "search_npk_codes",
     "Search NPK (standardized positions catalog) codes by keyword or number",
-    schema,
+    searchNpkCodesInputShape,
     handler
   );
 }

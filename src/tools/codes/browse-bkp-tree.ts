@@ -9,20 +9,23 @@ import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
 import type { CodeEntry, CodeSearchResponse } from "../../types/api.js";
 import { CodeTreeResponseSchema } from "../../types/schemas.js";
-import type { Language } from "../../types/common.js";
 import { getTranslation } from "../../utils/translation.js";
+import { toToolErrorResult } from "../../utils/errors.js";
 
 /**
- * Schema for browse_bkp_tree parameters.
+ * Schema (raw shape) for browse_bkp_tree parameters.
  */
-const schema = {
+export const browseBkpTreeInputShape = {
   parentCode: z
     .string()
     .regex(/^[0-9]{1,3}(\.[0-9])?$/)
     .optional()
     .describe("Parent BKP code. If omitted, shows root categories"),
   lang: z.enum(["de", "fr", "it", "en"]).default("en").describe("Display language"),
-};
+} as const;
+
+export const browseBkpTreeInputSchema = z.object(browseBkpTreeInputShape);
+export type BrowseBkpTreeInput = z.infer<typeof browseBkpTreeInputSchema>;
 
 /**
  * Check if a code entry has children (nested codes).
@@ -34,7 +37,7 @@ function hasChildren(item: CodeEntry & { codes?: CodeEntry[] | null }): boolean 
 /**
  * Handler for browse_bkp_tree.
  */
-async function handler(params: { parentCode?: string; lang: Language }) {
+async function handler(params: BrowseBkpTreeInput) {
   const { parentCode, lang } = params;
 
   try {
@@ -80,16 +83,10 @@ async function handler(params: { parentCode?: string; lang: Language }) {
       content: [{ type: "text" as const, text: result }],
     };
   } catch (error) {
-    console.error("browse_bkp_tree error:", error);
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: "An error occurred while browsing BKP codes. Please try again.",
-        },
-      ],
-      isError: true,
-    };
+    return toToolErrorResult(error, {
+      toolName: "browse_bkp_tree",
+      action: "browsing BKP codes",
+    });
   }
 }
 
@@ -100,7 +97,7 @@ export function registerBrowseBkpTree(server: McpServer): void {
   server.tool(
     "browse_bkp_tree",
     "Browse the BKP code hierarchy (Swiss construction cost plan)",
-    schema,
+    browseBkpTreeInputShape,
     handler
   );
 }

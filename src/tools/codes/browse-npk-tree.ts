@@ -9,20 +9,23 @@ import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
 import type { CodeEntry, CodeSearchResponse } from "../../types/api.js";
 import { CodeTreeResponseSchema } from "../../types/schemas.js";
-import type { Language } from "../../types/common.js";
 import { getTranslation } from "../../utils/translation.js";
+import { toToolErrorResult } from "../../utils/errors.js";
 
 /**
- * Schema for browse_npk_tree parameters.
+ * Schema (raw shape) for browse_npk_tree parameters.
  */
-const schema = {
+export const browseNpkTreeInputShape = {
   parentCode: z
     .string()
     .regex(/^[0-9]{1,10}$/)
     .optional()
     .describe("Parent NPK code. If omitted, shows root categories"),
   lang: z.enum(["de", "fr", "it", "en"]).default("en").describe("Display language"),
-};
+} as const;
+
+export const browseNpkTreeInputSchema = z.object(browseNpkTreeInputShape);
+export type BrowseNpkTreeInput = z.infer<typeof browseNpkTreeInputSchema>;
 
 /**
  * Check if a code entry has children (nested codes).
@@ -34,7 +37,7 @@ function hasChildren(item: CodeEntry & { codes?: CodeEntry[] | null }): boolean 
 /**
  * Handler for browse_npk_tree.
  */
-async function handler(params: { parentCode?: string; lang: Language }) {
+async function handler(params: BrowseNpkTreeInput) {
   const { parentCode, lang } = params;
 
   try {
@@ -79,16 +82,10 @@ async function handler(params: { parentCode?: string; lang: Language }) {
       content: [{ type: "text" as const, text: result }],
     };
   } catch (error) {
-    console.error("browse_npk_tree error:", error);
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: "An error occurred while browsing NPK codes. Please try again.",
-        },
-      ],
-      isError: true,
-    };
+    return toToolErrorResult(error, {
+      toolName: "browse_npk_tree",
+      action: "browsing NPK codes",
+    });
   }
 }
 
@@ -99,7 +96,7 @@ export function registerBrowseNpkTree(server: McpServer): void {
   server.tool(
     "browse_npk_tree",
     "Browse the NPK code hierarchy (standardized positions catalog)",
-    schema,
+    browseNpkTreeInputShape,
     handler
   );
 }

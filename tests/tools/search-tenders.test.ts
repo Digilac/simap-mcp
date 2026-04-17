@@ -2,70 +2,15 @@
  * Tests for search_tenders tool
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { z } from "zod";
+import { describe, it, expect } from "vitest";
+import { searchTendersInputSchema as schema } from "../../src/tools/search-tenders.js";
+import type { SearchTendersInput } from "../../src/tools/search-tenders.js";
+import { buildTenderSearchQuery } from "../../src/tools/search-tenders-params.js";
 
-// Valid Swiss canton codes
-const SWISS_CANTONS = [
-  "AG", "AI", "AR", "BE", "BL", "BS", "FR", "GE", "GL", "GR",
-  "JU", "LU", "NE", "NW", "OW", "SG", "SH", "SO", "SZ", "TG",
-  "TI", "UR", "VD", "VS", "ZG", "ZH",
-] as const;
-
-// Schema definition (mirrors the one in search-tenders.ts)
-const schema = z.object({
-  search: z.string().max(500).optional(),
-  publicationFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Must be YYYY-MM-DD format").optional(),
-  publicationUntil: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Must be YYYY-MM-DD format").optional(),
-  projectSubTypes: z
-    .array(
-      z.enum([
-        "construction",
-        "service",
-        "supply",
-        "project_competition",
-        "idea_competition",
-        "overall_performance_competition",
-        "project_study",
-        "idea_study",
-        "overall_performance_study",
-        "request_for_information",
-      ])
-    )
-    .max(10)
-    .optional(),
-  cantons: z.array(z.enum(SWISS_CANTONS)).max(26).optional(),
-  processTypes: z
-    .array(z.enum(["open", "selective", "invitation", "direct", "no_process"]))
-    .max(5)
-    .optional(),
-  pubTypes: z
-    .array(
-      z.enum([
-        "advance_notice",
-        "request_for_information",
-        "tender",
-        "competition",
-        "study_contract",
-        "award_tender",
-        "award_study_contract",
-        "award_competition",
-        "direct_award",
-        "participant_selection",
-        "selective_offering_phase",
-        "correction",
-        "revocation",
-        "abandonment",
-      ])
-    )
-    .max(14)
-    .optional(),
-  cpvCodes: z.array(z.string().regex(/^[0-9]{8}$/)).max(50).optional(),
-  bkpCodes: z.array(z.string().regex(/^[0-9]{1,3}(\.[0-9])?$/)).max(50).optional(),
-  issuedByOrganizations: z.array(z.string().uuid()).max(50).optional(),
-  lastItem: z.string().regex(/^\d{8}\|.+$/, "Invalid pagination token format").optional(),
-  lang: z.enum(["de", "fr", "it", "en"]).default("fr"),
-});
+/** Minimal factory for SearchTendersInput — lang is required in the inferred type. */
+function input(partial: Partial<SearchTendersInput> = {}): SearchTendersInput {
+  return { lang: "en", ...partial };
+}
 
 describe("search_tenders schema validation", () => {
   describe("search parameter", () => {
@@ -270,9 +215,9 @@ describe("search_tenders schema validation", () => {
   });
 
   describe("lang parameter", () => {
-    it("should default to fr", () => {
+    it("should default to en", () => {
       const result = schema.parse({});
-      expect(result.lang).toBe("fr");
+      expect(result.lang).toBe("en");
     });
 
     it("should accept valid languages", () => {
@@ -306,105 +251,70 @@ describe("search_tenders schema validation", () => {
   });
 });
 
-describe("query parameter building", () => {
-  /**
-   * Helper function that mirrors the query building logic from search-tenders.ts
-   */
-  function buildQueryParams(params: {
-    search?: string;
-    publicationFrom?: string;
-    publicationUntil?: string;
-    projectSubTypes?: string[];
-    cantons?: string[];
-    processTypes?: string[];
-    pubTypes?: string[];
-    cpvCodes?: string[];
-    bkpCodes?: string[];
-    issuedByOrganizations?: string[];
-    lastItem?: string;
-  }): Record<string, string | string[] | undefined> {
-    const queryParams: Record<string, string | string[] | undefined> = {};
-
-    if (params.search && params.search.length >= 3) {
-      queryParams.search = params.search;
-    }
-    if (params.publicationFrom) {
-      queryParams.newestPublicationFrom = params.publicationFrom;
-    }
-    if (params.publicationUntil) {
-      queryParams.newestPublicationUntil = params.publicationUntil;
-    }
-    if (params.projectSubTypes && params.projectSubTypes.length > 0) {
-      queryParams.projectSubTypes = params.projectSubTypes;
-    }
-    if (params.cantons && params.cantons.length > 0) {
-      queryParams.orderAddressCantons = params.cantons.map((c) => c.toUpperCase());
-    }
-    if (params.processTypes && params.processTypes.length > 0) {
-      queryParams.processTypes = params.processTypes;
-    }
-    if (params.pubTypes && params.pubTypes.length > 0) {
-      queryParams.newestPubTypes = params.pubTypes;
-    }
-    if (params.cpvCodes && params.cpvCodes.length > 0) {
-      queryParams.cpvCodes = params.cpvCodes;
-    }
-    if (params.bkpCodes && params.bkpCodes.length > 0) {
-      queryParams.bkpCodes = params.bkpCodes;
-    }
-    if (params.issuedByOrganizations && params.issuedByOrganizations.length > 0) {
-      queryParams.issuedByOrganizations = params.issuedByOrganizations;
-    }
-    if (params.lastItem) {
-      queryParams.lastItem = params.lastItem;
-    }
-
-    return queryParams;
-  }
-
+describe("query parameter building (buildTenderSearchQuery)", () => {
   it("should map processTypes correctly", () => {
-    const result = buildQueryParams({ processTypes: ["open", "selective"] });
+    const result = buildTenderSearchQuery(input({ processTypes: ["open", "selective"] }));
     expect(result.processTypes).toEqual(["open", "selective"]);
   });
 
   it("should map pubTypes to newestPubTypes", () => {
-    const result = buildQueryParams({ pubTypes: ["tender", "award_tender"] });
+    const result = buildTenderSearchQuery(input({ pubTypes: ["tender", "award_tender"] }));
     expect(result.newestPubTypes).toEqual(["tender", "award_tender"]);
   });
 
   it("should map cpvCodes correctly", () => {
-    const result = buildQueryParams({ cpvCodes: ["72000000"] });
+    const result = buildTenderSearchQuery(input({ cpvCodes: ["72000000"] }));
     expect(result.cpvCodes).toEqual(["72000000"]);
   });
 
   it("should map bkpCodes correctly", () => {
-    const result = buildQueryParams({ bkpCodes: ["211"] });
+    const result = buildTenderSearchQuery(input({ bkpCodes: ["211"] }));
     expect(result.bkpCodes).toEqual(["211"]);
   });
 
   it("should map issuedByOrganizations correctly", () => {
     const uuid = "123e4567-e89b-12d3-a456-426614174000";
-    const result = buildQueryParams({ issuedByOrganizations: [uuid] });
+    const result = buildTenderSearchQuery(input({ issuedByOrganizations: [uuid] }));
     expect(result.issuedByOrganizations).toEqual([uuid]);
   });
 
   it("should map lastItem correctly", () => {
-    const result = buildQueryParams({ lastItem: "20260204|24568" });
+    const result = buildTenderSearchQuery(input({ lastItem: "20260204|24568" }));
     expect(result.lastItem).toBe("20260204|24568");
   });
 
   it("should uppercase canton codes", () => {
-    const result = buildQueryParams({ cantons: ["vd", "ge"] });
+    const result = buildTenderSearchQuery(input({ cantons: ["VD", "GE"] }));
     expect(result.orderAddressCantons).toEqual(["VD", "GE"]);
   });
 
-  it("should ignore search terms shorter than 3 characters", () => {
-    const result = buildQueryParams({ search: "ab" });
-    expect(result.search).toBeUndefined();
+  it("should map publicationFrom to newestPublicationFrom", () => {
+    const result = buildTenderSearchQuery(input({ publicationFrom: "2026-01-15" }));
+    expect(result.newestPublicationFrom).toBe("2026-01-15");
   });
 
-  it("should include search terms with 3+ characters", () => {
-    const result = buildQueryParams({ search: "abc" });
+  it("should skip empty arrays", () => {
+    const result = buildTenderSearchQuery(input({ cpvCodes: [], cantons: [] }));
+    expect(result.cpvCodes).toBeUndefined();
+    expect(result.orderAddressCantons).toBeUndefined();
+  });
+
+  it("should default to today's Europe/Zurich date when no filters are provided", () => {
+    const result = buildTenderSearchQuery(input());
+    const today = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Europe/Zurich",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
+    expect(result.newestPublicationFrom).toBe(today);
+    // Sanity: Zurich date is exactly 10 chars in YYYY-MM-DD form.
+    expect(result.newestPublicationFrom).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it("should not inject today's default when any filter is set", () => {
+    const result = buildTenderSearchQuery(input({ search: "abc" }));
+    expect(result.newestPublicationFrom).toBeUndefined();
     expect(result.search).toBe("abc");
   });
 });

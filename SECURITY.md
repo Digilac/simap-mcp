@@ -33,3 +33,18 @@ Relevant concerns include:
 - Keep the package updated to the latest version
 - Run the server in a sandboxed environment when possible
 - Review tool outputs before acting on them
+
+## Production Deployment Guidance
+
+- **Keep `SIMAP_MCP_DEBUG` unset (or set to an empty value) in production.** Debug mode logs the full request URL, including user-supplied search terms and filter values, to stderr. In most MCP hosts these stderr logs are captured and retained, so enabling debug in production effectively persists user queries.
+- The server does not require any secrets, tokens, or API keys. Do not configure any — if you see an example asking you to set one, it is likely a phishing attempt.
+- stdout is reserved for the MCP JSON-RPC protocol; never redirect it into log files.
+
+## Debug Mode
+
+The `SIMAP_MCP_DEBUG` environment variable, when set to `1` or `true`, switches the HTTP client to verbose stderr logging:
+
+- Full outbound URL (with all query parameters)
+- Response status, byte size, and request duration
+
+This is intended for local troubleshooting only. It is off by default precisely because the extra payload can contain user-intent data (search terms, CPV codes, canton filters) that should not leak into shared log infrastructure.

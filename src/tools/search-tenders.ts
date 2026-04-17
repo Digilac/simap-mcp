@@ -9,8 +9,9 @@ import { simap } from "../api/client.js";
 import { ENDPOINTS } from "../api/endpoints.js";
 import type { ProjectsSearchResponse } from "../types/api.js";
 import { ProjectsSearchResponseSchema } from "../types/schemas.js";
-import type { Language } from "../types/common.js";
 import { formatProject, formatHeader } from "../utils/formatting.js";
+import { toToolErrorResult } from "../utils/errors.js";
+import { buildTenderSearchQuery } from "./search-tenders-params.js";
 
 /**
  * Valid Swiss canton codes.
@@ -45,9 +46,13 @@ const SWISS_CANTONS = [
 ] as const;
 
 /**
- * Schema for search_tenders parameters.
+ * Schema (raw shape) for search_tenders parameters.
+ *
+ * Exported so tests can import the source of truth instead of redefining it.
+ * `searchTendersInputShape` is the plain object consumed by `server.tool()`;
+ * `searchTendersInputSchema` wraps it in a `z.object()` for `.safeParse()` in tests.
  */
-const schema = {
+export const searchTendersInputShape = {
   search: z
     .string()
     .min(3)
@@ -138,92 +143,17 @@ const schema = {
     .enum(["de", "fr", "it", "en"])
     .default("en")
     .describe("Preferred language for results"),
-};
+} as const;
+
+export const searchTendersInputSchema = z.object(searchTendersInputShape);
+export type SearchTendersInput = z.infer<typeof searchTendersInputSchema>;
 
 /**
  * Handler for search_tenders.
  */
-async function handler(params: {
-  search?: string;
-  publicationFrom?: string;
-  publicationUntil?: string;
-  projectSubTypes?: string[];
-  cantons?: string[];
-  processTypes?: string[];
-  pubTypes?: string[];
-  cpvCodes?: string[];
-  bkpCodes?: string[];
-  issuedByOrganizations?: string[];
-  lastItem?: string;
-  lang: Language;
-}) {
-  const {
-    search,
-    publicationFrom,
-    publicationUntil,
-    projectSubTypes,
-    cantons,
-    processTypes,
-    pubTypes,
-    cpvCodes,
-    bkpCodes,
-    issuedByOrganizations,
-    lastItem,
-    lang,
-  } = params;
-
-  // Build query parameters
-  const queryParams: Record<string, string | string[] | undefined> = {};
-
-  if (search) {
-    queryParams.search = search;
-  }
-
-  if (publicationFrom) {
-    queryParams.newestPublicationFrom = publicationFrom;
-  }
-
-  if (publicationUntil) {
-    queryParams.newestPublicationUntil = publicationUntil;
-  }
-
-  if (projectSubTypes && projectSubTypes.length > 0) {
-    queryParams.projectSubTypes = projectSubTypes;
-  }
-
-  if (cantons && cantons.length > 0) {
-    queryParams.orderAddressCantons = cantons.map((c) => c.toUpperCase());
-  }
-
-  if (processTypes && processTypes.length > 0) {
-    queryParams.processTypes = processTypes;
-  }
-
-  if (pubTypes && pubTypes.length > 0) {
-    queryParams.newestPubTypes = pubTypes;
-  }
-
-  if (cpvCodes && cpvCodes.length > 0) {
-    queryParams.cpvCodes = cpvCodes;
-  }
-
-  if (bkpCodes && bkpCodes.length > 0) {
-    queryParams.bkpCodes = bkpCodes;
-  }
-
-  if (issuedByOrganizations && issuedByOrganizations.length > 0) {
-    queryParams.issuedByOrganizations = issuedByOrganizations;
-  }
-
-  if (lastItem) {
-    queryParams.lastItem = lastItem;
-  }
-
-  // At least one filter is required - default to today's publications
-  if (Object.keys(queryParams).length === 0) {
-    const today = new Date().toISOString().split("T")[0];
-    queryParams.newestPublicationFrom = today;
-  }
+async function handler(params: SearchTendersInput) {
+  const { lang } = params;
+  const queryParams = buildTenderSearchQuery(params);
 
   try {
     const data = await simap.get<ProjectsSearchResponse>(ENDPOINTS.PROJECT_SEARCH, {
@@ -259,16 +189,10 @@ async function handler(params: {
       content: [{ type: "text" as const, text: result }],
     };
   } catch (error) {
-    console.error("search_tenders error:", error);
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: "An error occurred while searching tenders. Please try again.",
-        },
-      ],
-      isError: true,
-    };
+    return toToolErrorResult(error, {
+      toolName: "search_tenders",
+      action: "searching tenders",
+    });
   }
 }
 
@@ -279,7 +203,7 @@ export function registerSearchTenders(server: McpServer): void {
   server.tool(
     "search_tenders",
     "Search public tenders on SIMAP.ch with filters by date, canton, CPV codes, and other criteria",
-    schema,
+    searchTendersInputShape,
     handler
   );
 }

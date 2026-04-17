@@ -3,15 +3,9 @@
  */
 
 import { describe, it, expect, vi } from "vitest";
-import { z } from "zod";
 import type { Translation } from "../../src/types/common.js";
 import type { Language } from "../../src/types/common.js";
-
-// Schema definition (mirrors the one in search-cpv-codes.ts)
-const schema = z.object({
-  query: z.string().min(1).max(500),
-  lang: z.enum(["de", "fr", "it", "en"]).default("en"),
-});
+import { searchCpvCodesInputSchema as schema } from "../../src/tools/codes/search-cpv-codes.js";
 
 describe("search_cpv_codes schema validation", () => {
   describe("query parameter", () => {

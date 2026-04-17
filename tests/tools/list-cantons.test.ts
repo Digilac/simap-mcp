@@ -3,10 +3,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
-
-// Schema definition (mirrors the one in list-cantons.ts - empty schema)
-const schema = z.object({});
+import { listCantonsInputSchema as schema } from "../../src/tools/codes/list-cantons.js";
 
 describe("list_cantons schema validation", () => {
   it("should accept empty parameters", () => {

@@ -3,13 +3,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
-
-// Schema definition (mirrors the one in search-proc-offices.ts)
-const schema = z.object({
-  search: z.string().min(3).optional(),
-  institutionId: z.string().uuid().optional(),
-});
+import { searchProcOfficesInputSchema as schema } from "../../src/tools/organizations/search-proc-offices.js";
 
 describe("search_proc_offices schema validation", () => {
   describe("search parameter", () => {
