@@ -34,7 +34,6 @@ type QueryValue = string | string[] | undefined;
 /**
  * Builds the SIMAP API query params for `search_tenders`, applying:
  * - user→API name mapping (see SEARCH_TENDERS_PARAM_MAP)
- * - canton codes are uppercased (the API is case-sensitive)
  * - empty arrays are skipped
  * - if no filter is provided, defaults to today's publications so the API
  *   call does not return the full dataset

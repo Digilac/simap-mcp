@@ -15,7 +15,12 @@ export interface RateLimiterOptions {
   maxRequests: number;
   /** Window size in ms. */
   windowMs: number;
-  /** Injectable clock (for tests). */
+  /**
+   * Injectable clock for tests. Only affects internal time calculations in
+   * `acquire()`; real `setTimeout` calls used by `scheduleDrain()` are not
+   * steered by this. When testing queued `acquire()` behavior, pair a fake
+   * `now` with fake timers (e.g. `vi.useFakeTimers()` + `advanceTimersByTime`).
+   */
   now?: () => number;
 }
 
