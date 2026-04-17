@@ -36,6 +36,17 @@ export class SlidingWindowRateLimiter {
     this.maxRequests = opts.maxRequests ?? DEFAULT_OPTIONS.maxRequests;
     this.windowMs = opts.windowMs ?? DEFAULT_OPTIONS.windowMs;
     this.now = opts.now ?? (() => Date.now());
+
+    if (!Number.isFinite(this.maxRequests) || this.maxRequests <= 0) {
+      throw new Error(
+        `SlidingWindowRateLimiter: maxRequests must be a positive finite number (got ${this.maxRequests})`
+      );
+    }
+    if (!Number.isFinite(this.windowMs) || this.windowMs <= 0) {
+      throw new Error(
+        `SlidingWindowRateLimiter: windowMs must be a positive finite number (got ${this.windowMs})`
+      );
+    }
   }
 
   /**
@@ -78,10 +89,12 @@ export class SlidingWindowRateLimiter {
         : Math.max(0, this.timestamps[0] + this.windowMs - this.now());
 
     this.scheduled = true;
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       this.scheduled = false;
       this.drain();
     }, delay);
+    // Don't keep the Node event loop alive just for a pending rate-limit timer.
+    timer.unref?.();
   }
 
   private drain(): void {

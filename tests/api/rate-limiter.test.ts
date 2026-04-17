@@ -14,6 +14,13 @@ describe("SlidingWindowRateLimiter", () => {
     vi.useRealTimers();
   });
 
+  it("rejects invalid options at construction time", () => {
+    expect(() => new SlidingWindowRateLimiter({ maxRequests: 0 })).toThrow();
+    expect(() => new SlidingWindowRateLimiter({ maxRequests: -1 })).toThrow();
+    expect(() => new SlidingWindowRateLimiter({ windowMs: 0 })).toThrow();
+    expect(() => new SlidingWindowRateLimiter({ windowMs: Number.NaN })).toThrow();
+  });
+
   it("resolves immediately under the limit", async () => {
     const limiter = new SlidingWindowRateLimiter({ maxRequests: 3, windowMs: 1000 });
     await limiter.acquire();

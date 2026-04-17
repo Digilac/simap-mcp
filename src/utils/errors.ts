@@ -22,13 +22,16 @@ function isNetworkOrTimeoutError(error: unknown): boolean {
   if (!(error instanceof Error)) return false;
   if (error.name === "AbortError" || error.name === "TimeoutError") return true;
   const msg = error.message;
+  const lower = msg.toLowerCase();
   return (
-    msg.includes("fetch failed") ||
+    // Node error codes are always uppercase — keep the literal checks.
     msg.includes("ECONNREFUSED") ||
     msg.includes("ECONNRESET") ||
     msg.includes("ETIMEDOUT") ||
     msg.includes("ENOTFOUND") ||
-    msg.includes("network")
+    // Message prose varies across runtimes ("fetch failed", "Network request failed", …).
+    lower.includes("fetch failed") ||
+    lower.includes("network")
   );
 }
 

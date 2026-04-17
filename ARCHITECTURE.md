@@ -66,11 +66,14 @@ src/
 
 ### Tool Registration
 
-Each tool file exports a `register*` function that takes an `McpServer`:
+Each tool file exports a `register*` function that takes an `McpServer`. The third argument is a raw Zod shape (plain object of fields), not a `z.object(...)`; the matching `*InputSchema` is also exported alongside for tests.
 
 ```typescript
+export const searchTendersInputShape = { /* fields */ } as const;
+export const searchTendersInputSchema = z.object(searchTendersInputShape);
+
 export function registerSearchTenders(server: McpServer): void {
-  server.tool("search_tenders", "Description", zodSchema, handler);
+  server.tool("search_tenders", "Description", searchTendersInputShape, handler);
 }
 ```
 

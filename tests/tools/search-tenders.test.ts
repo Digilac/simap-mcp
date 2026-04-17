@@ -299,10 +299,17 @@ describe("query parameter building (buildTenderSearchQuery)", () => {
     expect(result.orderAddressCantons).toBeUndefined();
   });
 
-  it("should default to today when no filters are provided", () => {
+  it("should default to today's Europe/Zurich date when no filters are provided", () => {
     const result = buildTenderSearchQuery(input());
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Europe/Zurich",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
     expect(result.newestPublicationFrom).toBe(today);
+    // Sanity: Zurich date is exactly 10 chars in YYYY-MM-DD form.
+    expect(result.newestPublicationFrom).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 
   it("should not inject today's default when any filter is set", () => {

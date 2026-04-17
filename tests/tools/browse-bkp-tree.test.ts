@@ -22,12 +22,7 @@ describe("browse_bkp_tree schema validation", () => {
       expect(result.success).toBe(true);
     });
 
-    it("should allow omitting parentCode for root categories", () => {
-      const result = schema.safeParse({});
-      expect(result.success).toBe(true);
-    });
-
-    it("should allow empty object", () => {
+    it("allows omitting parentCode for root categories (empty object)", () => {
       const result = schema.safeParse({});
       expect(result.success).toBe(true);
       expect(result.data?.parentCode).toBeUndefined();

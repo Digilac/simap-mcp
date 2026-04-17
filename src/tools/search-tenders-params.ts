@@ -78,10 +78,21 @@ export function buildTenderSearchQuery(
   if (lastItem) q[M.lastItem] = lastItem;
 
   // At least one filter is required — default to today's publications.
+  // Use Europe/Zurich calendar date: SIMAP is a Swiss platform and a UTC
+  // slice would flip a day near midnight for Swiss users.
   if (Object.keys(q).length === 0) {
-    const today = new Date().toISOString().split("T")[0];
-    q[M.publicationFrom] = today;
+    q[M.publicationFrom] = zurichTodayDate();
   }
 
   return q;
+}
+
+/** Returns today's date in Europe/Zurich as an ISO-8601 `YYYY-MM-DD` string. */
+function zurichTodayDate(): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Zurich",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
 }
