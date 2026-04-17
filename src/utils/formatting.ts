@@ -108,90 +108,269 @@ export function formatProjectHeader(
 
 /**
  * Formats publication details.
+ *
+ * Sections are rendered only when the underlying data is present. The response
+ * shape varies by publication `type` (tender / award / ...) — no one section
+ * is guaranteed.
  */
 export function formatPublicationDetails(
   details: PublicationDetails,
   lang: Language
 ): string {
-  let result = `## Publication Details\n\n`;
-  result += `- **Publication Type:** ${details.type || "N/A"}\n`;
+  const parts: string[] = [];
 
-  // Project info
-  if (details["project-info"]) {
-    const info = details["project-info"];
-    result += `\n### Project Information\n`;
+  parts.push(formatPublicationInfoSection(details, lang));
 
-    if (info.title) {
-      result += `- **Title:** ${getTranslation(info.title, lang)}\n`;
-    }
-    if (info.description) {
-      result += `- **Description:** ${getTranslation(info.description, lang)}\n`;
+  const cpv = formatCpvSection(details, lang);
+  if (cpv) parts.push(cpv);
+
+  const deadlines = formatDeadlinesSection(details, lang);
+  if (deadlines) parts.push(deadlines);
+
+  const terms = formatTermsSection(details, lang);
+  if (terms) parts.push(terms);
+
+  const criteria = formatCriteriaSection(details, lang);
+  if (criteria) parts.push(criteria);
+
+  const award = formatAwardDecisionSection(details, lang);
+  if (award) parts.push(award);
+
+  const publishers = formatPublishersSection(details);
+  if (publishers) parts.push(publishers);
+
+  return parts.join("\n") + "\n";
+}
+
+function formatPublicationInfoSection(
+  details: PublicationDetails,
+  lang: Language
+): string {
+  const base = details.base ?? undefined;
+  const info = details["project-info"] ?? undefined;
+
+  const title =
+    (base?.title && getTranslation(base.title, lang)) ||
+    (info?.title && getTranslation(info.title, lang)) ||
+    "";
+
+  const processType =
+    base?.processType || info?.processType || details.procurement?.processType;
+  const orderType = base?.orderType || info?.orderType || details.procurement?.orderType;
+
+  const typeLine = [details.type, processType, orderType].filter(Boolean).join(" · ");
+
+  let out = `## Publication Details\n\n`;
+  if (title) out += `- **Title:** ${title}\n`;
+  if (base?.publicationNumber) {
+    out += `- **Publication Number:** ${base.publicationNumber}\n`;
+  }
+  if (base?.projectNumber) {
+    out += `- **Project Number:** ${base.projectNumber}\n`;
+  }
+  if (base?.publicationDate) {
+    out += `- **Publication Date:** ${base.publicationDate}\n`;
+  }
+  if (typeLine) out += `- **Type:** ${typeLine}\n`;
+  if (details.hasProjectDocuments !== undefined && details.hasProjectDocuments !== null) {
+    out += `- **Has Project Documents:** ${details.hasProjectDocuments ? "yes" : "no"}\n`;
+  }
+  return out;
+}
+
+function formatCpvSection(details: PublicationDetails, lang: Language): string | null {
+  const cpv = details.base?.cpvCode || details.procurement?.cpvCode;
+  if (!cpv || !cpv.code) return null;
+  const label = cpv.label ? getTranslation(cpv.label, lang) : "";
+  let out = `### CPV\n`;
+  out += label ? `- **${cpv.code}** — ${label}\n` : `- **${cpv.code}**\n`;
+  return out;
+}
+
+function formatDeadlinesSection(
+  details: PublicationDetails,
+  lang: Language
+): string | null {
+  const dates = details.dates;
+  if (!dates) return null;
+
+  const qnas = dates.qnas ?? [];
+  const hasAny =
+    dates.offerDeadline ||
+    dates.offerOpening?.dateTime ||
+    dates.offerValidityDeadlineDays != null ||
+    dates.offerValidityDeadlineDate ||
+    qnas.length > 0;
+  if (!hasAny) return null;
+
+  let out = `### Deadlines\n`;
+  if (dates.offerDeadline) {
+    out += `- **Submission Deadline:** ${dates.offerDeadline}\n`;
+  }
+  if (dates.offerOpening?.dateTime) {
+    out += `- **Offer Opening:** ${dates.offerOpening.dateTime}\n`;
+  }
+  if (dates.offerValidityDeadlineDate) {
+    out += `- **Offer Validity Until:** ${dates.offerValidityDeadlineDate}\n`;
+  } else if (dates.offerValidityDeadlineDays != null) {
+    out += `- **Offer Validity:** ${dates.offerValidityDeadlineDays} days\n`;
+  }
+  if (qnas.length > 0) {
+    out += `\n**Q&A Rounds:**\n`;
+    for (const q of qnas) {
+      const note = q.note ? getTranslation(q.note, lang) : "";
+      const parts = [q.date, note].filter(Boolean).join(" — ");
+      out += `- ${parts || "(no date)"}\n`;
     }
   }
+  return out;
+}
 
-  // Procurement info
-  if (details.procurement) {
-    const proc = details.procurement;
-    result += `\n### Procurement Details\n`;
+function formatTermsSection(details: PublicationDetails, lang: Language): string | null {
+  const terms = details.terms;
+  if (!terms) return null;
 
-    if (proc.estimatedValue) {
-      result += `- **Estimated Value:** ${proc.estimatedValue.value} ${proc.estimatedValue.currency || "CHF"}\n`;
-    }
+  const termsNote = terms.termsNote ? getTranslation(terms.termsNote, lang) : "";
+  const remedies = terms.remediesNotice ? getTranslation(terms.remediesNotice, lang) : "";
+  const termsOfBusiness = terms.termsOfBusiness
+    ? getTranslation(terms.termsOfBusiness, lang)
+    : "";
+  const termsOfPayment = terms.termsOfPayment
+    ? getTranslation(terms.termsOfPayment, lang)
+    : "";
 
-    if (proc.cpvCodes && proc.cpvCodes.length > 0) {
-      result += `- **CPV Codes:** ${proc.cpvCodes.join(", ")}\n`;
-    }
+  const hasAny =
+    terms.consortiumAllowed ||
+    terms.subContractorAllowed ||
+    termsNote ||
+    remedies ||
+    termsOfBusiness ||
+    termsOfPayment;
+  if (!hasAny) return null;
+
+  let out = `### Conditions\n`;
+  if (terms.consortiumAllowed) {
+    out += `- **Consortium allowed:** ${terms.consortiumAllowed}\n`;
   }
-
-  // Deadlines
-  if (details.deadlines) {
-    const dl = details.deadlines;
-    result += `\n### Deadlines\n`;
-
-    if (dl.offerDeadline) {
-      result += `- **Submission Deadline:** ${dl.offerDeadline}\n`;
-    }
-    if (dl.questionDeadline) {
-      result += `- **Question Deadline:** ${dl.questionDeadline}\n`;
-    }
+  if (terms.subContractorAllowed) {
+    out += `- **Subcontracting allowed:** ${terms.subContractorAllowed}\n`;
   }
-
-  // Contact
-  if (details.contact) {
-    const contact = details.contact;
-    result += `\n### Contact\n`;
-
-    if (contact.organization) {
-      result += `- **Organization:** ${getTranslation(contact.organization, lang)}\n`;
-    }
-    if (contact.contactPerson) {
-      result += `- **Contact Person:** ${contact.contactPerson}\n`;
-    }
-    if (contact.email) {
-      result += `- **Email:** ${contact.email}\n`;
-    }
-    if (contact.phone) {
-      result += `- **Phone:** ${contact.phone}\n`;
-    }
+  if (termsNote) {
+    out += `- **Terms note:** ${escapeInlineCode(termsNote)}\n`;
   }
+  if (termsOfBusiness) {
+    out += `- **Terms of business:** ${escapeInlineCode(termsOfBusiness)}\n`;
+  }
+  if (termsOfPayment) {
+    out += `- **Terms of payment:** ${escapeInlineCode(termsOfPayment)}\n`;
+  }
+  if (remedies) {
+    out += `- **Remedies notice:** ${escapeInlineCode(remedies)}\n`;
+  }
+  return out;
+}
 
-  // Award (if present)
-  if (details.decision && details.type === "award") {
-    result += `\n### Award Decision\n`;
+function formatCriteriaSection(
+  details: PublicationDetails,
+  lang: Language
+): string | null {
+  const criteria = details.criteria;
+  if (!criteria) return null;
 
-    if (details.decision.awardees && details.decision.awardees.length > 0) {
-      result += `\n**Awardees:**\n`;
-      for (const awardee of details.decision.awardees) {
-        result += `- ${awardee.name || getTranslation(awardee.organization, lang)}`;
-        if (awardee.price) {
-          result += ` - ${awardee.price.value} ${awardee.price.currency || "CHF"}`;
-        }
-        result += `\n`;
+  const qualNote = criteria.qualificationCriteriaNote
+    ? getTranslation(criteria.qualificationCriteriaNote, lang)
+    : "";
+  const awardNote = criteria.awardCriteriaNote
+    ? getTranslation(criteria.awardCriteriaNote, lang)
+    : "";
+  const qualCount = criteria.qualificationCriteria?.length ?? 0;
+  const awardCount = criteria.awardCriteria?.length ?? 0;
+
+  const hasAny =
+    criteria.qualificationCriteriaInDocuments ||
+    criteria.awardCriteriaSelection ||
+    qualNote ||
+    awardNote ||
+    qualCount > 0 ||
+    awardCount > 0;
+  if (!hasAny) return null;
+
+  let out = `### Criteria\n`;
+  if (criteria.qualificationCriteriaInDocuments) {
+    out += `- **Qualification criteria in documents:** ${criteria.qualificationCriteriaInDocuments}\n`;
+  }
+  if (qualCount > 0) {
+    out += `- **Qualification criteria listed:** ${qualCount}\n`;
+  }
+  if (qualNote) {
+    out += `- **Qualification criteria note:** ${escapeInlineCode(qualNote)}\n`;
+  }
+  if (criteria.awardCriteriaSelection) {
+    out += `- **Award criteria selection:** ${criteria.awardCriteriaSelection}\n`;
+  }
+  if (awardCount > 0) {
+    out += `- **Award criteria listed:** ${awardCount}\n`;
+  }
+  if (awardNote) {
+    out += `- **Award criteria note:** ${escapeInlineCode(awardNote)}\n`;
+  }
+  return out;
+}
+
+function formatAwardDecisionSection(
+  details: PublicationDetails,
+  lang: Language
+): string | null {
+  const decision = details.decision;
+  if (!decision) return null;
+
+  const vendors = decision.vendors ?? [];
+  const hasAny =
+    decision.awardDecisionDate ||
+    decision.numberOfSubmissions != null ||
+    decision.totalPriceSelection ||
+    vendors.length > 0;
+  if (!hasAny) return null;
+
+  let out = `### Award Decision\n`;
+  if (decision.awardDecisionDate) {
+    out += `- **Decision Date:** ${decision.awardDecisionDate}\n`;
+  }
+  if (decision.numberOfSubmissions != null) {
+    out += `- **Number of Submissions:** ${decision.numberOfSubmissions}\n`;
+  }
+  if (decision.totalPriceSelection) {
+    out += `- **Total Price Basis:** ${decision.totalPriceSelection}\n`;
+  }
+  if (vendors.length > 0) {
+    out += `\n**Awardees:**\n`;
+    for (const v of vendors) {
+      const name = v.vendorName || "(unnamed)";
+      let line = `- ${name}`;
+      if (v.price?.price != null) {
+        const currency = (v.price.currency || "CHF").toUpperCase();
+        line += ` — ${v.price.price} ${currency}`;
+        if (v.price.vatType) line += ` (${v.price.vatType})`;
       }
+      if (v.rank != null) line += ` — rank ${v.rank}`;
+      const note = v.note ? getTranslation(v.note, lang) : "";
+      if (note) line += ` — ${escapeInlineCode(note)}`;
+      out += `${line}\n`;
     }
   }
+  return out;
+}
 
-  return result;
+function formatPublishersSection(details: PublicationDetails): string | null {
+  const publishers = details.publishers ?? [];
+  if (publishers.length === 0) return null;
+  let out = `### Publishers\n`;
+  for (const p of publishers) {
+    const name = p.name || "(unnamed)";
+    const id = p.id ? ` (${p.id})` : "";
+    out += `- ${name}${id}\n`;
+  }
+  return out;
 }
 
 /**
@@ -202,20 +381,4 @@ export function formatHeader(title: string, count?: number): string {
     return `# ${title}\n\n**${count} result(s)**\n\n`;
   }
   return `# ${title}\n\n`;
-}
-
-/**
- * Truncates JSON for display.
- */
-export function formatJsonPreview(data: unknown, maxLength = 3000): string {
-  const json = JSON.stringify(data, null, 2);
-  if (json.length <= maxLength) {
-    return json;
-  }
-  const truncated = json.substring(0, maxLength);
-  const lastNewline = truncated.lastIndexOf("\n");
-  return (
-    (lastNewline > 0 ? truncated.substring(0, lastNewline) : truncated) +
-    "\n... (truncated)"
-  );
 }

@@ -10,11 +10,7 @@ import { ENDPOINTS } from "../api/endpoints.js";
 import { SimapApiError } from "../types/api.js";
 import type { ProjectHeader, PublicationDetails } from "../types/api.js";
 import { ProjectHeaderSchema, PublicationDetailsSchema } from "../types/schemas.js";
-import {
-  formatProjectHeader,
-  formatPublicationDetails,
-  formatJsonPreview,
-} from "../utils/formatting.js";
+import { formatProjectHeader, formatPublicationDetails } from "../utils/formatting.js";
 import { toToolErrorResult } from "../utils/errors.js";
 
 /**
@@ -25,6 +21,12 @@ export const getTenderDetailsInputShape = {
   projectId: z.string().uuid().describe("Project ID (UUID)"),
   publicationId: z.string().uuid().describe("Publication ID (UUID)"),
   lang: z.enum(["de", "fr", "it", "en"]).default("en").describe("Preferred language"),
+  fullRaw: z
+    .boolean()
+    .default(false)
+    .describe(
+      "Include the complete unmodified API response as JSON at the end of the output. Verbose — only enable when the structured fields are insufficient."
+    ),
 } as const;
 
 export const getTenderDetailsInputSchema = z.object(getTenderDetailsInputShape);
@@ -46,10 +48,10 @@ async function fetchOrNull<T>(promise: Promise<T>): Promise<T | null> {
 }
 
 /**
- * Handler for get_tender_details.
+ * Handler for get_tender_details. Exported for tests.
  */
-async function handler(params: GetTenderDetailsInput) {
-  const { projectId, publicationId, lang } = params;
+export async function handler(params: GetTenderDetailsInput) {
+  const { projectId, publicationId, lang, fullRaw } = params;
 
   try {
     // Fetch both the header and the publication details in parallel
@@ -86,11 +88,12 @@ async function handler(params: GetTenderDetailsInput) {
     if (details) {
       result += "\n" + formatPublicationDetails(details, lang);
 
-      // Add raw JSON preview
-      result += `\n### Raw Data (excerpt)\n`;
-      result += "```json\n";
-      result += formatJsonPreview(details);
-      result += "\n```\n";
+      if (fullRaw) {
+        result += `\n### Full Raw Response\n\n`;
+        result += "```json\n";
+        result += JSON.stringify(details, null, 2);
+        result += "\n```\n";
+      }
     }
 
     return {

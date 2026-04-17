@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `get_tender_details`: new `fullRaw` boolean parameter (default `false`). When `true`, the full unmodified publication-details JSON is appended under a `### Full Raw Response` section.
+
+### Changed
+
+- `get_tender_details`: structured Markdown output now reads the real SIMAP response shape (`base`, `dates`, `terms`, `criteria`, `procurement.cpvCode`, `publishers`, `decision`). Previous version read keys that do not exist in the API (`deadlines.*`, `contact.*`, `decision.awardees`), so sections like Deadlines / Conditions / CPV were silently empty. **Breaking** for any consumer that parsed the previous `### Raw Data (excerpt)` block — that section is gone (use `fullRaw: true` for the equivalent JSON).
+- `PublicationDetailsSchema` (`src/types/schemas.ts`) and `PublicationDetails` (`src/types/api.ts`) rewritten on the real API keys. Still `.passthrough()` so unknown fields are preserved for `fullRaw`.
+
+### Removed
+
+- `formatJsonPreview` helper (`src/utils/formatting.ts`). It truncated at 3000 characters, silently dropping ~76% of a typical publication-details response. `get_tender_details` now renders structured fields for the default view and `JSON.stringify(details, null, 2)` verbatim for the `fullRaw` view.
+
+### Fixed
+
+- `get_tender_details`: the 3000-character truncation that clipped most of the useful tender data (deadlines, criteria, conditions, award) is gone.
+
 ## [1.1.0] - 2026-04-17
 
 ### Added

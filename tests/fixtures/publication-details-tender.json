@@ -1,0 +1,501 @@
+{
+    "project-info": {
+        "stateContractArea": false,
+        "dialog": "no",
+        "documentsWithCosts": "no",
+        "publicationTed": false,
+        "procOfficeAddress": {
+            "postalCode": "1020",
+            "countryId": "CH",
+            "cantonId": "VD",
+            "id": "12d6a635-c4c5-4f8d-b191-5a8b50fe785d",
+            "name": {
+                "de": null,
+                "en": null,
+                "fr": "Transports publics de la r\u00e9gion lausannoise sa",
+                "it": null
+            },
+            "contactPerson": {
+                "de": null,
+                "en": null,
+                "fr": "FA-Achats",
+                "it": null
+            },
+            "phone": "+41216210111",
+            "email": "marchespublics@t-l.ch",
+            "url": {
+                "de": null,
+                "en": null,
+                "fr": null,
+                "it": null
+            },
+            "reference": null,
+            "street": {
+                "de": null,
+                "en": null,
+                "fr": "Chemin du Closel 15",
+                "it": null
+            },
+            "city": {
+                "de": null,
+                "en": null,
+                "fr": "Renens",
+                "it": null
+            }
+        },
+        "procurementRecipientAddress": {
+            "postalCode": "1020",
+            "countryId": "CH",
+            "cantonId": "VD",
+            "id": "818e87d6-15a7-48c4-bf28-e301e8ed4964",
+            "name": {
+                "de": null,
+                "en": null,
+                "fr": "Transports publics de la r\u00e9gion lausannoise sa",
+                "it": null
+            },
+            "contactPerson": {
+                "de": null,
+                "en": null,
+                "fr": "FA-Achats",
+                "it": null
+            },
+            "phone": null,
+            "email": "marchespublics@t-l.ch",
+            "url": {
+                "de": null,
+                "en": null,
+                "fr": null,
+                "it": null
+            },
+            "reference": null,
+            "street": {
+                "de": null,
+                "en": null,
+                "fr": "Chemin du Closel 15",
+                "it": null
+            },
+            "city": {
+                "de": null,
+                "en": null,
+                "fr": "Renens",
+                "it": null
+            }
+        },
+        "title": {
+            "de": null,
+            "en": null,
+            "fr": "MP 2025.04.775 - Licences et support Atlassian",
+            "it": null
+        },
+        "documentsLanguages": [
+            "fr"
+        ],
+        "documentsSourceType": "documents_source_simap",
+        "offerLanguages": [
+            "fr"
+        ],
+        "offerTypes": [
+            "offer_external"
+        ],
+        "publicationLanguages": [
+            "fr"
+        ],
+        "processType": "open",
+        "orderType": "service",
+        "participantLotsLimitation": null,
+        "participantLotsLimitationNote": {
+            "de": null,
+            "en": null,
+            "fr": null,
+            "it": null
+        },
+        "dialogNote": null,
+        "documentsCosts": {
+            "currency": null,
+            "price": null
+        },
+        "documentsCostsNote": {
+            "de": null,
+            "en": null,
+            "fr": null,
+            "it": null
+        },
+        "documentsLanguagesNote": {
+            "de": null,
+            "en": null,
+            "fr": null,
+            "it": null
+        },
+        "documentsSourceEmail": null,
+        "documentsSourceUrl": null,
+        "documentsSourceNote": {
+            "de": null,
+            "en": null,
+            "fr": null,
+            "it": null
+        },
+        "offerSpecificNote": {
+            "de": null,
+            "en": null,
+            "fr": "<p>Selon les indications de la pi\u00e8ce 1 \u00ab Conditions administratives \u00bb</p>",
+            "it": null
+        },
+        "offerDigitalExternalPlatformUrl": null,
+        "documentsSourceAddress": null,
+        "offerAddress": {
+            "postalCode": "1020",
+            "countryId": "CH",
+            "cantonId": null,
+            "id": "3cad3f7a-afba-4703-97b8-372fa719eaf4",
+            "name": {
+                "de": null,
+                "en": null,
+                "fr": "Transports publics de la r\u00e9gion lausannoise sa",
+                "it": null
+            },
+            "contactPerson": {
+                "de": null,
+                "en": null,
+                "fr": "FA-Achats",
+                "it": null
+            },
+            "phone": null,
+            "email": null,
+            "url": {
+                "de": null,
+                "en": null,
+                "fr": null,
+                "it": null
+            },
+            "reference": "MP 2025.04.775 - Licences et support Atlassian",
+            "street": {
+                "de": null,
+                "en": null,
+                "fr": "Chemin du Closel 15",
+                "it": null
+            },
+            "city": {
+                "de": null,
+                "en": null,
+                "fr": "Renens",
+                "it": null
+            }
+        },
+        "publicationLanguagesComment": {
+            "de": null,
+            "en": null,
+            "fr": null,
+            "it": null
+        }
+    },
+    "procurement": {
+        "orderDescription": {
+            "de": null,
+            "en": null,
+            "fr": "<p>Les Transports Publics de la R\u00e9gion Lausannoise (tl) ont mis en place la solution Atlassian Cloud en 2018 pour r\u00e9pondre principalement \u00e0 des besoins informatiques de planification \u00ab&nbsp;agile&nbsp;\u00bb (kanban) et de suivi de tickets utilisateurs. Depuis l\u2019outil a pris de l\u2019ampleur dans l\u2019entreprise jusqu\u2019\u00e0 l\u2019utilisation actuelle des licences, Atlassian Guard, Confluence, JIRA, JIRA Service Management, Xray Test Management.</p><p>Le pr\u00e9sent appel d\u2019offres porte sur la fourniture de licences et de services techniques (maintenance - conseil g\u00e9n\u00e9ral et support de niveau 2 et 3). </p><p>Le d\u00e9tail des services attendus est d\u00e9crit dans la pi\u00e8ce 2 \u00ab&nbsp;Cahier des charges technique&nbsp;\u00bb.</p>",
+            "it": null
+        },
+        "processType": "open",
+        "orderType": "service",
+        "additionalCpvCodes": [],
+        "bkpCodes": [],
+        "ebkphCodes": [],
+        "ebkptCodes": [],
+        "npkCodes": [],
+        "cpcCode": null,
+        "orderAddressOnlyDescription": "no",
+        "orderAddressDescription": {
+            "de": null,
+            "en": null,
+            "fr": "Site de Perrelet",
+            "it": null
+        },
+        "executionDeadlineType": "not_specified",
+        "executionPeriod": null,
+        "executionDays": null,
+        "executionNote": {
+            "de": null,
+            "en": null,
+            "fr": "Selon les indications de la pi\u00e8ce 1 \u00ab Conditions administratives \u00bb",
+            "it": null
+        },
+        "variants": "no",
+        "variantsNote": {
+            "de": null,
+            "en": null,
+            "fr": null,
+            "it": null
+        },
+        "partialOffers": "no",
+        "partialOffersNote": {
+            "de": null,
+            "en": null,
+            "fr": null,
+            "it": null
+        },
+        "orderAddress": {
+            "countryId": "CH",
+            "cantonId": "VD",
+            "postalCode": "1020",
+            "city": {
+                "de": null,
+                "en": null,
+                "fr": "Renens",
+                "it": null
+            }
+        },
+        "contractDeadlineType": "days_after",
+        "contractPeriod": null,
+        "contractDays": 1460,
+        "canContractBeExtended": "no",
+        "canContractBeExtendedNote": {
+            "de": null,
+            "en": null,
+            "fr": null,
+            "it": null
+        },
+        "options": "no",
+        "optionsNote": {
+            "de": null,
+            "en": null,
+            "fr": null,
+            "it": null
+        },
+        "cpvCode": {
+            "code": "48000000",
+            "label": {
+                "de": "Softwarepaket und Informationssysteme",
+                "en": "Software package and information systems",
+                "fr": "Logiciels et syst\u00e8mes d'information",
+                "it": "Pacchetti software e sistemi di informazione"
+            }
+        }
+    },
+    "terms": {
+        "termsType": "in_documents",
+        "termsCriteria": [],
+        "termsCriteriaAsPDF": false,
+        "consortiumAllowed": "no",
+        "consortiumMultiApplicationAllowed": "no",
+        "subContractorAllowed": "no",
+        "subContractorMultiApplicationAllowed": "no",
+        "processType": "open",
+        "orderType": "service",
+        "preInvolvedVendor": {
+            "de": null,
+            "en": null,
+            "fr": null,
+            "it": null
+        },
+        "termsOfBusiness": {
+            "de": null,
+            "en": null,
+            "fr": null,
+            "it": null
+        },
+        "termsOfPayment": {
+            "de": null,
+            "en": null,
+            "fr": null,
+            "it": null
+        },
+        "includedCosts": {
+            "de": null,
+            "en": null,
+            "fr": null,
+            "it": null
+        },
+        "securityDeposits": {
+            "de": null,
+            "en": null,
+            "fr": null,
+            "it": null
+        },
+        "nonWTORequirements": {
+            "de": null,
+            "en": null,
+            "fr": null,
+            "it": null
+        },
+        "walkThroughNotes": {
+            "de": null,
+            "en": null,
+            "fr": "Selon les indications de la pi\u00e8ce 1 \u00ab Conditions administratives \u00bb",
+            "it": null
+        },
+        "termsNote": {
+            "de": null,
+            "en": null,
+            "fr": "Selon les indications de la pi\u00e8ce 1 \u00ab Conditions administratives \u00bb",
+            "it": null
+        },
+        "otherRequirements": {
+            "de": null,
+            "en": null,
+            "fr": null,
+            "it": null
+        },
+        "consortiumNote": {
+            "de": null,
+            "en": null,
+            "fr": null,
+            "it": null
+        },
+        "subContractorNote": {
+            "de": null,
+            "en": null,
+            "fr": null,
+            "it": null
+        },
+        "remediesNotice": {
+            "de": null,
+            "en": null,
+            "fr": "Le pr\u00e9sent appel d\u2019offres peut faire l\u2019objet d\u2019un recours \u00e0 la Cour de droit administratif et public du Tribunal cantonal, Route du Signal 8 (Palais de Justice de l\u2019Hermitage), 1014 Lausanne, dans les vingt jours d\u00e8s sa notification par publication ; le recours doit \u00eatre sign\u00e9 et indiquer les conclusions et ses motifs. La d\u00e9cision attaqu\u00e9e est jointe au recours.",
+            "it": null
+        }
+    },
+    "dates": {
+        "qnaRoundSourceType": "simap",
+        "offerValidityDeadlineType": "days_after",
+        "offerValidityNotes": {
+            "de": null,
+            "en": null,
+            "fr": null,
+            "it": null
+        },
+        "reductionMinimumOfferDeadline": false,
+        "publicOfferOpening": "no",
+        "qnas": [
+            {
+                "id": "ab9588d8-7569-488c-9842-691b1bae9598",
+                "date": "2026-02-09",
+                "note": {
+                    "de": null,
+                    "en": null,
+                    "fr": "Selon les indications de la pi\u00e8ce 1 \u00ab Conditions administratives \u00bb",
+                    "it": null
+                },
+                "externalLink": null
+            }
+        ],
+        "otherAppointments": [],
+        "processType": "open",
+        "orderType": "service",
+        "publicationDate": "2026-01-22",
+        "initialPublicationDate": null,
+        "publicationDateForecast": null,
+        "offerDeadline": "2026-03-05T12:00:00+01:00",
+        "specificDeadlinesAndFormalRequirements": {
+            "de": null,
+            "en": null,
+            "fr": "Selon les indications de la pi\u00e8ce 1 \u00ab Conditions administratives \u00bb",
+            "it": null
+        },
+        "documentsAvailable": null,
+        "expressionOfInterestUntil": null,
+        "offerValidityDeadlineDate": null,
+        "offerValidityDeadlineDays": 364,
+        "offerOpening": {
+            "dateTime": "2026-03-05T14:00:00+01:00",
+            "ignoreTime": false
+        },
+        "offerOpeningNotes": {
+            "de": null,
+            "en": null,
+            "fr": "Selon les indications de la pi\u00e8ce 1 \u00ab Conditions administratives \u00bb",
+            "it": null
+        },
+        "offerOpeningPostalCode": null,
+        "offerOpeningCity": {
+            "de": null,
+            "en": null,
+            "fr": null,
+            "it": null
+        }
+    },
+    "id": "14ae742d-ab60-4553-9b1e-9d1320fe18f7",
+    "type": "tender",
+    "projectType": "tender",
+    "publishers": [
+        {
+            "id": "c92c5781-c89a-4f93-94b1-f2061c35e556",
+            "name": "simap.ch"
+        }
+    ],
+    "correction": null,
+    "referencingPub": null,
+    "invitedVendors": null,
+    "lots": [],
+    "criteria": {
+        "qualificationCriteriaInDocuments": "yes",
+        "qualificationCriteriaAsPDF": false,
+        "qualificationCriteria": [],
+        "awardCriteriaSelection": "criteria_in_documents",
+        "awardCriteria": [],
+        "processType": "open",
+        "orderType": "service",
+        "qualificationCriteriaNote": {
+            "de": null,
+            "en": null,
+            "fr": "Selon les indications de la pi\u00e8ce 1 \u00ab Conditions administratives \u00bb",
+            "it": null
+        },
+        "awardCriteriaNote": {
+            "de": null,
+            "en": null,
+            "fr": "Selon les indications de la pi\u00e8ce 1 \u00ab Conditions administratives \u00bb",
+            "it": null
+        }
+    },
+    "base": {
+        "corrected": false,
+        "cpvCode": {
+            "code": "48000000",
+            "label": {
+                "de": "Softwarepaket und Informationssysteme",
+                "en": "Software package and information systems",
+                "fr": "Logiciels et syst\u00e8mes d'information",
+                "it": "Pacchetti software e sistemi di informazione"
+            }
+        },
+        "orderType": "service",
+        "lots": [],
+        "publicationTed": false,
+        "id": "14ae742d-ab60-4553-9b1e-9d1320fe18f7",
+        "title": {
+            "de": null,
+            "en": null,
+            "fr": "MP 2025.04.775 - Licences et support Atlassian",
+            "it": null
+        },
+        "projectType": "tender",
+        "processType": "open",
+        "lotsType": "without",
+        "stateContractArea": false,
+        "type": "tender",
+        "publicationNumber": "29941-01",
+        "projectId": "31367328-20d0-4786-acab-f0858c46dc82",
+        "publicationDate": "2026-01-22",
+        "creationLanguage": "fr",
+        "translationLanguages": [],
+        "procOfficeId": "627d0b9e-2365-4618-9b7f-d7a475584f0b",
+        "publishers": [
+            "c92c5781-c89a-4f93-94b1-f2061c35e556"
+        ],
+        "participantLotsLimitation": null,
+        "participantLotsLimitationNote": {
+            "de": null,
+            "en": null,
+            "fr": null,
+            "it": null
+        },
+        "correctedPubId": null,
+        "initialPublicationDate": null,
+        "referencingPubId": null,
+        "cpcCode": null,
+        "projectNumber": "29941"
+    },
+    "hasProjectDocuments": true,
+    "ted": null
+}

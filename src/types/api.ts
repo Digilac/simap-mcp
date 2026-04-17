@@ -94,39 +94,104 @@ export interface ProjectHeader {
 }
 
 /**
- * Publication details (partial - API returns complex nested structure).
+ * CPV code object as returned inline in publication details
+ * (single code + label, not to be confused with the array-based CPVCode).
+ */
+export interface PublicationCpvCode {
+  code: string;
+  label?: Translation | null;
+}
+
+/**
+ * Publication details. SIMAP returns a complex structure whose shape varies
+ * by publication `type` (tender / award / direct_award / ...). We model only
+ * the fields we render; `[key: string]: unknown` (via `.passthrough()` on the
+ * Zod side) preserves anything else for the `fullRaw` output mode.
  */
 export interface PublicationDetails {
+  id?: string | null;
   type?: string | null;
+  projectType?: string | null;
+  hasProjectDocuments?: boolean | null;
+  base?: {
+    id?: string | null;
+    type?: string | null;
+    projectType?: string | null;
+    projectId?: string | null;
+    projectNumber?: string | null;
+    publicationNumber?: string | null;
+    publicationDate?: string | null;
+    title?: Translation | null;
+    processType?: string | null;
+    orderType?: string | null;
+    lotsType?: string | null;
+    cpvCode?: PublicationCpvCode | null;
+    procOfficeId?: string | null;
+    creationLanguage?: string | null;
+  } | null;
   "project-info"?: {
     title?: Translation | null;
-    description?: Translation | null;
+    processType?: string | null;
+    orderType?: string | null;
   } | null;
   procurement?: {
-    estimatedValue?: {
-      value: number;
-      currency?: string | null;
-    } | null;
-    cpvCodes?: string[] | null;
+    orderDescription?: Translation | null;
+    cpvCode?: PublicationCpvCode | null;
+    processType?: string | null;
+    orderType?: string | null;
   } | null;
-  deadlines?: {
+  dates?: {
+    publicationDate?: string | null;
     offerDeadline?: string | null;
-    questionDeadline?: string | null;
+    offerOpening?: {
+      dateTime?: string | null;
+      ignoreTime?: boolean | null;
+    } | null;
+    offerValidityDeadlineDays?: number | null;
+    offerValidityDeadlineDate?: string | null;
+    qnas?: Array<{
+      id?: string | null;
+      date?: string | null;
+      note?: Translation | null;
+      externalLink?: string | null;
+    }> | null;
   } | null;
-  contact?: {
-    organization?: Translation | null;
-    contactPerson?: string | null;
-    email?: string | null;
-    phone?: string | null;
+  terms?: {
+    consortiumAllowed?: string | null;
+    subContractorAllowed?: string | null;
+    termsType?: string | null;
+    termsNote?: Translation | null;
+    termsOfBusiness?: Translation | null;
+    termsOfPayment?: Translation | null;
+    remediesNotice?: Translation | null;
   } | null;
+  criteria?: {
+    qualificationCriteriaInDocuments?: string | null;
+    qualificationCriteria?: unknown[] | null;
+    qualificationCriteriaNote?: Translation | null;
+    awardCriteriaSelection?: string | null;
+    awardCriteria?: unknown[] | null;
+    awardCriteriaNote?: Translation | null;
+  } | null;
+  publishers?: Array<{
+    id?: string | null;
+    name?: string | null;
+  }> | null;
+  lots?: unknown[] | null;
   decision?: {
-    awardees?: Array<{
-      name?: string | null;
-      organization?: Translation | null;
+    awardDecisionDate?: string | null;
+    numberOfSubmissions?: number | null;
+    totalPriceSelection?: string | null;
+    vendors?: Array<{
+      vendorId?: string | null;
+      vendorName?: string | null;
       price?: {
-        value: number;
         currency?: string | null;
+        price?: number | null;
+        vatType?: string | null;
       } | null;
+      note?: Translation | null;
+      rank?: number | null;
     }> | null;
   } | null;
   [key: string]: unknown;

@@ -1,0 +1,242 @@
+{
+    "procurement": {
+        "oagCodes": [],
+        "projectType": "tender",
+        "processType": "open",
+        "pubType": "award",
+        "orderType": "construction",
+        "orderDescription": {
+            "de": null,
+            "en": null,
+            "fr": "<p>Travaux de g\u00e9nie civil sur l'Avenue de l'Ain et le carrefour avec la route de Vernier. </p>",
+            "it": null
+        },
+        "additionalCpvCodes": [],
+        "bkpCodes": [],
+        "ebkphCodes": [],
+        "ebkptCodes": [],
+        "npkCodes": [],
+        "cpcCode": null,
+        "constructionType": "execution",
+        "constructionCategory": "civil_engineering",
+        "cpvCode": {
+            "code": "45200000",
+            "label": {
+                "de": "Komplett- oder Teilbauleistungen im Hochbau sowie Tiefbauarbeiten",
+                "en": "Works for complete or part construction and civil engineering work",
+                "fr": "Travaux de construction compl\u00e8te ou partielle et travaux de g\u00e9nie civil",
+                "it": "Lavori per la costruzione completa o parziale e ingegneria civile"
+            }
+        },
+        "projectOrderDescription": null,
+        "externalReference": null
+    },
+    "id": "e34aee22-5e62-4db9-b5eb-857892e05434",
+    "type": "award",
+    "projectType": "tender",
+    "publishers": [
+        {
+            "id": "c92c5781-c89a-4f93-94b1-f2061c35e556",
+            "name": "simap.ch"
+        }
+    ],
+    "project-info": {
+        "procOfficeAddress": {
+            "postalCode": "1213",
+            "countryId": "CH",
+            "cantonId": "GE",
+            "id": "d7ccfc29-1a7e-49e4-bb46-22ba8fcb8b97",
+            "name": {
+                "de": null,
+                "en": null,
+                "fr": "OCGC - Service des Infrastructures Transports Publics (MO)",
+                "it": null
+            },
+            "contactPerson": {
+                "de": null,
+                "en": null,
+                "fr": null,
+                "it": null
+            },
+            "phone": "+41225466330",
+            "email": "admin-sitp@etat.ge.ch",
+            "url": {
+                "de": null,
+                "en": null,
+                "fr": null,
+                "it": null
+            },
+            "reference": null,
+            "street": {
+                "de": null,
+                "en": null,
+                "fr": "Chemin des Olliquettes 4",
+                "it": null
+            },
+            "city": {
+                "de": null,
+                "en": null,
+                "fr": "Petit-Lancy",
+                "it": null
+            }
+        },
+        "procurementRecipientAddress": {
+            "postalCode": "1213",
+            "countryId": "CH",
+            "cantonId": "GE",
+            "id": "d15c9954-409b-4d6c-b67d-767ad146fac8",
+            "name": {
+                "de": null,
+                "en": null,
+                "fr": "OCGC - Service des Infrastructures Transports Publics (MO)",
+                "it": null
+            },
+            "contactPerson": {
+                "de": null,
+                "en": null,
+                "fr": null,
+                "it": null
+            },
+            "phone": "+41225466330",
+            "email": "admin-sitp@etat.ge.ch",
+            "url": {
+                "de": null,
+                "en": null,
+                "fr": null,
+                "it": null
+            },
+            "reference": null,
+            "street": {
+                "de": null,
+                "en": null,
+                "fr": "Chemin des Olliquettes 4",
+                "it": null
+            },
+            "city": {
+                "de": null,
+                "en": null,
+                "fr": "Petit-Lancy",
+                "it": null
+            }
+        },
+        "title": {
+            "de": null,
+            "en": null,
+            "fr": "BHNS GVZ - Secteur 5 - lot 1 - Travaux de g\u00e9nie civil",
+            "it": null
+        },
+        "stateContractArea": false,
+        "publicationTed": false
+    },
+    "decision": {
+        "awardDecisionWithJustification": false,
+        "vendors": [
+            {
+                "vendorId": "3eb46ce8-65b5-474c-b9f0-7911f5cb6a8f",
+                "vendorName": "SOGECA SA",
+                "vendorAddress": {
+                    "countryId": "CH",
+                    "street": "chemin Delay 16",
+                    "city": "Vernier",
+                    "postalCode": "1214",
+                    "cantonId": "GE"
+                },
+                "price": {
+                    "currency": "chf",
+                    "price": 2724864.44,
+                    "vatType": "full"
+                },
+                "note": {
+                    "de": null,
+                    "en": null,
+                    "fr": null,
+                    "it": null
+                },
+                "rank": null
+            }
+        ],
+        "numberOfSubmissions": 4,
+        "totalPriceSelection": "price_of_selected_offers",
+        "totalPriceSelectionNote": {
+            "de": null,
+            "en": null,
+            "fr": null,
+            "it": null
+        },
+        "totalPriceRange": {
+            "currency": null,
+            "vatType": null,
+            "range": null
+        },
+        "awardDecisionDate": "2026-04-15",
+        "awardDecisionJustification": {
+            "de": null,
+            "en": null,
+            "fr": null,
+            "it": null
+        },
+        "awardDecisionJuryDescription": {
+            "de": null,
+            "en": null,
+            "fr": null,
+            "it": null
+        },
+        "awardDecisionNote": {
+            "de": null,
+            "en": null,
+            "fr": null,
+            "it": null
+        },
+        "remediesNotice": {
+            "de": null,
+            "en": null,
+            "fr": null,
+            "it": null
+        }
+    },
+    "referencingPub": {
+        "publishers": [
+            {
+                "id": "c92c5781-c89a-4f93-94b1-f2061c35e556",
+                "name": "simap.ch"
+            }
+        ],
+        "publicationId": "8ec5b325-49ca-445b-9f1e-f3959f2acc56",
+        "pubType": "tender",
+        "projectType": "tender",
+        "processType": "open",
+        "corrected": true,
+        "publicationNumber": "19474-02",
+        "publicationDate": "2025-09-24"
+    },
+    "base": {
+        "publicationTed": false,
+        "id": "e34aee22-5e62-4db9-b5eb-857892e05434",
+        "title": {
+            "de": null,
+            "en": null,
+            "fr": "BHNS GVZ - Secteur 5 - lot 1 - Travaux de g\u00e9nie civil",
+            "it": null
+        },
+        "projectType": "tender",
+        "processType": "open",
+        "lotsType": "without",
+        "stateContractArea": false,
+        "type": "award",
+        "publicationNumber": "19474-03",
+        "projectId": "af18ebb4-ed0d-4ad3-97b9-8a4f64f258b1",
+        "publicationDate": "2026-04-17",
+        "creationLanguage": "fr",
+        "translationLanguages": [],
+        "procOfficeId": "e227f674-33a3-438d-aade-06dc524d5677",
+        "publishers": [
+            "c92c5781-c89a-4f93-94b1-f2061c35e556"
+        ],
+        "projectNumber": "19474",
+        "referencingPubId": "8ec5b325-49ca-445b-9f1e-f3959f2acc56",
+        "referencingLotId": null
+    },
+    "hasProjectDocuments": false,
+    "ted": null,
+    "lot": null
+}
