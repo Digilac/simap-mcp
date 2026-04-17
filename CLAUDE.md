@@ -87,12 +87,14 @@ Tests mirror this tree under `tests/` (see [ARCHITECTURE.md](./ARCHITECTURE.md) 
 - **Classes / Types**: PascalCase (`SimapClient`, `ProjectSearchEntry`)
 - **MCP tools**: snake_case (`search_tenders`)
 - **Constants**: UPPER_SNAKE (`SIMAP_API_BASE`)
+- **TypeScript**: strict mode is enforced (`tsconfig.json`). Never use `any` — prefer `unknown` and narrow.
+- **Commits**: Conventional Commits format — `type(scope): short description`. Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`. Example: `feat(tools): add search_xxx tool`.
 
 ## Development Workflow
 
 1. **Write tests for every new feature or tool.** Tests are mandatory.
 2. Run `npm run format` and `npm run typecheck` before committing.
-3. Update [CHANGELOG.md](./CHANGELOG.md) under `[Unreleased]` as you go.
+3. Update [CHANGELOG.md](./CHANGELOG.md) under `[Unreleased]` as you go (see [CHANGELOG Usage](#changelog-usage) below).
 4. Update [ARCHITECTURE.md](./ARCHITECTURE.md) / [SECURITY.md](./SECURITY.md) when patterns or threat model change.
 
 ## Testing
@@ -104,13 +106,30 @@ Tests mirror this tree under `tests/` (see [ARCHITECTURE.md](./ARCHITECTURE.md) 
   3. **Response formatting** — output is correctly formatted for the user.
 - For `api/client.ts` and `api/rate-limiter.ts`, cover URL building, timeout, schema validation, error mapping, debug logging, FIFO ordering, and windowing.
 
+## CHANGELOG Usage
+
+The project follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/). Every user-visible change lands in [CHANGELOG.md](./CHANGELOG.md) **under `[Unreleased]` as part of the same PR that introduces it** — not at release time.
+
+Use these section headers, in this order:
+
+- **Added** — new features (new tool, new env var, new export).
+- **Changed** — behavior change in existing functionality (parameter mapping, target bump, refactor with user-visible impact).
+- **Deprecated** — still works, but will be removed.
+- **Removed** — deleted feature or file.
+- **Fixed** — bug fix.
+- **Security** — vulnerability fix (link the GHSA advisory).
+- **Documentation** — doc-only changes worth mentioning.
+
+One bullet = one concrete change. Lead with the affected symbol/file/tool in backticks, then the "what" and, when non-obvious, the "why".
+
 ## Release Process
 
-1. Move entries from `[Unreleased]` to a new dated section in [CHANGELOG.md](./CHANGELOG.md).
-2. Bump `version` in `package.json` **and** `server.json` (both root `version` and `packages[0].version`).
-3. Run `npm install` to update `package-lock.json`.
-4. Commit, push to `main`.
-5. `gh release create v<version>` — creates the tag and triggers `publish.yml`, which publishes to npm and to the MCP Registry via `mcp-publisher`.
+1. Verify everything is green: `npm run lint && npm run typecheck && npm run build && npm test`.
+2. Move entries from `[Unreleased]` to a new dated section in [CHANGELOG.md](./CHANGELOG.md). Keep an empty `[Unreleased]` header on top.
+3. Bump `version` in `package.json` **and** `server.json` (both root `version` and `packages[0].version`).
+4. Run `npm install` to update `package-lock.json`.
+5. Commit (`chore: release v<version>`), push to `main`.
+6. `gh release create v<version>` — creates the tag and triggers `publish.yml`, which publishes to npm and to the MCP Registry via `mcp-publisher`. Use the [Release Notes Template](#release-notes-template) below for the release body.
 
 ### Release Notes Template
 
@@ -131,18 +150,3 @@ Tests mirror this tree under `tests/` (see [ARCHITECTURE.md](./ARCHITECTURE.md) 
 ```
 
 Emoji conventions: 🚀 New features · 🔒 Security · 📦 Dependencies · 🐛 Bug fixes · ♻️ Refactoring
-
-## MCP Integration
-
-Add to Claude Code config (`~/.claude/settings.json`):
-
-```json
-{
-  "mcpServers": {
-    "simap": {
-      "command": "node",
-      "args": ["/path/to/simap-mcp/dist/index.js"]
-    }
-  }
-}
-```
