@@ -10,11 +10,12 @@ import { ENDPOINTS } from "../../api/endpoints.js";
 import type { ProcOfficesPublicResponse, ProcOfficeType } from "../../types/api.js";
 import { ProcOfficesPublicResponseSchema } from "../../types/schemas.js";
 import { escapeInlineCode } from "../../utils/formatting.js";
+import { toToolErrorResult } from "../../utils/errors.js";
 
 /**
- * Schema for search_proc_offices parameters.
+ * Schema (raw shape) for search_proc_offices parameters.
  */
-const schema = {
+export const searchProcOfficesInputShape = {
   search: z
     .string()
     .min(3)
@@ -26,7 +27,10 @@ const schema = {
     .uuid()
     .optional()
     .describe("Filter by parent institution (UUID)"),
-};
+} as const;
+
+export const searchProcOfficesInputSchema = z.object(searchProcOfficesInputShape);
+export type SearchProcOfficesInput = z.infer<typeof searchProcOfficesInputSchema>;
 
 /**
  * Maximum number of results to display.
@@ -51,7 +55,7 @@ function getTypeLabel(type: ProcOfficeType): string {
 /**
  * Handler for search_proc_offices.
  */
-async function handler(params: { search?: string; institutionId?: string }) {
+async function handler(params: SearchProcOfficesInput) {
   const { search, institutionId } = params;
 
   // At least one parameter is required
@@ -120,16 +124,10 @@ async function handler(params: { search?: string; institutionId?: string }) {
       content: [{ type: "text" as const, text: result }],
     };
   } catch (error) {
-    console.error("search_proc_offices error:", error);
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: "An error occurred while searching procurement offices. Please try again.",
-        },
-      ],
-      isError: true,
-    };
+    return toToolErrorResult(error, {
+      toolName: "search_proc_offices",
+      action: "searching procurement offices",
+    });
   }
 }
 
@@ -140,7 +138,7 @@ export function registerSearchProcOffices(server: McpServer): void {
   server.tool(
     "search_proc_offices",
     "Search public procurement offices by name or institution",
-    schema,
+    searchProcOfficesInputShape,
     handler
   );
 }

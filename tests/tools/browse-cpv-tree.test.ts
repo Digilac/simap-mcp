@@ -3,16 +3,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
-
-// Schema definition (mirrors the one in browse-cpv-tree.ts)
-const schema = z.object({
-  parentCode: z
-    .string()
-    .regex(/^[0-9]{8}$/)
-    .optional(),
-  lang: z.enum(["de", "fr", "it", "en"]).default("fr"),
-});
+import { browseCpvTreeInputSchema as schema } from "../../src/tools/codes/browse-cpv-tree.js";
 
 describe("browse_cpv_tree schema validation", () => {
   describe("parentCode parameter", () => {
@@ -53,9 +44,9 @@ describe("browse_cpv_tree schema validation", () => {
   });
 
   describe("lang parameter", () => {
-    it("should default to fr", () => {
+    it("should default to en", () => {
       const result = schema.parse({});
-      expect(result.lang).toBe("fr");
+      expect(result.lang).toBe("en");
     });
 
     it("should accept all valid languages", () => {

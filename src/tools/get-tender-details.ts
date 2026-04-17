@@ -10,21 +10,25 @@ import { ENDPOINTS } from "../api/endpoints.js";
 import { SimapApiError } from "../types/api.js";
 import type { ProjectHeader, PublicationDetails } from "../types/api.js";
 import { ProjectHeaderSchema, PublicationDetailsSchema } from "../types/schemas.js";
-import type { Language } from "../types/common.js";
 import {
   formatProjectHeader,
   formatPublicationDetails,
   formatJsonPreview,
 } from "../utils/formatting.js";
+import { toToolErrorResult } from "../utils/errors.js";
 
 /**
- * Schema for get_tender_details parameters.
+ * Schema (raw shape) for get_tender_details parameters.
+ * Exported so tests can import the source of truth.
  */
-const schema = {
+export const getTenderDetailsInputShape = {
   projectId: z.string().uuid().describe("Project ID (UUID)"),
   publicationId: z.string().uuid().describe("Publication ID (UUID)"),
   lang: z.enum(["de", "fr", "it", "en"]).default("en").describe("Preferred language"),
-};
+} as const;
+
+export const getTenderDetailsInputSchema = z.object(getTenderDetailsInputShape);
+export type GetTenderDetailsInput = z.infer<typeof getTenderDetailsInputSchema>;
 
 /**
  * Fetches data, returning null only for 404 (not found).
@@ -44,11 +48,7 @@ async function fetchOrNull<T>(promise: Promise<T>): Promise<T | null> {
 /**
  * Handler for get_tender_details.
  */
-async function handler(params: {
-  projectId: string;
-  publicationId: string;
-  lang: Language;
-}) {
+async function handler(params: GetTenderDetailsInput) {
   const { projectId, publicationId, lang } = params;
 
   try {
@@ -93,16 +93,10 @@ async function handler(params: {
       content: [{ type: "text" as const, text: result }],
     };
   } catch (error) {
-    console.error("get_tender_details error:", error);
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: "An error occurred while retrieving tender details. Please try again.",
-        },
-      ],
-      isError: true,
-    };
+    return toToolErrorResult(error, {
+      toolName: "get_tender_details",
+      action: "retrieving tender details",
+    });
   }
 }
 
@@ -113,7 +107,7 @@ export function registerGetTenderDetails(server: McpServer): void {
   server.tool(
     "get_tender_details",
     "Get detailed information about a specific tender",
-    schema,
+    getTenderDetailsInputShape,
     handler
   );
 }

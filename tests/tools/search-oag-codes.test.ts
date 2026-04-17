@@ -3,13 +3,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
-
-// Schema definition (mirrors the one in search-oag-codes.ts)
-const schema = z.object({
-  query: z.string().min(1).max(500),
-  lang: z.enum(["de", "fr", "it", "en"]).default("fr"),
-});
+import { searchOagCodesInputSchema as schema } from "../../src/tools/codes/search-oag-codes.js";
 
 describe("search_oag_codes schema validation", () => {
   describe("query parameter", () => {
@@ -45,9 +39,9 @@ describe("search_oag_codes schema validation", () => {
   });
 
   describe("lang parameter", () => {
-    it("should default to fr", () => {
+    it("should default to en", () => {
       const result = schema.parse({ query: "test" });
-      expect(result.lang).toBe("fr");
+      expect(result.lang).toBe("en");
     });
 
     it("should accept all valid languages", () => {

@@ -3,13 +3,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
-
-// Schema definition (mirrors the one in list-institutions.ts)
-const schema = z.object({
-  search: z.string().min(3).optional(),
-  lang: z.enum(["de", "fr", "it", "en"]).default("fr"),
-});
+import { listInstitutionsInputSchema as schema } from "../../src/tools/organizations/list-institutions.js";
 
 describe("list_institutions schema validation", () => {
   describe("search parameter", () => {

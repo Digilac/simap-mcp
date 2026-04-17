@@ -9,14 +9,18 @@ import { simap } from "../../api/client.js";
 import { ENDPOINTS, SIMAP_API_BASE } from "../../api/endpoints.js";
 import { SimapApiError, type PastPublicationsResponse } from "../../types/api.js";
 import { PastPublicationsResponseSchema } from "../../types/schemas.js";
+import { toToolErrorResult } from "../../utils/errors.js";
 
 /**
- * Schema for get_publication_history parameters.
+ * Schema (raw shape) for get_publication_history parameters.
  */
-const schema = {
+export const getPublicationHistoryInputShape = {
   publicationId: z.string().uuid().describe("Current publication ID (UUID)"),
   lotId: z.string().uuid().optional().describe("Lot ID (optional, to filter by lot)"),
-};
+} as const;
+
+export const getPublicationHistoryInputSchema = z.object(getPublicationHistoryInputShape);
+export type GetPublicationHistoryInput = z.infer<typeof getPublicationHistoryInputSchema>;
 
 /**
  * Maps pubType to a human-readable English label.
@@ -44,7 +48,7 @@ function getPubTypeLabel(pubType: string): string {
 /**
  * Handler for get_publication_history.
  */
-async function handler(params: { publicationId: string; lotId?: string }) {
+async function handler(params: GetPublicationHistoryInput) {
   const { publicationId, lotId } = params;
 
   try {
@@ -99,9 +103,7 @@ async function handler(params: { publicationId: string; lotId?: string }) {
       content: [{ type: "text" as const, text: result }],
     };
   } catch (error) {
-    console.error("get_publication_history error:", error);
-
-    // API returns 400 when no history is available
+    // API returns 400 when no history is available — treat as "no data", not an error
     if (error instanceof SimapApiError && error.statusCode === 400) {
       return {
         content: [
@@ -113,15 +115,10 @@ async function handler(params: { publicationId: string; lotId?: string }) {
       };
     }
 
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: "An error occurred while retrieving publication history. Please try again.",
-        },
-      ],
-      isError: true,
-    };
+    return toToolErrorResult(error, {
+      toolName: "get_publication_history",
+      action: "retrieving publication history",
+    });
   }
 }
 
@@ -132,7 +129,7 @@ export function registerGetPublicationHistory(server: McpServer): void {
   server.tool(
     "get_publication_history",
     "Get the publication history for a project (corrections, awards, etc.)",
-    schema,
+    getPublicationHistoryInputShape,
     handler
   );
 }

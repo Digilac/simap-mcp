@@ -3,13 +3,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
-
-// Schema definition (mirrors the one in get-publication-history.ts)
-const schema = z.object({
-  publicationId: z.string().uuid(),
-  lotId: z.string().uuid().optional(),
-});
+import { getPublicationHistoryInputSchema as schema } from "../../src/tools/organizations/get-publication-history.js";
 
 describe("get_publication_history schema validation", () => {
   describe("publicationId parameter", () => {

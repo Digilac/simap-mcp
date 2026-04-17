@@ -4,10 +4,19 @@
  */
 
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z } from "zod";
 import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
 import type { CantonsResponse } from "../../types/api.js";
 import { CantonsResponseSchema } from "../../types/schemas.js";
+import { toToolErrorResult } from "../../utils/errors.js";
+
+/**
+ * Schema (raw shape) for list_cantons parameters. Empty — no inputs.
+ */
+export const listCantonsInputShape = {} as const;
+export const listCantonsInputSchema = z.object(listCantonsInputShape);
+export type ListCantonsInput = z.infer<typeof listCantonsInputSchema>;
 
 /**
  * Canton names mapping (API only returns codes).
@@ -75,16 +84,10 @@ async function handler() {
       content: [{ type: "text" as const, text: result }],
     };
   } catch (error) {
-    console.error("list_cantons error:", error);
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: "An error occurred while retrieving cantons. Please try again.",
-        },
-      ],
-      isError: true,
-    };
+    return toToolErrorResult(error, {
+      toolName: "list_cantons",
+      action: "retrieving cantons",
+    });
   }
 }
 
@@ -95,7 +98,7 @@ export function registerListCantons(server: McpServer): void {
   server.tool(
     "list_cantons",
     "List all Swiss cantons with their codes (useful for search filters)",
-    {},
+    listCantonsInputShape,
     handler
   );
 }

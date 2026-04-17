@@ -9,14 +9,14 @@ import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
 import type { InstitutionsResponse, Institution } from "../../types/api.js";
 import { InstitutionsResponseSchema } from "../../types/schemas.js";
-import type { Language } from "../../types/common.js";
 import { getTranslation } from "../../utils/translation.js";
 import { escapeInlineCode } from "../../utils/formatting.js";
+import { toToolErrorResult } from "../../utils/errors.js";
 
 /**
- * Schema for list_institutions parameters.
+ * Schema (raw shape) for list_institutions parameters.
  */
-const schema = {
+export const listInstitutionsInputShape = {
   search: z
     .string()
     .min(3)
@@ -24,7 +24,10 @@ const schema = {
     .optional()
     .describe("Filter by name (min 3 characters)"),
   lang: z.enum(["de", "fr", "it", "en"]).default("en").describe("Language for names"),
-};
+} as const;
+
+export const listInstitutionsInputSchema = z.object(listInstitutionsInputShape);
+export type ListInstitutionsInput = z.infer<typeof listInstitutionsInputSchema>;
 
 /**
  * Maximum number of institutions to display.
@@ -49,7 +52,7 @@ function matchesSearch(inst: Institution, searchLower: string): boolean {
 /**
  * Handler for list_institutions.
  */
-async function handler(params: { search?: string; lang: Language }) {
+async function handler(params: ListInstitutionsInput) {
   const { search, lang } = params;
 
   try {
@@ -113,16 +116,10 @@ async function handler(params: { search?: string; lang: Language }) {
       content: [{ type: "text" as const, text: result }],
     };
   } catch (error) {
-    console.error("list_institutions error:", error);
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: "An error occurred while retrieving institutions. Please try again.",
-        },
-      ],
-      isError: true,
-    };
+    return toToolErrorResult(error, {
+      toolName: "list_institutions",
+      action: "retrieving institutions",
+    });
   }
 }
 
@@ -133,7 +130,7 @@ export function registerListInstitutions(server: McpServer): void {
   server.tool(
     "list_institutions",
     "List Swiss public institutions (Confederation, cantons, municipalities) that publish tenders",
-    schema,
+    listInstitutionsInputShape,
     handler
   );
 }

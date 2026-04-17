@@ -9,22 +9,25 @@ import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
 import type { CodeSearchResponse } from "../../types/api.js";
 import { CodeSearchResponseSchema } from "../../types/schemas.js";
-import type { Language } from "../../types/common.js";
 import { getTranslation } from "../../utils/translation.js";
 import { escapeInlineCode } from "../../utils/formatting.js";
+import { toToolErrorResult } from "../../utils/errors.js";
 
 /**
- * Schema for search_bkp_codes parameters.
+ * Schema (raw shape) for search_bkp_codes parameters.
  */
-const schema = {
+export const searchBkpCodesInputShape = {
   query: z.string().min(1).max(500).describe("Search term (keyword or code number)"),
   lang: z.enum(["de", "fr", "it", "en"]).default("en").describe("Search language"),
-};
+} as const;
+
+export const searchBkpCodesInputSchema = z.object(searchBkpCodesInputShape);
+export type SearchBkpCodesInput = z.infer<typeof searchBkpCodesInputSchema>;
 
 /**
  * Handler for search_bkp_codes.
  */
-async function handler(params: { query: string; lang: Language }) {
+async function handler(params: SearchBkpCodesInput) {
   const { query, lang } = params;
 
   try {
@@ -61,16 +64,10 @@ async function handler(params: { query: string; lang: Language }) {
       content: [{ type: "text" as const, text: result }],
     };
   } catch (error) {
-    console.error("search_bkp_codes error:", error);
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: "An error occurred while searching BKP codes. Please try again.",
-        },
-      ],
-      isError: true,
-    };
+    return toToolErrorResult(error, {
+      toolName: "search_bkp_codes",
+      action: "searching BKP codes",
+    });
   }
 }
 
@@ -81,7 +78,7 @@ export function registerSearchBkpCodes(server: McpServer): void {
   server.tool(
     "search_bkp_codes",
     "Search BKP (Swiss construction cost plan) codes by keyword or number",
-    schema,
+    searchBkpCodesInputShape,
     handler
   );
 }
