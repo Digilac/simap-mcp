@@ -5,6 +5,17 @@
 import { type ZodType } from "zod";
 import { SIMAP_API_BASE } from "./endpoints.js";
 import { SimapApiError } from "../types/api.js";
+import { SlidingWindowRateLimiter } from "./rate-limiter.js";
+
+/**
+ * When SIMAP_MCP_DEBUG=1 (or "true") is set, the client emits extra info
+ * (full URL, response status, size, duration) to stderr. Off by default so
+ * user-supplied search terms are not written to logs in production.
+ */
+function isDebugEnabled(): boolean {
+  const v = process.env.SIMAP_MCP_DEBUG;
+  return v === "1" || v === "true";
+}
 
 /**
  * Request options for the SIMAP client.
@@ -20,37 +31,31 @@ export interface RequestOptions<T = unknown> {
  */
 export class SimapClient {
   private readonly baseUrl: string;
-  private requestTimestamps: number[] = [];
-  private readonly maxRequestsPerMinute = 60;
+  private readonly rateLimiter: SlidingWindowRateLimiter;
 
-  constructor(baseUrl: string = SIMAP_API_BASE) {
+  constructor(
+    baseUrl: string = SIMAP_API_BASE,
+    rateLimiter: SlidingWindowRateLimiter = new SlidingWindowRateLimiter()
+  ) {
     this.baseUrl = baseUrl;
-  }
-
-  /**
-   * Simple sliding window rate limiter.
-   */
-  private async checkRateLimit(): Promise<void> {
-    let now = Date.now();
-    this.requestTimestamps = this.requestTimestamps.filter((t) => now - t < 60000);
-    while (this.requestTimestamps.length >= this.maxRequestsPerMinute) {
-      const waitTime = 60000 - (now - this.requestTimestamps[0]);
-      await new Promise((resolve) => setTimeout(resolve, waitTime));
-      now = Date.now();
-      this.requestTimestamps = this.requestTimestamps.filter((t) => now - t < 60000);
-    }
-    this.requestTimestamps.push(Date.now());
+    this.rateLimiter = rateLimiter;
   }
 
   /**
    * Performs a GET request to the SIMAP API.
    */
   async get<T>(endpoint: string, options: RequestOptions<T> = {}): Promise<T> {
-    await this.checkRateLimit();
+    await this.rateLimiter.acquire();
 
-    const url = this.buildUrl(endpoint, options.params);
+    const url = buildUrl(this.baseUrl, endpoint, options.params);
+    const debug = isDebugEnabled();
+    const startedAt = Date.now();
 
-    console.error(`[${new Date().toISOString()}] GET ${endpoint}`);
+    if (debug) {
+      console.error(`[${new Date().toISOString()}] GET ${endpoint} → ${url}`);
+    } else {
+      console.error(`[${new Date().toISOString()}] GET ${endpoint}`);
+    }
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), options.timeout ?? 30000);
@@ -72,7 +77,18 @@ export class SimapClient {
         );
       }
 
-      const json = await response.json();
+      let json: unknown;
+      if (debug) {
+        const text = await response.text();
+        const ms = Date.now() - startedAt;
+        console.error(
+          `  ← ${response.status} ${response.statusText} · ${text.length} bytes · ${ms}ms`
+        );
+        json = JSON.parse(text);
+      } else {
+        json = await response.json();
+      }
+
       if (options.schema) {
         return options.schema.parse(json);
       }
@@ -81,33 +97,36 @@ export class SimapClient {
       clearTimeout(timeoutId);
     }
   }
+}
 
-  /**
-   * Builds a URL with query parameters.
-   */
-  private buildUrl(
-    endpoint: string,
-    params?: Record<string, string | string[] | undefined>
-  ): string {
-    const url = new URL(this.baseUrl);
-    url.pathname = url.pathname.replace(/\/$/, "") + endpoint;
+/**
+ * Builds a URL with query parameters. Array values are emitted as repeated
+ * `?key=v1&key=v2` pairs; undefined values are skipped.
+ *
+ * Exported (not a private method) so it can be unit-tested directly.
+ */
+export function buildUrl(
+  baseUrl: string,
+  endpoint: string,
+  params?: Record<string, string | string[] | undefined>
+): string {
+  const url = new URL(baseUrl);
+  url.pathname = url.pathname.replace(/\/$/, "") + endpoint;
 
-    if (params) {
-      for (const [key, value] of Object.entries(params)) {
-        if (value === undefined) continue;
-
-        if (Array.isArray(value)) {
-          for (const v of value) {
-            url.searchParams.append(key, v);
-          }
-        } else {
-          url.searchParams.append(key, value);
+  if (params) {
+    for (const [key, value] of Object.entries(params)) {
+      if (value === undefined) continue;
+      if (Array.isArray(value)) {
+        for (const v of value) {
+          url.searchParams.append(key, v);
         }
+      } else {
+        url.searchParams.append(key, value);
       }
     }
-
-    return url.toString();
   }
+
+  return url.toString();
 }
 
 /**
