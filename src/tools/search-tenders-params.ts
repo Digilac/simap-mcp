@@ -66,7 +66,7 @@ export function buildTenderSearchQuery(
     q[M.projectSubTypes] = projectSubTypes;
   }
   if (cantons && cantons.length > 0) {
-    q[M.cantons] = cantons.map((c) => c.toUpperCase());
+    q[M.cantons] = cantons;
   }
   if (processTypes && processTypes.length > 0) q[M.processTypes] = processTypes;
   if (pubTypes && pubTypes.length > 0) q[M.pubTypes] = pubTypes;

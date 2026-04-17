@@ -81,8 +81,9 @@ export class SimapClient {
       if (debug) {
         const text = await response.text();
         const ms = Date.now() - startedAt;
+        const bytes = Buffer.byteLength(text, "utf8");
         console.error(
-          `  ← ${response.status} ${response.statusText} · ${text.length} bytes · ${ms}ms`
+          `  ← ${response.status} ${response.statusText} · ${bytes} bytes · ${ms}ms`
         );
         json = JSON.parse(text);
       } else {

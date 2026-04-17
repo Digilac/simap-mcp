@@ -68,7 +68,11 @@ async function handler(params: GetTenderDetailsInput) {
     ]);
 
     if (!header && !details) {
-      throw new Error("Unable to retrieve project or publication data");
+      throw new SimapApiError(
+        "Both header and details returned 404",
+        404,
+        ENDPOINTS.PROJECT_HEADER(projectId)
+      );
     }
 
     let result = `# Tender Details\n\n`;
