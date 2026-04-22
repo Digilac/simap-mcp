@@ -51,7 +51,7 @@ describe("formatPublicationDetails — tender fixture", () => {
   const details = loadFixture("publication-details-tender.json");
   const output = formatPublicationDetails(details, "fr");
 
-  it("renders publication info with real title and numbers", () => {
+  it("should render publication info with real title and numbers", () => {
     expect(output).toContain("## Publication Details");
     expect(output).toContain("MP 2025.04.775 - Licences et support Atlassian");
     expect(output).toContain("29941-01");
@@ -61,51 +61,51 @@ describe("formatPublicationDetails — tender fixture", () => {
     expect(output).toContain("service");
   });
 
-  it("renders the primary CPV code with its label", () => {
+  it("should render the primary CPV code with its label", () => {
     expect(output).toContain("### CPV");
     expect(output).toContain("48000000");
     expect(output).toContain("Logiciels");
   });
 
-  it("renders submission deadline and offer opening from dates.*", () => {
+  it("should render submission deadline and offer opening from dates.*", () => {
     expect(output).toContain("### Deadlines");
     expect(output).toContain("2026-03-05T12:00:00+01:00");
     expect(output).toContain("2026-03-05T14:00:00+01:00");
     expect(output).toContain("364 days");
   });
 
-  it("renders Q&A rounds from dates.qnas", () => {
+  it("should render Q&A rounds from dates.qnas", () => {
     expect(output).toContain("Q&A Rounds");
     expect(output).toContain("2026-02-09");
   });
 
-  it("renders conditions from terms.*", () => {
+  it("should render conditions from terms.*", () => {
     expect(output).toContain("### Conditions");
     expect(output).toContain("Consortium allowed:");
     expect(output).toContain("Subcontracting allowed:");
     expect(output).toContain("Remedies notice:");
   });
 
-  it("renders criteria from criteria.*", () => {
+  it("should render criteria from criteria.*", () => {
     expect(output).toContain("### Criteria");
     expect(output).toContain("Qualification criteria in documents:");
     expect(output).toContain("Award criteria selection:");
   });
 
-  it("renders publishers from publishers[]", () => {
+  it("should render publishers from publishers[]", () => {
     expect(output).toContain("### Publishers");
     expect(output).toContain("simap.ch");
   });
 
-  it("does not render Award Decision for tender type", () => {
+  it("should not render Award Decision for tender type", () => {
     expect(output).not.toContain("### Award Decision");
   });
 
-  it("does not include the legacy truncation marker", () => {
+  it("should not include the legacy truncation marker", () => {
     expect(output).not.toContain("(truncated)");
   });
 
-  it("uses the requested language for translations", () => {
+  it("should use the requested language for translations", () => {
     const de = formatPublicationDetails(details, "de");
     expect(de).toContain("Softwarepaket und Informationssysteme");
   });
@@ -115,7 +115,7 @@ describe("formatPublicationDetails — award fixture", () => {
   const details = loadFixture("publication-details-award.json");
   const output = formatPublicationDetails(details, "fr");
 
-  it("renders the Award Decision section with vendor and price", () => {
+  it("should render the Award Decision section with vendor and price", () => {
     expect(output).toContain("### Award Decision");
     expect(output).toContain("2026-04-15");
     expect(output).toContain("SOGECA SA");
@@ -124,12 +124,12 @@ describe("formatPublicationDetails — award fixture", () => {
     expect(output).toContain("Number of Submissions:** 4");
   });
 
-  it("renders publication info even without tender-specific sections", () => {
+  it("should render publication info even without tender-specific sections", () => {
     expect(output).toContain("BHNS GVZ");
     expect(output).toContain("19474-03");
   });
 
-  it("gracefully omits sections missing from award publications", () => {
+  it("should gracefully omit sections missing from award publications", () => {
     expect(output).not.toContain("### Deadlines");
     expect(output).not.toContain("### Conditions");
     expect(output).not.toContain("### Criteria");
@@ -137,7 +137,7 @@ describe("formatPublicationDetails — award fixture", () => {
 });
 
 describe("formatPublicationDetails — empty input", () => {
-  it("still produces the Publication Details header when given an empty object", () => {
+  it("should still produce the Publication Details header when given an empty object", () => {
     const output = formatPublicationDetails({}, "en");
     expect(output).toContain("## Publication Details");
   });
