@@ -142,6 +142,11 @@ export function formatPublicationDetails(
   return parts.join("\n") + "\n";
 }
 
+/**
+ * Renders the top-level "Publication Details" header + summary lines (title,
+ * numbers, type, dates). Always returns a string — the header is emitted even
+ * when every field is absent, so callers can rely on a stable anchor.
+ */
 function formatPublicationInfoSection(
   details: PublicationDetails,
   lang: Language
@@ -178,6 +183,10 @@ function formatPublicationInfoSection(
   return out;
 }
 
+/**
+ * Renders the CPV (Common Procurement Vocabulary) code section.
+ * Returns null when no CPV code is present on either `base` or `procurement`.
+ */
 function formatCpvSection(details: PublicationDetails, lang: Language): string | null {
   const cpv = details.base?.cpvCode || details.procurement?.cpvCode;
   if (!cpv || !cpv.code) return null;
@@ -187,6 +196,11 @@ function formatCpvSection(details: PublicationDetails, lang: Language): string |
   return out;
 }
 
+/**
+ * Renders submission / opening / validity deadlines and Q&A rounds.
+ * Returns null when `details.dates` is missing or contains no displayable field,
+ * so the section header is not emitted for empty payloads (common on awards).
+ */
 function formatDeadlinesSection(
   details: PublicationDetails,
   lang: Language
@@ -226,6 +240,11 @@ function formatDeadlinesSection(
   return out;
 }
 
+/**
+ * Renders contractual terms (consortium / subcontracting rules, business and
+ * payment terms, remedies notice). Returns null when every displayable term is
+ * empty, so the section is skipped rather than shown with a lone header.
+ */
 function formatTermsSection(details: PublicationDetails, lang: Language): string | null {
   const terms = details.terms;
   if (!terms) return null;
@@ -270,6 +289,10 @@ function formatTermsSection(details: PublicationDetails, lang: Language): string
   return out;
 }
 
+/**
+ * Renders qualification and award criteria (counts + notes).
+ * Returns null when no criteria metadata is present on the publication.
+ */
 function formatCriteriaSection(
   details: PublicationDetails,
   lang: Language
@@ -317,6 +340,11 @@ function formatCriteriaSection(
   return out;
 }
 
+/**
+ * Renders award decision data (decision date, submissions count, winning
+ * vendors with price/rank). Returns null on tender-type publications that have
+ * not yet reached the award stage — i.e. when `details.decision` is absent.
+ */
 function formatAwardDecisionSection(
   details: PublicationDetails,
   lang: Language
@@ -361,6 +389,10 @@ function formatAwardDecisionSection(
   return out;
 }
 
+/**
+ * Renders the list of publishing organisations attached to the publication.
+ * Returns null when the publishers array is empty, to avoid an empty section.
+ */
 function formatPublishersSection(details: PublicationDetails): string | null {
   const publishers = details.publishers ?? [];
   if (publishers.length === 0) return null;
