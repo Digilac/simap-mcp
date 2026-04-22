@@ -168,6 +168,7 @@ Get tender details.
 | `projectId` | uuid | Project ID |
 | `publicationId` | uuid | Publication ID |
 | `lang` | string | Preferred language |
+| `fullRaw` | boolean | Append the full unmodified API response JSON (default: `false`) |
 
 ### `search_cpv_codes` / `search_bkp_codes` / `search_npk_codes` / `search_oag_codes`
 
