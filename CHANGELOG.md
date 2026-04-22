@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `get_tender_details`: structured Markdown output now reads the real SIMAP response shape (`base`, `dates`, `terms`, `criteria`, `procurement.cpvCode`, `publishers`, `decision`). Previous version read keys that do not exist in the API (`deadlines.*`, `contact.*`, `decision.awardees`), so sections like Deadlines / Conditions / CPV were silently empty. **Breaking** for any consumer that parsed the previous `### Raw Data (excerpt)` block — that section is gone (use `fullRaw: true` for the equivalent JSON).
 - `PublicationDetailsSchema` (`src/types/schemas.ts`) and `PublicationDetails` (`src/types/api.ts`) rewritten on the real API keys. Still `.passthrough()` so unknown fields are preserved for `fullRaw`.
+- Dev dependencies bumped: `eslint` 10.2.0 → 10.2.1, `typescript` 6.0.2 → 6.0.3, `typescript-eslint` 8.58.2 → 8.59.0, `vitest` 4.1.4 → 4.1.5.
 
 ### Removed
 
