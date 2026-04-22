@@ -16,6 +16,11 @@ import type { PublicationDetails } from "../../src/types/api.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FIXTURES_DIR = resolve(__dirname, "../fixtures");
 
+/**
+ * Loads a JSON fixture from tests/fixtures and validates it through the
+ * real `PublicationDetailsSchema`. Parsing via the schema guarantees the
+ * fixture keeps matching the schema as the latter evolves.
+ */
 function loadFixture(name: string): PublicationDetails {
   const raw = JSON.parse(
     readFileSync(resolve(FIXTURES_DIR, name), "utf-8")

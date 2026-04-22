@@ -14,12 +14,20 @@ import {
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FIXTURES_DIR = resolve(__dirname, "../fixtures");
 
+/**
+ * Loads a fixture file verbatim as `unknown` (no schema validation).
+ * Useful when the handler test needs the raw payload exactly as the SIMAP
+ * API would return it, without ever coupling to the schema.
+ */
 function loadFixtureRaw(name: string): unknown {
   return JSON.parse(
     readFileSync(resolve(FIXTURES_DIR, name), "utf-8")
   ) as unknown;
 }
 
+/**
+ * Builds a minimal `Response` stub with a JSON body for `fetch` mocks.
+ */
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -87,6 +95,12 @@ describe("get_tender_details handler — fixture-driven", () => {
     vi.restoreAllMocks();
   });
 
+  /**
+   * Installs a `fetch` stub that returns the tender fixture for the
+   * publication-details endpoint and a 404 for the project-header endpoint.
+   * Exercises the handler's partial-response branch where only one of the
+   * two parallel requests succeeds.
+   */
   function stubFetchWithTender(): void {
     // Route fetch calls: project-header → 404, publication-details → fixture.
     vi.stubGlobal(
