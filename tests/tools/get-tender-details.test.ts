@@ -31,7 +31,7 @@ const PROJECT_ID = "31367328-20d0-4786-acab-f0858c46dc82";
 const PUBLICATION_ID = "14ae742d-ab60-4553-9b1e-9d1320fe18f7";
 
 describe("get_tender_details schema validation", () => {
-  it("accepts the minimal required input", () => {
+  it("should accept the minimal required input", () => {
     const result = schema.safeParse({
       projectId: PROJECT_ID,
       publicationId: PUBLICATION_ID,
@@ -39,7 +39,7 @@ describe("get_tender_details schema validation", () => {
     expect(result.success).toBe(true);
   });
 
-  it("rejects a non-UUID projectId", () => {
+  it("should reject a non-UUID projectId", () => {
     const result = schema.safeParse({
       projectId: "not-a-uuid",
       publicationId: PUBLICATION_ID,
@@ -47,7 +47,7 @@ describe("get_tender_details schema validation", () => {
     expect(result.success).toBe(false);
   });
 
-  it("defaults lang to en and fullRaw to false", () => {
+  it("should default lang to en and fullRaw to false", () => {
     const result = schema.parse({
       projectId: PROJECT_ID,
       publicationId: PUBLICATION_ID,
@@ -56,7 +56,7 @@ describe("get_tender_details schema validation", () => {
     expect(result.fullRaw).toBe(false);
   });
 
-  it("accepts fullRaw: true", () => {
+  it("should accept fullRaw: true", () => {
     const result = schema.parse({
       projectId: PROJECT_ID,
       publicationId: PUBLICATION_ID,
@@ -65,7 +65,7 @@ describe("get_tender_details schema validation", () => {
     expect(result.fullRaw).toBe(true);
   });
 
-  it("rejects a non-boolean fullRaw", () => {
+  it("should reject a non-boolean fullRaw", () => {
     const result = schema.safeParse({
       projectId: PROJECT_ID,
       publicationId: PUBLICATION_ID,
@@ -104,7 +104,7 @@ describe("get_tender_details handler — fixture-driven", () => {
     );
   }
 
-  it("default output exposes real structured fields and no truncation marker", async () => {
+  it("should expose real structured fields and no truncation marker in default output", async () => {
     stubFetchWithTender();
 
     const result = await handler({
@@ -125,7 +125,7 @@ describe("get_tender_details handler — fixture-driven", () => {
     expect(text).not.toContain("### Full Raw Response");
   });
 
-  it("fullRaw=true appends the complete untruncated JSON", async () => {
+  it("should append the complete untruncated JSON when fullRaw=true", async () => {
     stubFetchWithTender();
 
     const result = await handler({
