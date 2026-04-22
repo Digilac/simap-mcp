@@ -154,57 +154,142 @@ export const ProjectHeaderSchema = z.object({
 
 // --- Publication details schemas ---
 
+const PublicationCpvCodeSchema = z.object({
+  code: z.string(),
+  label: TranslationSchema.nullish(),
+});
+
 export const PublicationDetailsSchema = z
   .object({
+    id: z.string().nullish(),
     type: z.string().nullish(),
+    projectType: z.string().nullish(),
+    hasProjectDocuments: z.boolean().nullish(),
+    base: z
+      .object({
+        id: z.string().nullish(),
+        type: z.string().nullish(),
+        projectType: z.string().nullish(),
+        projectId: z.string().nullish(),
+        projectNumber: z.string().nullish(),
+        publicationNumber: z.string().nullish(),
+        publicationDate: z.string().nullish(),
+        title: TranslationSchema.nullish(),
+        processType: z.string().nullish(),
+        orderType: z.string().nullish(),
+        lotsType: z.string().nullish(),
+        cpvCode: PublicationCpvCodeSchema.nullish(),
+        procOfficeId: z.string().nullish(),
+        creationLanguage: z.string().nullish(),
+      })
+      .passthrough()
+      .nullish(),
     "project-info": z
       .object({
         title: TranslationSchema.nullish(),
-        description: TranslationSchema.nullish(),
+        processType: z.string().nullish(),
+        orderType: z.string().nullish(),
       })
+      .passthrough()
       .nullish(),
     procurement: z
       .object({
-        estimatedValue: z
-          .object({
-            value: z.number(),
-            currency: z.string().nullish(),
-          })
-          .nullish(),
-        cpvCodes: z.array(z.string()).nullish(),
+        orderDescription: TranslationSchema.nullish(),
+        cpvCode: PublicationCpvCodeSchema.nullish(),
+        processType: z.string().nullish(),
+        orderType: z.string().nullish(),
       })
+      .passthrough()
       .nullish(),
-    deadlines: z
+    dates: z
       .object({
+        publicationDate: z.string().nullish(),
         offerDeadline: z.string().nullish(),
-        questionDeadline: z.string().nullish(),
-      })
-      .nullish(),
-    contact: z
-      .object({
-        organization: TranslationSchema.nullish(),
-        contactPerson: z.string().nullish(),
-        email: z.string().nullish(),
-        phone: z.string().nullish(),
-      })
-      .nullish(),
-    decision: z
-      .object({
-        awardees: z
+        offerOpening: z
+          .object({
+            dateTime: z.string().nullish(),
+            ignoreTime: z.boolean().nullish(),
+          })
+          .passthrough()
+          .nullish(),
+        offerValidityDeadlineDays: z.number().nullish(),
+        offerValidityDeadlineDate: z.string().nullish(),
+        qnas: z
           .array(
-            z.object({
-              name: z.string().nullish(),
-              organization: TranslationSchema.nullish(),
-              price: z
-                .object({
-                  value: z.number(),
-                  currency: z.string().nullish(),
-                })
-                .nullish(),
-            })
+            z
+              .object({
+                id: z.string().nullish(),
+                date: z.string().nullish(),
+                note: TranslationSchema.nullish(),
+                externalLink: z.string().nullish(),
+              })
+              .passthrough()
           )
           .nullish(),
       })
+      .passthrough()
+      .nullish(),
+    terms: z
+      .object({
+        consortiumAllowed: z.string().nullish(),
+        subContractorAllowed: z.string().nullish(),
+        termsType: z.string().nullish(),
+        termsNote: TranslationSchema.nullish(),
+        termsOfBusiness: TranslationSchema.nullish(),
+        termsOfPayment: TranslationSchema.nullish(),
+        remediesNotice: TranslationSchema.nullish(),
+      })
+      .passthrough()
+      .nullish(),
+    criteria: z
+      .object({
+        qualificationCriteriaInDocuments: z.string().nullish(),
+        qualificationCriteria: z.array(z.unknown()).nullish(),
+        qualificationCriteriaNote: TranslationSchema.nullish(),
+        awardCriteriaSelection: z.string().nullish(),
+        awardCriteria: z.array(z.unknown()).nullish(),
+        awardCriteriaNote: TranslationSchema.nullish(),
+      })
+      .passthrough()
+      .nullish(),
+    publishers: z
+      .array(
+        z
+          .object({
+            id: z.string().nullish(),
+            name: z.string().nullish(),
+          })
+          .passthrough()
+      )
+      .nullish(),
+    lots: z.array(z.unknown()).nullish(),
+    decision: z
+      .object({
+        awardDecisionDate: z.string().nullish(),
+        numberOfSubmissions: z.number().nullish(),
+        totalPriceSelection: z.string().nullish(),
+        vendors: z
+          .array(
+            z
+              .object({
+                vendorId: z.string().nullish(),
+                vendorName: z.string().nullish(),
+                price: z
+                  .object({
+                    currency: z.string().nullish(),
+                    price: z.number().nullish(),
+                    vatType: z.string().nullish(),
+                  })
+                  .passthrough()
+                  .nullish(),
+                note: TranslationSchema.nullish(),
+                rank: z.number().nullish(),
+              })
+              .passthrough()
+          )
+          .nullish(),
+      })
+      .passthrough()
       .nullish(),
   })
   .passthrough();
