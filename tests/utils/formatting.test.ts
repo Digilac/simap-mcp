@@ -88,6 +88,7 @@ describe("formatPublicationDetails — tender fixture", () => {
     expect(output).toContain("### Conditions");
     expect(output).toContain("Consortium allowed:");
     expect(output).toContain("Subcontracting allowed:");
+    expect(output).toContain("Terms type:** in_documents");
     expect(output).toContain("Remedies notice:");
   });
 
@@ -145,5 +146,30 @@ describe("formatPublicationDetails — empty input", () => {
   it("should still produce the Publication Details header when given an empty object", () => {
     const output = formatPublicationDetails({}, "en");
     expect(output).toContain("## Publication Details");
+  });
+});
+
+describe("formatPublicationDetails — edge cases", () => {
+  it("should fall back to procurement.cpvCode when base.cpvCode lacks a code", () => {
+    const details: PublicationDetails = {
+      base: { cpvCode: { label: { en: "Partial label" } } },
+      procurement: { cpvCode: { code: "45200000", label: { en: "Real label" } } },
+    };
+    const output = formatPublicationDetails(details, "en");
+    expect(output).toContain("### CPV");
+    expect(output).toContain("45200000");
+    expect(output).toContain("Real label");
+  });
+
+  it("should render qnas.externalLink when date and note are absent", () => {
+    const details: PublicationDetails = {
+      dates: {
+        qnas: [{ externalLink: "https://example.com/qa" }],
+      },
+    };
+    const output = formatPublicationDetails(details, "en");
+    expect(output).toContain("Q&A Rounds");
+    expect(output).toContain("https://example.com/qa");
+    expect(output).not.toContain("(no date)");
   });
 });

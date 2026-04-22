@@ -188,7 +188,11 @@ function formatPublicationInfoSection(
  * Returns null when no CPV code is present on either `base` or `procurement`.
  */
 function formatCpvSection(details: PublicationDetails, lang: Language): string | null {
-  const cpv = details.base?.cpvCode || details.procurement?.cpvCode;
+  // `base.cpvCode` may be a partial object (e.g. label only) — prefer it only
+  // when it carries an actual `.code`, otherwise fall back to `procurement`.
+  const cpv = details.base?.cpvCode?.code
+    ? details.base.cpvCode
+    : details.procurement?.cpvCode;
   if (!cpv || !cpv.code) return null;
   const label = cpv.label ? getTranslation(cpv.label, lang) : "";
   let out = `### CPV\n`;
@@ -233,7 +237,7 @@ function formatDeadlinesSection(
     out += `\n**Q&A Rounds:**\n`;
     for (const q of qnas) {
       const note = q.note ? getTranslation(q.note, lang) : "";
-      const parts = [q.date, note].filter(Boolean).join(" — ");
+      const parts = [q.date, note, q.externalLink].filter(Boolean).join(" — ");
       out += `- ${parts || "(no date)"}\n`;
     }
   }
@@ -261,6 +265,7 @@ function formatTermsSection(details: PublicationDetails, lang: Language): string
   const hasAny =
     terms.consortiumAllowed ||
     terms.subContractorAllowed ||
+    terms.termsType ||
     termsNote ||
     remedies ||
     termsOfBusiness ||
@@ -273,6 +278,9 @@ function formatTermsSection(details: PublicationDetails, lang: Language): string
   }
   if (terms.subContractorAllowed) {
     out += `- **Subcontracting allowed:** ${terms.subContractorAllowed}\n`;
+  }
+  if (terms.termsType) {
+    out += `- **Terms type:** ${terms.termsType}\n`;
   }
   if (termsNote) {
     out += `- **Terms note:** ${escapeInlineCode(termsNote)}\n`;

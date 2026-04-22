@@ -23,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `get_tender_details`: the 3000-character truncation that clipped most of the useful tender data (deadlines, criteria, conditions, award) is gone.
+- `formatPublicationDetails` (`src/utils/formatting.ts`): CPV selection prefers `base.cpvCode` only when it carries a `.code`, so a partial `base.cpvCode` (label only) no longer masks a valid `procurement.cpvCode`.
+- `formatPublicationDetails`: Conditions section now includes `terms.termsType` (e.g. `"in_documents"`); previously this populated SIMAP field was dropped.
+- `formatPublicationDetails`: Q&A rounds now render `qnas[].externalLink`; a QnA with only a link no longer degrades to `"(no date)"`.
 
 ## [1.1.0] - 2026-04-17
 
