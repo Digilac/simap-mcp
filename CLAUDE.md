@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-MCP (Model Context Protocol) server that integrates with SIMAP.ch, Switzerland's public procurement platform. Exposes 14 tools for searching and retrieving tender information, nomenclature codes (CPV/BKP/NPK/OAG), and organization data.
+MCP (Model Context Protocol) server that integrates with simap.ch, Switzerland's public procurement platform. Exposes 14 tools for searching and retrieving tender information, nomenclature codes (CPV/BKP/NPK/OAG), and organization data.
 
 ## Documentation
 
@@ -76,7 +76,7 @@ Tests mirror this tree under `tests/` (see [ARCHITECTURE.md](./ARCHITECTURE.md) 
 - **Tool registration** — each tool exports `*InputShape` (raw Zod shape), `*InputSchema` (`z.object(shape)`), `*Input` (inferred type), and a `register*()` function. The shape is passed to `server.tool(...)`; tests import the schema directly to avoid drift.
 - **API client** — `SimapClient` (singleton `simap`) wraps `fetch`, handles URL building (via the module-level exported `buildUrl()`), timeouts, Zod response validation, and typed error mapping. It composes a `SlidingWindowRateLimiter` (default 60 req/min, FIFO-ordered, single outstanding timer).
 - **Error handling** — tool handlers route caught errors through `toToolErrorResult()` (`src/utils/errors.ts`) which distinguishes `SimapApiError` 404 / other 4xx / 5xx / network / timeout / generic. Always logs the original error to stderr first.
-- **search_tenders parameter mapping** — user→SIMAP parameter translation lives in `src/tools/search-tenders-params.ts`, not in the handler. Defaults `publicationFrom` to today (Europe/Zurich) when no filter is provided.
+- **search_tenders parameter mapping** — user→simap parameter translation lives in `src/tools/search-tenders-params.ts`, not in the handler. Defaults `publicationFrom` to today (Europe/Zurich) when no filter is provided.
 - **Debug logging** — `SIMAP_MCP_DEBUG=1` enables verbose stderr logs (URL, status, UTF-8 byte size, duration). Off by default.
 - **Translation** — `getTranslation(t, lang)` with fallback chain: requested lang → de → fr → en → it.
 
@@ -102,7 +102,7 @@ Tests mirror this tree under `tests/` (see [ARCHITECTURE.md](./ARCHITECTURE.md) 
 - Test files: `tests/{module-path}/{module}.test.ts` — mirror the source structure.
 - For each tool, cover:
   1. **Schema validation** — Zod accepts valid inputs and rejects invalid ones (import the real schema).
-  2. **Query parameter building** — user inputs map correctly to SIMAP API params.
+  2. **Query parameter building** — user inputs map correctly to simap API params.
   3. **Response formatting** — output is correctly formatted for the user.
 - For `api/client.ts` and `api/rate-limiter.ts`, cover URL building, timeout, schema validation, error mapping, debug logging, FIFO ordering, and windowing.
 

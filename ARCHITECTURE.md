@@ -1,4 +1,4 @@
-# SIMAP MCP Server - Architecture
+# simap MCP Server - Architecture
 
 ## Overview
 
@@ -12,7 +12,7 @@ simap-mcp Server (McpServer)
   └── utils/          → translation & formatting
         │ HTTPS
         ▼
-SIMAP.ch API (https://simap.ch/api)
+simap.ch API (https://www.simap.ch/api-doc/)
 ```
 
 ## File Structure
@@ -94,8 +94,8 @@ The client composes a `SlidingWindowRateLimiter` (default: 60 req/min, FIFO-orde
 Tool handlers convert caught errors through `toToolErrorResult()` (`src/utils/errors.ts`), which returns a user-facing message that distinguishes:
 
 - `SimapApiError` with `statusCode === 404` → "not found" message
-- `SimapApiError` 4xx (other than 404) → "SIMAP rejected the request" (HTTP status included)
-- `SimapApiError` 5xx → "SIMAP is currently unavailable"
+- `SimapApiError` 4xx (other than 404) → "simap rejected the request" (HTTP status included)
+- `SimapApiError` 5xx → "simap is currently unavailable"
 - `AbortError` / `fetch failed` / `ECONNREFUSED` / `ETIMEDOUT` → "Network or timeout error"
 - Anything else → generic fallback
 
@@ -103,15 +103,15 @@ The original error is always logged to stderr first for operator debugging.
 
 ### Parameter Mapping (search_tenders)
 
-The SIMAP API uses different parameter names than the tool surface. The mapping and default-filter logic live in `src/tools/search-tenders-params.ts` (`SEARCH_TENDERS_PARAM_MAP` constant, `buildTenderSearchQuery()` function), not inline in the handler.
+The simap API uses different parameter names than the tool surface. The mapping and default-filter logic live in `src/tools/search-tenders-params.ts` (`SEARCH_TENDERS_PARAM_MAP` constant, `buildTenderSearchQuery()` function), not inline in the handler.
 
-| User-facing | SIMAP API | Transform |
+| User-facing | simap API | Transform |
 |---|---|---|
 | `search` | `search` | — |
 | `publicationFrom` | `newestPublicationFrom` | — |
 | `publicationUntil` | `newestPublicationUntil` | — |
 | `projectSubTypes` | `projectSubTypes` | skip empty array |
-| `cantons` | `orderAddressCantons` | `.toUpperCase()` on each |
+| `cantons` | `orderAddressCantons` | skip empty array |
 | `processTypes` | `processTypes` | skip empty array |
 | `pubTypes` | `newestPubTypes` | skip empty array |
 | `cpvCodes` | `cpvCodes` | skip empty array |
@@ -135,6 +135,161 @@ When `SIMAP_MCP_DEBUG=1` (or `true`), the HTTP client emits verbose stderr logs 
 | Constants | UPPER_SNAKE | `SIMAP_API_BASE` |
 | Types/Interfaces | PascalCase | `ProjectSearchEntry` |
 | MCP Tools | snake_case | `search_tenders` |
+
+## Tools Reference
+
+Full parameter surface of the 14 MCP tools exposed to the client.
+
+<details>
+<summary><code>search_tenders</code> — Search public tenders</summary>
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `search` | string | Search text (min 3 characters) |
+| `publicationFrom` | date | Start date (YYYY-MM-DD) |
+| `publicationUntil` | date | End date (YYYY-MM-DD) |
+| `projectSubTypes` | array | Project types (see below) |
+| `cantons` | array | Canton codes (BE, VD, GE, ZH, etc.) |
+| `processTypes` | array | Process types (see below) |
+| `pubTypes` | array | Publication types (see below) |
+| `cpvCodes` | array | CPV codes (8 digits, e.g., `72000000`) |
+| `bkpCodes` | array | BKP construction codes (e.g., `211`) |
+| `issuedByOrganizations` | array | UUIDs of issuing organizations |
+| `lastItem` | string | Pagination token for next page |
+| `lang` | string | Language: `de`, `fr`, `it`, `en` (default: `en`) |
+
+<details>
+<summary>Project Types (projectSubTypes)</summary>
+
+| Code | Description |
+|------|-------------|
+| `construction` | Construction works |
+| `service` | Services |
+| `supply` | Supplies |
+| `project_competition` | Project competitions |
+| `idea_competition` | Idea competitions |
+| `overall_performance_competition` | Overall performance competitions |
+| `project_study` | Project studies |
+| `idea_study` | Idea studies |
+| `overall_performance_study` | Overall performance studies |
+| `request_for_information` | Requests for information |
+
+</details>
+
+<details>
+<summary>Process Types (processTypes)</summary>
+
+| Code | Description |
+|------|-------------|
+| `open` | Open procedure |
+| `selective` | Selective procedure |
+| `invitation` | Invitation procedure |
+| `direct` | Direct award |
+| `no_process` | No procedure (e.g., RFI) |
+
+</details>
+
+<details>
+<summary>Publication Types (pubTypes)</summary>
+
+| Code | Description |
+|------|-------------|
+| `advance_notice` | Advance notice |
+| `request_for_information` | Request for information |
+| `tender` | Tender |
+| `competition` | Competition |
+| `study_contract` | Study contract |
+| `award_tender` | Award (tender) |
+| `award_study_contract` | Award (study) |
+| `award_competition` | Award (competition) |
+| `direct_award` | Direct award |
+| `participant_selection` | Participant selection |
+| `selective_offering_phase` | Selective offering phase |
+| `correction` | Correction |
+| `revocation` | Revocation |
+| `abandonment` | Abandonment |
+
+</details>
+
+<details>
+<summary>Swiss Cantons</summary>
+
+```text
+AG, AI, AR, BE, BL, BS, FR, GE, GL, GR, JU, LU, NE, NW, OW, SG, SH, SO, SZ, TG, TI, UR, VD, VS, ZG, ZH
+```
+
+</details>
+
+</details>
+
+<details>
+<summary><code>get_tender_details</code> — Get full details of a specific tender</summary>
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `projectId` | uuid | Project ID |
+| `publicationId` | uuid | Publication ID |
+| `lang` | string | Preferred language |
+| `fullRaw` | boolean | Append the full unmodified API response JSON (default: `false`) |
+
+</details>
+
+<details>
+<summary><code>search_cpv_codes</code> / <code>search_bkp_codes</code> / <code>search_npk_codes</code> / <code>search_oag_codes</code> — Search nomenclature codes</summary>
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `query` | string | Search term (keyword or code prefix) |
+| `lang` | string | Language: `de`, `fr`, `it`, `en` (default: `en`) |
+
+</details>
+
+<details>
+<summary><code>browse_cpv_tree</code> / <code>browse_bkp_tree</code> / <code>browse_npk_tree</code> / <code>browse_oag_tree</code> — Navigate code hierarchies</summary>
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `parentCode` | string | Parent code (optional, omit for root categories) |
+| `lang` | string | Language: `de`, `fr`, `it`, `en` (default: `en`) |
+
+</details>
+
+<details>
+<summary><code>list_cantons</code> — List all Swiss cantons</summary>
+
+No parameters required.
+
+</details>
+
+<details>
+<summary><code>list_institutions</code> — List Swiss public institutions that publish tenders</summary>
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `search` | string | Filter by name (min 3 characters, optional) |
+| `lang` | string | Language: `de`, `fr`, `it`, `en` (default: `en`) |
+
+</details>
+
+<details>
+<summary><code>get_publication_history</code> — Get the publication history for a project</summary>
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `publicationId` | uuid | Current publication ID |
+| `lotId` | uuid | Lot ID (optional, to filter by lot) |
+
+</details>
+
+<details>
+<summary><code>search_proc_offices</code> — Search public procurement offices</summary>
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `search` | string | Name to search (min 3 characters) |
+| `institutionId` | uuid | Filter by parent institution (optional) |
+
+</details>
 
 ## API Endpoints
 

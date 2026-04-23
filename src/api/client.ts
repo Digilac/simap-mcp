@@ -1,5 +1,5 @@
 /**
- * HTTP client for SIMAP API.
+ * HTTP client for simap API.
  */
 
 import { type ZodType } from "zod";
@@ -18,7 +18,7 @@ function isDebugEnabled(): boolean {
 }
 
 /**
- * Request options for the SIMAP client.
+ * Request options for the simap client.
  */
 export interface RequestOptions<T = unknown> {
   params?: Record<string, string | string[] | undefined>;
@@ -27,7 +27,7 @@ export interface RequestOptions<T = unknown> {
 }
 
 /**
- * SIMAP API client.
+ * simap API client.
  */
 export class SimapClient {
   private readonly baseUrl: string;
@@ -42,7 +42,7 @@ export class SimapClient {
   }
 
   /**
-   * Performs a GET request to the SIMAP API.
+   * Performs a GET request to the simap API.
    */
   async get<T>(endpoint: string, options: RequestOptions<T> = {}): Promise<T> {
     await this.rateLimiter.acquire();
@@ -131,6 +131,6 @@ export function buildUrl(
 }
 
 /**
- * Default SIMAP client instance.
+ * Default simap client instance.
  */
 export const simap = new SimapClient();

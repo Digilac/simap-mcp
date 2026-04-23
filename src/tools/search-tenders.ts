@@ -1,6 +1,6 @@
 /**
  * Tool: search_tenders
- * Search public procurement tenders on SIMAP.ch
+ * Search public procurement tenders on simap.ch
  */
 
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -172,7 +172,7 @@ async function handler(params: SearchTendersInput) {
       };
     }
 
-    let result = formatHeader("SIMAP Search Results", data.projects.length);
+    let result = formatHeader("simap Search Results", data.projects.length);
 
     for (const project of data.projects) {
       result += formatProject(project, lang);
@@ -202,7 +202,7 @@ async function handler(params: SearchTendersInput) {
 export function registerSearchTenders(server: McpServer): void {
   server.tool(
     "search_tenders",
-    "Search public tenders on SIMAP.ch with filters by date, canton, CPV codes, and other criteria",
+    "Search public tenders on simap.ch with filters by date, canton, CPV codes, and other criteria",
     searchTendersInputShape,
     handler
   );

@@ -1,13 +1,12 @@
-# SIMAP MCP Server
+# simap MCP Server
 
 [![GitHub License](https://img.shields.io/github/license/Digilac/simap-mcp)](./LICENSE)
 [![NPM Version](https://img.shields.io/npm/v/%40digilac%2Fsimap-mcp)](https://www.npmjs.com/package/@digilac/simap-mcp)
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Digilac/simap-mcp/publish.yml)](https://github.com/Digilac/simap-mcp/actions/workflows/publish.yml)
 ![NPM Downloads](https://img.shields.io/npm/dw/%40digilac%2Fsimap-mcp)
-[![MCP Badge](https://lobehub.com/badge/mcp/digilac-simap-mcp)](https://lobehub.com/mcp/digilac-simap-mcp)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Digilac/simap-mcp)
 
-An [MCP](https://modelcontextprotocol.io/) (Model Context Protocol) server for interacting with [SIMAP.ch](https://simap.ch), Switzerland's public procurement platform.
+An [MCP](https://modelcontextprotocol.io/) (Model Context Protocol) server for interacting with [simap.ch](https://www.simap.ch/), Switzerland's public procurement platform.
 
 Enables Claude and other AI assistants to search and view public tenders in Switzerland.
 
@@ -32,13 +31,40 @@ Developed by [Digilac](https://www.digilac.ch/).
 | `search_oag_codes` | Search OAG codes (object types) |
 | `browse_oag_tree` | Navigate OAG code hierarchy |
 
-## Installation
+## Prerequisites
 
-### Quick start with npx (recommended)
+- **Node.js ≥ 20** (LTS or newer).
+- An MCP-compatible client (Claude Code, Claude Desktop, Cursor, VS Code, Windsurf, Cline, Zed, …).
+- No simap account or API key required — the simap API is public and read-only.
 
-No installation needed — just configure your MCP client to use `npx`:
+## Installation & Configuration
 
-#### Claude Code (CLI)
+The recommended way is `npx` — no global install needed. Pick your client below and copy the snippet.
+
+### Claude Desktop
+
+Edit the Claude Desktop configuration file:
+
+- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "simap": {
+      "command": "npx",
+      "args": ["-y", "@digilac/simap-mcp"]
+    }
+  }
+}
+```
+
+Restart Claude Desktop for the change to take effect.
+
+### Other clients
+
+<details>
+<summary><b>Claude Code (CLI)</b></summary>
 
 Add to `~/.claude/settings.json`:
 
@@ -53,9 +79,12 @@ Add to `~/.claude/settings.json`:
 }
 ```
 
-#### Claude Desktop
+</details>
 
-Add to your Claude Desktop configuration file:
+<details>
+<summary><b>Cursor</b></summary>
+
+Global config at `~/.cursor/mcp.json` (all projects) or project-level `.cursor/mcp.json`:
 
 ```json
 {
@@ -68,13 +97,95 @@ Add to your Claude Desktop configuration file:
 }
 ```
 
-### Global install
+Fully quit and reopen Cursor — MCP servers are only loaded at startup.
+
+</details>
+
+<details>
+<summary><b>VS Code (GitHub Copilot)</b></summary>
+
+Workspace config at `.vscode/mcp.json` (or open the user-level file via the **MCP: Open User Configuration** command):
+
+```json
+{
+  "servers": {
+    "simap": {
+      "command": "npx",
+      "args": ["-y", "@digilac/simap-mcp"]
+    }
+  }
+}
+```
+
+> VS Code uses `servers` as the top-level key (not `mcpServers`).
+
+</details>
+
+<details>
+<summary><b>Windsurf</b></summary>
+
+Edit `~/.codeium/windsurf/mcp_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "simap": {
+      "command": "npx",
+      "args": ["-y", "@digilac/simap-mcp"]
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><b>Cline (VS Code extension)</b></summary>
+
+Open Cline's **MCP Servers** panel → **Configure** tab, then paste:
+
+```json
+{
+  "mcpServers": {
+    "simap": {
+      "command": "npx",
+      "args": ["-y", "@digilac/simap-mcp"],
+      "disabled": false
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><b>Zed</b></summary>
+
+Edit the user `settings.json` (`~/.config/zed/settings.json` on macOS/Linux, `%APPDATA%\Zed\settings.json` on Windows) or a project-level `.zed/settings.json`:
+
+```json
+{
+  "context_servers": {
+    "simap": {
+      "command": "npx",
+      "args": ["-y", "@digilac/simap-mcp"]
+    }
+  }
+}
+```
+
+> Zed uses `context_servers` as the top-level key.
+
+</details>
+
+<details>
+<summary><b>Alternative: Global install</b></summary>
 
 ```bash
 npm install -g @digilac/simap-mcp
 ```
 
-Then configure with the direct command:
+Then configure your client with the direct command:
 
 ```json
 {
@@ -86,7 +197,10 @@ Then configure with the direct command:
 }
 ```
 
-### From source
+</details>
+
+<details>
+<summary><b>Alternative: From source</b></summary>
 
 ```bash
 git clone https://github.com/Digilac/simap-mcp.git
@@ -94,6 +208,8 @@ cd simap-mcp
 npm install
 npm run build
 ```
+
+Then configure your client with the absolute path:
 
 ```json
 {
@@ -106,215 +222,16 @@ npm run build
 }
 ```
 
+</details>
+
 ## Usage
 
-Once configured, simply ask Claude:
+Once configured, just ask your AI assistant in natural language. Mention "in simap" to make sure the assistant routes the request through the MCP server:
 
-**Search today's tenders:**
-> "Show me new tenders published today"
-
-**Filter by type and canton:**
-> "Find construction tenders in canton Vaud"
-
-**Get details:**
-> "Give me the details of this tender" (after a search)
-
-**Keyword search:**
-> "Find public contracts related to IT in Geneva"
-
-**Find CPV codes:**
-> "Search CPV codes for IT services"
-
-**Browse code hierarchies:**
-> "Show root CPV categories"
-> "Show subcategories of CPV code 72000000"
-
-**Search construction codes:**
-> "Search BKP codes for masonry"
-
-**View project history:**
-> "Show me the publication history of this project"
-
-**Search procurement offices:**
-> "Find procurement offices in the city of Zurich"
-
-## Reference
-
-### `search_tenders`
-
-Search public tenders.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `search` | string | Search text (min 3 characters) |
-| `publicationFrom` | date | Start date (YYYY-MM-DD) |
-| `publicationUntil` | date | End date (YYYY-MM-DD) |
-| `projectSubTypes` | array | Project types (see below) |
-| `cantons` | array | Canton codes (BE, VD, GE, ZH, etc.) |
-| `processTypes` | array | Process types (see below) |
-| `pubTypes` | array | Publication types (see below) |
-| `cpvCodes` | array | CPV codes (8 digits, e.g., `72000000`) |
-| `bkpCodes` | array | BKP construction codes (e.g., `211`) |
-| `issuedByOrganizations` | array | UUIDs of issuing organizations |
-| `lastItem` | string | Pagination token for next page |
-| `lang` | string | Language: `de`, `fr`, `it`, `en` (default: `en`) |
-
-### `get_tender_details`
-
-Get tender details.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `projectId` | uuid | Project ID |
-| `publicationId` | uuid | Publication ID |
-| `lang` | string | Preferred language |
-| `fullRaw` | boolean | Append the full unmodified API response JSON (default: `false`) |
-
-### `search_cpv_codes` / `search_bkp_codes` / `search_npk_codes` / `search_oag_codes`
-
-Search nomenclature codes by keyword or number.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `query` | string | Search term (keyword or code prefix) |
-| `lang` | string | Language: `de`, `fr`, `it`, `en` (default: `en`) |
-
-### `browse_cpv_tree` / `browse_bkp_tree` / `browse_npk_tree` / `browse_oag_tree`
-
-Navigate code hierarchies.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `parentCode` | string | Parent code (optional, omit for root categories) |
-| `lang` | string | Language: `de`, `fr`, `it`, `en` (default: `en`) |
-
-### `list_cantons`
-
-List all Swiss cantons with their codes. No parameters required.
-
-### `list_institutions`
-
-List Swiss public institutions that publish tenders.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `search` | string | Filter by name (min 3 characters, optional) |
-| `lang` | string | Language: `de`, `fr`, `it`, `en` (default: `en`) |
-
-### `get_publication_history`
-
-Get the publication history for a project.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `publicationId` | uuid | Current publication ID |
-| `lotId` | uuid | Lot ID (optional, to filter by lot) |
-
-### `search_proc_offices`
-
-Search public procurement offices.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `search` | string | Name to search (min 3 characters) |
-| `institutionId` | uuid | Filter by parent institution (optional) |
-
-### Enums
-
-<details>
-<summary>Project Types (projectSubTypes)</summary>
-
-| Code | Description |
-|------|-------------|
-| `construction` | Construction works |
-| `service` | Services |
-| `supply` | Supplies |
-| `project_competition` | Project competitions |
-| `idea_competition` | Idea competitions |
-| `overall_performance_competition` | Overall performance competitions |
-| `project_study` | Project studies |
-| `idea_study` | Idea studies |
-| `overall_performance_study` | Overall performance studies |
-| `request_for_information` | Requests for information |
-
-</details>
-
-<details>
-<summary>Process Types (processTypes)</summary>
-
-| Code | Description |
-|------|-------------|
-| `open` | Open procedure |
-| `selective` | Selective procedure |
-| `invitation` | Invitation procedure |
-| `direct` | Direct award |
-| `no_process` | No procedure (e.g., RFI) |
-
-</details>
-
-<details>
-<summary>Publication Types (pubTypes)</summary>
-
-| Code | Description |
-|------|-------------|
-| `advance_notice` | Advance notice |
-| `request_for_information` | Request for information |
-| `tender` | Tender |
-| `competition` | Competition |
-| `study_contract` | Study contract |
-| `award_tender` | Award (tender) |
-| `award_study_contract` | Award (study) |
-| `award_competition` | Award (competition) |
-| `direct_award` | Direct award |
-| `participant_selection` | Participant selection |
-| `selective_offering_phase` | Selective offering phase |
-| `correction` | Correction |
-| `revocation` | Revocation |
-| `abandonment` | Abandonment |
-
-</details>
-
-<details>
-<summary>Swiss Cantons</summary>
-
-```
-AG, AI, AR, BE, BL, BS, FR, GE, GL, GR, JU, LU, NE, NW, OW, SG, SH, SO, SZ, TG, TI, UR, VD, VS, ZG, ZH
-```
-
-</details>
-
-## Development
-
-```bash
-npm run build          # Compile TypeScript
-npm start              # Run the server
-npm run dev            # Build + run
-npm test               # Run tests
-npm run lint           # Lint code
-npm run format         # Format code
-```
-
-### Project Structure
-
-```
-simap-mcp/
-├── src/
-│   ├── index.ts                  # Entry point
-│   ├── server.ts                 # MCP server configuration
-│   ├── api/
-│   │   ├── client.ts             # SIMAP HTTP client
-│   │   └── endpoints.ts          # Endpoint constants
-│   ├── tools/
-│   │   ├── search-tenders.ts
-│   │   ├── get-tender-details.ts
-│   │   ├── codes/                # Nomenclature tools (CPV, BKP, NPK, OAG)
-│   │   └── organizations/        # Institution & procurement office tools
-│   ├── types/                    # TypeScript interfaces
-│   └── utils/                    # Translation & formatting helpers
-├── tests/
-├── dist/                         # Compiled output
-└── package.json
-```
+- *"Show me new tenders published today in simap"*
+- *"Find construction tenders in canton Vaud in simap"*
+- *"Give me the details of this tender in simap"* (after a search)
+- *"Search CPV codes for IT services in simap"*
 
 ## Listed on
 
@@ -327,13 +244,12 @@ simap-mcp/
 
 ## Contributing
 
-Contributions are welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) to get started.
+Contributions are welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) for development setup and commands, and [ARCHITECTURE.md](./ARCHITECTURE.md) for architecture, internal patterns, and the full tool parameter reference.
 
-## SIMAP API
+## simap API
 
-This server uses the public API from [SIMAP.ch](https://www.simap.ch/api-doc/).
+This server uses the public API from [simap.ch](https://www.simap.ch/api-doc/).
 
 ## License
 
 [MIT](./LICENSE)
-

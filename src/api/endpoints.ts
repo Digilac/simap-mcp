@@ -1,5 +1,5 @@
 /**
- * SIMAP API endpoint definitions.
+ * simap API endpoint definitions.
  */
 
 export const SIMAP_API_BASE = "https://www.simap.ch/api";

@@ -1,4 +1,4 @@
-# Contributing to SIMAP MCP Server
+# Contributing to simap MCP Server
 
 Thank you for your interest in this project! This guide will help you contribute effectively.
 
@@ -16,7 +16,7 @@ Thank you for your interest in this project! This guide will help you contribute
 ### Proposing a Feature
 
 1. Create an issue describing the use case
-2. Mention the relevant SIMAP API endpoint if applicable
+2. Mention the relevant simap API endpoint if applicable
 
 ### Contributing Code
 

@@ -17,14 +17,14 @@ describe("toToolErrorResult", () => {
     const err = new SimapApiError("Not Found", 404, "/x");
     const res = toToolErrorResult(err, CTX);
     expect(res.isError).toBe(true);
-    expect(res.content[0].text).toContain("not found on SIMAP");
+    expect(res.content[0].text).toContain("not found on simap");
     expect(res.content[0].text).toContain("testing");
   });
 
   it("returns a client-error message for SimapApiError 400", () => {
     const err = new SimapApiError("Bad Request", 400, "/x");
     const res = toToolErrorResult(err, CTX);
-    expect(res.content[0].text).toContain("SIMAP rejected the request");
+    expect(res.content[0].text).toContain("simap rejected the request");
     expect(res.content[0].text).toContain("HTTP 400");
   });
 

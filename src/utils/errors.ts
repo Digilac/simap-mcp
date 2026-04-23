@@ -48,13 +48,13 @@ export function toToolErrorResult(error: unknown, ctx: ToolErrorContext) {
 
   if (error instanceof SimapApiError) {
     if (error.statusCode === 404) {
-      text = `The requested resource was not found on SIMAP (while ${ctx.action}).`;
+      text = `The requested resource was not found on simap (while ${ctx.action}).`;
     } else if (error.statusCode >= 400 && error.statusCode < 500) {
-      text = `SIMAP rejected the request while ${ctx.action} (HTTP ${error.statusCode}). Please check the input parameters.`;
+      text = `simap rejected the request while ${ctx.action} (HTTP ${error.statusCode}). Please check the input parameters.`;
     } else if (error.statusCode >= 500 && error.statusCode < 600) {
-      text = `SIMAP is currently unavailable (HTTP ${error.statusCode}). Please try again later.`;
+      text = `simap is currently unavailable (HTTP ${error.statusCode}). Please try again later.`;
     } else {
-      text = `An unexpected SIMAP error occurred while ${ctx.action} (HTTP ${error.statusCode}).`;
+      text = `An unexpected simap error occurred while ${ctx.action} (HTTP ${error.statusCode}).`;
     }
   } else if (isNetworkOrTimeoutError(error)) {
     text = `Network or timeout error while ${ctx.action}. Please check connectivity and try again.`;

@@ -1,7 +1,7 @@
 /**
  * Parameter mapping and query builder for `search_tenders`.
  *
- * The SIMAP API uses different parameter names than our tool surface
+ * The simap API uses different parameter names than our tool surface
  * (e.g. `cantons` → `orderAddressCantons`). Keeping the mapping and the
  * default-filter logic here — rather than hardcoded in the handler — makes
  * it easy to inspect, test, and extend.
@@ -10,7 +10,7 @@
 import type { SearchTendersInput } from "./search-tenders.js";
 
 /**
- * User-facing parameter name → SIMAP API query parameter name.
+ * User-facing parameter name → simap API query parameter name.
  *
  * Every key of SearchTendersInput (except `lang`, which does not hit the API
  * directly as a filter) should appear here so that the mapping is complete.
@@ -32,7 +32,7 @@ export const SEARCH_TENDERS_PARAM_MAP = {
 type QueryValue = string | string[] | undefined;
 
 /**
- * Builds the SIMAP API query params for `search_tenders`, applying:
+ * Builds the simap API query params for `search_tenders`, applying:
  * - user→API name mapping (see SEARCH_TENDERS_PARAM_MAP)
  * - empty arrays are skipped
  * - if no filter is provided, defaults to today's publications so the API
@@ -77,7 +77,7 @@ export function buildTenderSearchQuery(
   if (lastItem) q[M.lastItem] = lastItem;
 
   // At least one filter is required — default to today's publications.
-  // Use Europe/Zurich calendar date: SIMAP is a Swiss platform and a UTC
+  // Use Europe/Zurich calendar date: simap is a Swiss platform and a UTC
   // slice would flip a day near midnight for Swiss users.
   if (Object.keys(q).length === 0) {
     q[M.publicationFrom] = zurichTodayDate();

@@ -21,7 +21,7 @@ export function escapeInlineCode(value: string): string {
 }
 
 /**
- * Builds the SIMAP.ch URL for a project.
+ * Builds the simap.ch URL for a project.
  */
 export function buildSimapUrl(projectId: string, lang: Language): string {
   return `${SIMAP_BASE_URL}/${lang}/project-detail/${projectId}`;
@@ -36,7 +36,7 @@ export function formatProject(project: ProjectSearchEntry, lang: Language): stri
   const simapUrl = buildSimapUrl(project.id, lang);
 
   let result = `## ${title}\n\n`;
-  result += `- **SIMAP Link:** ${simapUrl}\n`;
+  result += `- **simap Link:** ${simapUrl}\n`;
   result += `- **Project Number:** ${project.projectNumber}\n`;
   result += `- **Publication Number:** ${project.publicationNumber}\n`;
   result += `- **Publication Date:** ${project.publicationDate}\n`;
@@ -78,7 +78,7 @@ export function formatProjectHeader(
 ): string {
   let result = `## General Information\n\n`;
   if (projectId) {
-    result += `- **SIMAP Link:** ${buildSimapUrl(projectId, lang)}\n`;
+    result += `- **simap Link:** ${buildSimapUrl(projectId, lang)}\n`;
   }
   result += `- **Project Number:** ${header.projectNumber || "N/A"}\n`;
   result += `- **Title:** ${getTranslation(header.title, lang)}\n`;

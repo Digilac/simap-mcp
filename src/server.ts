@@ -31,5 +31,5 @@ export async function startServer(): Promise<void> {
   const server = createServer();
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("SIMAP MCP Server running on stdio");
+  console.error("simap MCP Server running on stdio");
 }
