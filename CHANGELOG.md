@@ -13,7 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Documentation
 
-- `README.md` — restructured for clarity: added a **Prerequisites** section (Node.js ≥ 20); added collapsible per-client configuration blocks (Claude Code, Claude Desktop, Cursor, VS Code, Windsurf, Cline, Zed); moved each tool in the **Reference** section into its own collapsible block; removed the duplicated **Development** and **Project Structure** sections (now link to `CONTRIBUTING.md` and `ARCHITECTURE.md`); removed the LobeHub badge.
+- `README.md` — restructured for clarity: added a **Prerequisites** section (Node.js ≥ 20); added per-client configuration blocks with Claude Desktop visible by default and the others (Claude Code, Cursor, VS Code, Windsurf, Cline, Zed) in collapsible `<details>` dropdowns; removed the duplicated **Development** and **Project Structure** sections (now link to `CONTRIBUTING.md` and `ARCHITECTURE.md`); removed the LobeHub badge.
+- `README.md` — added an "in simap" hint to the Usage examples so assistants route the request through the MCP instead of answering from general knowledge.
+- `ARCHITECTURE.md` — moved the full tool-parameter reference here (new **Tools Reference** section) from the README, so the README stays focused on installation/usage and ARCHITECTURE.md holds both the HTTP endpoint map and the tool surface.
+- All docs — normalized the brand to lowercase "simap" in prose (code identifiers like `SIMAP_API_BASE`, `SIMAP_MCP_DEBUG`, `SimapClient`, `SimapApiError` are unchanged).
 
 ## [1.2.0] - 2026-04-22
 
