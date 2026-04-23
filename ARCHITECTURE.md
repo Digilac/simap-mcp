@@ -214,7 +214,7 @@ Full parameter surface of the 14 MCP tools exposed to the client.
 <details>
 <summary>Swiss Cantons</summary>
 
-```
+```text
 AG, AI, AR, BE, BL, BS, FR, GE, GL, GR, JU, LU, NE, NW, OW, SG, SH, SO, SZ, TG, TI, UR, VD, VS, ZG, ZH
 ```
 
