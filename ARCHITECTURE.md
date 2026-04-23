@@ -111,7 +111,7 @@ The simap API uses different parameter names than the tool surface. The mapping 
 | `publicationFrom` | `newestPublicationFrom` | — |
 | `publicationUntil` | `newestPublicationUntil` | — |
 | `projectSubTypes` | `projectSubTypes` | skip empty array |
-| `cantons` | `orderAddressCantons` | `.toUpperCase()` on each |
+| `cantons` | `orderAddressCantons` | skip empty array |
 | `processTypes` | `processTypes` | skip empty array |
 | `pubTypes` | `newestPubTypes` | skip empty array |
 | `cpvCodes` | `cpvCodes` | skip empty array |
