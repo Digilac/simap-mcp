@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- `src/utils/errors.ts`, `src/utils/formatting.ts`, `src/tools/search-tenders.ts`, `src/tools/organizations/get-publication-history.ts`, `src/server.ts` — lowercase "simap" in all user-facing strings: 4xx/5xx/404 error messages, `simap Link:` / `simap URL:` / `simap Search Results` labels, the `search_tenders` tool description, and the stdio startup log. Test assertions in `tests/utils/errors.test.ts` updated to match. Keeps runtime output consistent with the brand style used in the docs.
+- `package.json`, `server.json` — package/MCP-registry `description` uses lowercase "simap.ch".
+
 ### Removed
 
 - `simap.yaml` — 809 KB orphan copy of the simap.ch OpenAPI spec that was not referenced from any source, test, or build step. Live documentation remains at <https://www.simap.ch/api-doc/>.
@@ -14,14 +19,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `ARCHITECTURE.md` — Parameter Mapping table: the `cantons` Transform cell now reads `skip empty array` instead of the stale `.toUpperCase() on each` claim. The Zod schema (`z.enum(SWISS_CANTONS)`) already rejects non-uppercase input, so `buildTenderSearchQuery` never performed a `.toUpperCase()`. Doc has been stale since commit `b57fa58`.
-
-### Changed
-
-- `src/utils/errors.ts`, `src/utils/formatting.ts`, `src/tools/search-tenders.ts`, `src/tools/organizations/get-publication-history.ts`, `src/server.ts` — lowercase "simap" in all user-facing strings: 4xx/5xx/404 error messages, `simap Link:` / `simap URL:` / `simap Search Results` labels, the `search_tenders` tool description, and the stdio startup log. Test assertions in `tests/utils/errors.test.ts` updated to match. Keeps runtime output consistent with the brand style used in the docs.
-- `package.json`, `server.json` — package/MCP-registry `description` uses lowercase "simap.ch".
-
-### Fixed
-
 - `ProjectHeaderSchema` and `LotEntrySchema`: `lotTitle` is now `.nullish()` — the SIMAP API can return lots with `lotTitle` absent (e.g. project 29058), which caused a Zod validation error in `get_tender_details` ([#22](https://github.com/Digilac/simap-mcp/pull/22)).
 
 ### Documentation
