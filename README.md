@@ -227,12 +227,12 @@ Then configure your client with the absolute path:
 
 ## Usage
 
-Once configured, just ask your AI assistant in natural language:
+Once configured, just ask your AI assistant in natural language. Mention **"in SIMAP"** so the assistant actually routes the request through the MCP server instead of answering from general knowledge:
 
-- *"Show me new tenders published today"*
-- *"Find construction tenders in canton Vaud"*
-- *"Give me the details of this tender"* (after a search)
-- *"Search CPV codes for IT services"*
+- *"Show me new tenders published today **in SIMAP**"*
+- *"Find construction tenders in canton Vaud **in SIMAP**"*
+- *"Give me the details of this tender **in SIMAP**"* (after a search)
+- *"Search CPV codes for IT services **in SIMAP**"*
 
 ## Reference
 
