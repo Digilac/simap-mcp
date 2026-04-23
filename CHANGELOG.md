@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- `simap.yaml` — 809 KB orphan copy of the simap.ch OpenAPI spec that was not referenced from any source, test, or build step. Live documentation remains at <https://www.simap.ch/api-doc/>.
+
 ### Changed
 
 - `src/utils/errors.ts`, `src/utils/formatting.ts`, `src/tools/search-tenders.ts`, `src/tools/organizations/get-publication-history.ts`, `src/server.ts` — lowercase "simap" in all user-facing strings: 4xx/5xx/404 error messages, `simap Link:` / `simap URL:` / `simap Search Results` labels, the `search_tenders` tool description, and the stdio startup log. Test assertions in `tests/utils/errors.test.ts` updated to match. Keeps runtime output consistent with the brand style used in the docs.
