@@ -94,7 +94,7 @@ export const OrderAddressSchema = z
 export const LotEntrySchema = z.object({
   lotId: z.string(),
   lotNumber: z.number(),
-  lotTitle: TranslationSchema,
+  lotTitle: TranslationSchema.nullish(),
   publicationId: z.string(),
   publicationDate: z.string(),
 });
@@ -140,7 +140,7 @@ export const ProjectHeaderSchema = z.object({
     .array(
       z.object({
         lotNumber: z.number(),
-        lotTitle: TranslationSchema,
+        lotTitle: TranslationSchema.nullish(),
         latestPublication: z
           .object({
             publicationNumber: z.string().nullish(),
