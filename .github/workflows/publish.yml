@@ -28,7 +28,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          MCP_PUBLISHER_VERSION="1.5.0"
+          MCP_PUBLISHER_VERSION="1.6.0"
           ASSET="mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz"
           curl -fSL -o "$ASSET" "https://github.com/modelcontextprotocol/registry/releases/download/v${MCP_PUBLISHER_VERSION}/${ASSET}"
           curl -fSL -o checksums.txt "https://github.com/modelcontextprotocol/registry/releases/download/v${MCP_PUBLISHER_VERSION}/registry_${MCP_PUBLISHER_VERSION}_checksums.txt"
