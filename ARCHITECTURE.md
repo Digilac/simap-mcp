@@ -12,7 +12,7 @@ simap-mcp Server (McpServer)
   └── utils/          → translation & formatting
         │ HTTPS
         ▼
-simap.ch API (https://simap.ch/api)
+simap.ch API (https://www.simap.ch/api-doc/)
 ```
 
 ## File Structure
