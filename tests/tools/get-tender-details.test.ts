@@ -16,7 +16,7 @@ const FIXTURES_DIR = resolve(__dirname, "../fixtures");
 
 /**
  * Loads a fixture file verbatim as `unknown` (no schema validation).
- * Useful when the handler test needs the raw payload exactly as the SIMAP
+ * Useful when the handler test needs the raw payload exactly as the simap
  * API would return it, without ever coupling to the schema.
  */
 function loadFixtureRaw(name: string): unknown {

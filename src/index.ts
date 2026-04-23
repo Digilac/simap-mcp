@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 /**
- * SIMAP MCP Server
+ * simap MCP Server
  *
- * A Model Context Protocol server for interacting with SIMAP.ch,
+ * A Model Context Protocol server for interacting with simap.ch,
  * Switzerland's public procurement platform.
  */
 

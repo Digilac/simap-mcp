@@ -1,5 +1,5 @@
 /**
- * Tests for the SIMAP HTTP client (URL building, error mapping, timeout,
+ * Tests for the simap HTTP client (URL building, error mapping, timeout,
  * schema parsing, debug logging). Network is mocked via vi.stubGlobal.
  */
 

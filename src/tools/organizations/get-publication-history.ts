@@ -90,9 +90,9 @@ async function handler(params: GetPublicationHistoryInput) {
       }
       result += `- **ID:** \`${pub.id}\`\n`;
 
-      // Add SIMAP URL
+      // Add simap URL
       const simapUrl = `${SIMAP_API_BASE.replace("/api", "")}/publications/${pub.id}`;
-      result += `- **SIMAP URL:** ${simapUrl}\n`;
+      result += `- **simap URL:** ${simapUrl}\n`;
 
       result += "\n";
     }

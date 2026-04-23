@@ -1,11 +1,11 @@
 /**
- * Types for SIMAP API responses.
+ * Types for simap API responses.
  */
 
 import type { Translation, Pagination } from "./common.js";
 
 /**
- * Custom error for SIMAP API errors.
+ * Custom error for simap API errors.
  */
 export class SimapApiError extends Error {
   constructor(
@@ -103,7 +103,7 @@ export interface PublicationCpvCode {
 }
 
 /**
- * Publication details. SIMAP returns a complex structure whose shape varies
+ * Publication details. simap returns a complex structure whose shape varies
  * by publication `type` (tender / award / direct_award / ...). We model only
  * the fields we render; `[key: string]: unknown` (via `.passthrough()` on the
  * Zod side) preserves anything else for the `fullRaw` output mode.

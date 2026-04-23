@@ -1,5 +1,5 @@
 /**
- * Zod schemas for runtime validation of SIMAP API responses.
+ * Zod schemas for runtime validation of simap API responses.
  */
 
 import { z } from "zod";
