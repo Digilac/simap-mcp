@@ -24,7 +24,7 @@ export class SimapApiError extends Error {
 export interface LotEntry {
   lotId: string;
   lotNumber: number;
-  lotTitle: Translation;
+  lotTitle?: Translation | null;
   publicationId: string;
   publicationDate: string;
 }
@@ -85,7 +85,7 @@ export interface ProjectHeader {
   } | null;
   lots?: Array<{
     lotNumber: number;
-    lotTitle: Translation;
+    lotTitle?: Translation | null;
     latestPublication?: {
       publicationNumber?: string | null;
       publicationDate?: string | null;
