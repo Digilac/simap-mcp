@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `ProjectHeaderSchema` and `LotEntrySchema`: `lotTitle` is now `.nullish()` — the SIMAP API can return lots with `lotTitle` absent (e.g. project 29058), which caused a Zod validation error in `get_tender_details` ([#22](https://github.com/Digilac/simap-mcp/pull/22)).
 
+### Documentation
+
+- `README.md` — restructured for clarity: added a **Prerequisites** section (Node.js ≥ 20); added collapsible per-client configuration blocks (Claude Code, Claude Desktop, Cursor, VS Code, Windsurf, Cline, Zed); moved each tool in the **Reference** section into its own collapsible block; removed the duplicated **Development** and **Project Structure** sections (now link to `CONTRIBUTING.md` and `ARCHITECTURE.md`); removed the LobeHub badge.
+
 ## [1.2.0] - 2026-04-22
 
 ### Added
