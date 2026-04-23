@@ -13,9 +13,9 @@ Describe the feature you'd like.
 
 Why would this be useful? What problem does it solve?
 
-## SIMAP API endpoint (if applicable)
+## simap API endpoint (if applicable)
 
-Which SIMAP API endpoint would be used?
+Which simap API endpoint would be used?
 
 Example: `/codes/v1/cpv/search`
 

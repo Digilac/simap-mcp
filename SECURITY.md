@@ -21,7 +21,7 @@ You can expect:
 
 ## Scope
 
-This project is an MCP server that acts as a read-only client to the public SIMAP API. It does not handle authentication, store credentials, or process sensitive user data.
+This project is an MCP server that acts as a read-only client to the public simap API. It does not handle authentication, store credentials, or process sensitive user data.
 
 Relevant concerns include:
 - Dependency vulnerabilities

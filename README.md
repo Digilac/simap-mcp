@@ -1,4 +1,4 @@
-# SIMAP MCP Server
+# simap MCP Server
 
 [![GitHub License](https://img.shields.io/github/license/Digilac/simap-mcp)](./LICENSE)
 [![NPM Version](https://img.shields.io/npm/v/%40digilac%2Fsimap-mcp)](https://www.npmjs.com/package/@digilac/simap-mcp)
@@ -6,7 +6,7 @@
 ![NPM Downloads](https://img.shields.io/npm/dw/%40digilac%2Fsimap-mcp)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Digilac/simap-mcp)
 
-An [MCP](https://modelcontextprotocol.io/) (Model Context Protocol) server for interacting with [SIMAP.ch](https://simap.ch), Switzerland's public procurement platform.
+An [MCP](https://modelcontextprotocol.io/) (Model Context Protocol) server for interacting with [simap.ch](https://simap.ch), Switzerland's public procurement platform.
 
 Enables Claude and other AI assistants to search and view public tenders in Switzerland.
 
@@ -35,7 +35,7 @@ Developed by [Digilac](https://www.digilac.ch/).
 
 - **Node.js ≥ 20** (LTS or newer).
 - An MCP-compatible client (Claude Code, Claude Desktop, Cursor, VS Code, Windsurf, Cline, Zed, …).
-- No SIMAP account or API key required — the SIMAP API is public and read-only.
+- No simap account or API key required — the simap API is public and read-only.
 
 ## Installation & Configuration
 
@@ -227,12 +227,12 @@ Then configure your client with the absolute path:
 
 ## Usage
 
-Once configured, just ask your AI assistant in natural language. Mention **"in SIMAP"** so the assistant actually routes the request through the MCP server instead of answering from general knowledge:
+Once configured, just ask your AI assistant in natural language. Mention "in simap" so the assistant actually routes the request through the MCP server instead of answering from general knowledge:
 
-- *"Show me new tenders published today **in SIMAP**"*
-- *"Find construction tenders in canton Vaud **in SIMAP**"*
-- *"Give me the details of this tender **in SIMAP**"* (after a search)
-- *"Search CPV codes for IT services **in SIMAP**"*
+- *"Show me new tenders published today in simap"*
+- *"Find construction tenders in canton Vaud in simap"*
+- *"Give me the details of this tender in simap"* (after a search)
+- *"Search CPV codes for IT services in simap"*
 
 ## Reference
 
@@ -400,9 +400,9 @@ No parameters required.
 
 Contributions are welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) for development setup and commands, and [ARCHITECTURE.md](./ARCHITECTURE.md) for architecture and internal patterns.
 
-## SIMAP API
+## simap API
 
-This server uses the public API from [SIMAP.ch](https://www.simap.ch/api-doc/).
+This server uses the public API from [simap.ch](https://www.simap.ch/api-doc/).
 
 ## License
 

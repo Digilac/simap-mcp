@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report a bug in the SIMAP MCP server
+about: Report a bug in the simap MCP server
 title: "[BUG] "
 labels: bug
 ---

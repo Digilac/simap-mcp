@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `get_tender_details`: structured Markdown output now reads the real SIMAP response shape (`base`, `dates`, `terms`, `criteria`, `procurement.cpvCode`, `publishers`, `decision`). Previous version read keys that do not exist in the API (`deadlines.*`, `contact.*`, `decision.awardees`), so sections like Deadlines / Conditions / CPV were silently empty. **Breaking** for any consumer that parsed the previous `### Raw Data (excerpt)` block — that section is gone (use `fullRaw: true` for the equivalent JSON).
+- `get_tender_details`: structured Markdown output now reads the real simap response shape (`base`, `dates`, `terms`, `criteria`, `procurement.cpvCode`, `publishers`, `decision`). Previous version read keys that do not exist in the API (`deadlines.*`, `contact.*`, `decision.awardees`), so sections like Deadlines / Conditions / CPV were silently empty. **Breaking** for any consumer that parsed the previous `### Raw Data (excerpt)` block — that section is gone (use `fullRaw: true` for the equivalent JSON).
 - `PublicationDetailsSchema` (`src/types/schemas.ts`) and `PublicationDetails` (`src/types/api.ts`) rewritten on the real API keys. Still `.passthrough()` so unknown fields are preserved for `fullRaw`.
 - Dev dependencies bumped: `eslint` 10.2.0 → 10.2.1, `typescript` 6.0.2 → 6.0.3, `typescript-eslint` 8.58.2 → 8.59.0, `vitest` 4.1.4 → 4.1.5.
 
@@ -35,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `get_tender_details`: the 3000-character truncation that clipped most of the useful tender data (deadlines, criteria, conditions, award) is gone.
 - `formatPublicationDetails` (`src/utils/formatting.ts`): CPV selection prefers `base.cpvCode` only when it carries a `.code`, so a partial `base.cpvCode` (label only) no longer masks a valid `procurement.cpvCode`.
-- `formatPublicationDetails`: Conditions section now includes `terms.termsType` (e.g. `"in_documents"`); previously this populated SIMAP field was dropped.
+- `formatPublicationDetails`: Conditions section now includes `terms.termsType` (e.g. `"in_documents"`); previously this populated simap field was dropped.
 - `formatPublicationDetails`: Q&A rounds now render `qnas[].externalLink`; a QnA with only a link no longer degrades to `"(no date)"`.
 
 ## [1.1.0] - 2026-04-17
@@ -52,7 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `search_tenders` parameter mapping refactored into a dedicated helper (`src/tools/search-tenders-params.ts`). The user→SIMAP API parameter mapping is now documented in [ARCHITECTURE.md](./ARCHITECTURE.md).
+- `search_tenders` parameter mapping refactored into a dedicated helper (`src/tools/search-tenders-params.ts`). The user→simap API parameter mapping is now documented in [ARCHITECTURE.md](./ARCHITECTURE.md).
 - `buildUrl` is now a module-level exported function (previously a private method on `SimapClient`) so it can be unit-tested directly. Behavior is unchanged.
 - Existing tool tests import the real Zod schemas from the source modules instead of redefining local copies, eliminating schema drift.
 - TypeScript compilation target raised from ES2022 to ES2023.

@@ -1,4 +1,4 @@
-# SIMAP MCP Server - Architecture
+# simap MCP Server - Architecture
 
 ## Overview
 
@@ -12,7 +12,7 @@ simap-mcp Server (McpServer)
   └── utils/          → translation & formatting
         │ HTTPS
         ▼
-SIMAP.ch API (https://simap.ch/api)
+simap.ch API (https://simap.ch/api)
 ```
 
 ## File Structure
@@ -94,8 +94,8 @@ The client composes a `SlidingWindowRateLimiter` (default: 60 req/min, FIFO-orde
 Tool handlers convert caught errors through `toToolErrorResult()` (`src/utils/errors.ts`), which returns a user-facing message that distinguishes:
 
 - `SimapApiError` with `statusCode === 404` → "not found" message
-- `SimapApiError` 4xx (other than 404) → "SIMAP rejected the request" (HTTP status included)
-- `SimapApiError` 5xx → "SIMAP is currently unavailable"
+- `SimapApiError` 4xx (other than 404) → "simap rejected the request" (HTTP status included)
+- `SimapApiError` 5xx → "simap is currently unavailable"
 - `AbortError` / `fetch failed` / `ECONNREFUSED` / `ETIMEDOUT` → "Network or timeout error"
 - Anything else → generic fallback
 
@@ -103,9 +103,9 @@ The original error is always logged to stderr first for operator debugging.
 
 ### Parameter Mapping (search_tenders)
 
-The SIMAP API uses different parameter names than the tool surface. The mapping and default-filter logic live in `src/tools/search-tenders-params.ts` (`SEARCH_TENDERS_PARAM_MAP` constant, `buildTenderSearchQuery()` function), not inline in the handler.
+The simap API uses different parameter names than the tool surface. The mapping and default-filter logic live in `src/tools/search-tenders-params.ts` (`SEARCH_TENDERS_PARAM_MAP` constant, `buildTenderSearchQuery()` function), not inline in the handler.
 
-| User-facing | SIMAP API | Transform |
+| User-facing | simap API | Transform |
 |---|---|---|
 | `search` | `search` | — |
 | `publicationFrom` | `newestPublicationFrom` | — |
