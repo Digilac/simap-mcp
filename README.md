@@ -226,7 +226,7 @@ Then configure your client with the absolute path:
 
 ## Usage
 
-Once configured, just ask your AI assistant in natural language. Mention "in simap" so the assistant actually routes the request through the MCP server instead of answering from general knowledge:
+Once configured, just ask your AI assistant in natural language. Mention "in simap" to make sure the assistant routes the request through the MCP server:
 
 - *"Show me new tenders published today in simap"*
 - *"Find construction tenders in canton Vaud in simap"*
