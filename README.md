@@ -6,7 +6,7 @@
 ![NPM Downloads](https://img.shields.io/npm/dw/%40digilac%2Fsimap-mcp)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Digilac/simap-mcp)
 
-An [MCP](https://modelcontextprotocol.io/) (Model Context Protocol) server for interacting with [simap.ch](https://simap.ch), Switzerland's public procurement platform.
+An [MCP](https://modelcontextprotocol.io/) (Model Context Protocol) server for interacting with [simap.ch](https://www.simap.ch/), Switzerland's public procurement platform.
 
 Enables Claude and other AI assistants to search and view public tenders in Switzerland.
 
