@@ -116,30 +116,46 @@ touch src/tools/organizations/xxx.ts
 
 ### 2. Follow the Tool Pattern
 
+Each tool exports **three symbols** alongside the `register*()` function — the shape for `server.tool()`, the schema for tests, and the inferred input type:
+
 ```typescript
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
+import { toToolErrorResult } from "../../utils/errors.js";
 
-const schema = {
-  query: z.string().min(1).describe("Parameter description"),
-  lang: z.enum(["de", "fr", "it", "en"]).default("en"),
-};
+// Raw Zod shape — plain object, consumed by `server.tool()`.
+export const searchXxxInputShape = {
+  query: z.string().min(1).max(500).describe("Parameter description"),
+  lang: z.enum(["de", "fr", "it", "en"]).default("en").describe("Search language"),
+} as const;
 
-async function handle(params: { query: string; lang: string }) {
-  const data = await simap.get(ENDPOINTS.XXX, {
-    params: { query: params.query, language: params.lang },
-  });
+// Wrapped schema — used by tests via `.safeParse()` to avoid drift.
+export const searchXxxInputSchema = z.object(searchXxxInputShape);
+export type SearchXxxInput = z.infer<typeof searchXxxInputSchema>;
 
-  // Format and return
-  return {
-    content: [{ type: "text" as const, text: "..." }],
-  };
+async function handler(params: SearchXxxInput) {
+  try {
+    const data = await simap.get(ENDPOINTS.XXX, {
+      params: { query: params.query, language: params.lang },
+      // schema: XxxResponseSchema,  // add a Zod response schema from types/schemas.ts
+    });
+
+    // Format and return
+    return {
+      content: [{ type: "text" as const, text: "..." }],
+    };
+  } catch (error) {
+    return toToolErrorResult(error, {
+      toolName: "search_xxx",
+      action: "searching xxx",
+    });
+  }
 }
 
 export function registerSearchXxx(server: McpServer): void {
-  server.tool("search_xxx", "Short description", schema, handle);
+  server.tool("search_xxx", "Short description", searchXxxInputShape, handler);
 }
 ```
 
