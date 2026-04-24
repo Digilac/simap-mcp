@@ -7,9 +7,10 @@ Claude / AI Assistant (MCP Client)
         │ stdio (JSON-RPC)
         ▼
 simap-mcp Server (McpServer)
-  ├── tools/          → 14 tools exposed to the client
-  ├── api/client.ts   → centralized HTTP client
-  └── utils/          → translation & formatting
+  ├── tools/               → 14 tools exposed to the client
+  ├── api/client.ts        → centralized HTTP client
+  ├── api/rate-limiter.ts  → sliding-window rate limiter (FIFO)
+  └── utils/               → translation, formatting, error mapping
         │ HTTPS
         ▼
 simap.ch API (https://www.simap.ch/api-doc/)
@@ -19,21 +20,24 @@ simap.ch API (https://www.simap.ch/api-doc/)
 
 ```
 src/
-├── index.ts                  # Entry point (starts server)
-├── server.ts                 # MCP server creation & tool registration
+├── index.ts                      # Entry point (starts server)
+├── server.ts                     # MCP server creation & tool registration
 │
 ├── api/
-│   ├── index.ts              # Client export
-│   ├── client.ts             # SimapClient (HTTP GET, URL building, timeouts)
-│   └── endpoints.ts          # API endpoint constants
+│   ├── index.ts                  # Re-exports
+│   ├── client.ts                 # SimapClient + exported buildUrl()
+│   ├── endpoints.ts              # API endpoint constants
+│   └── rate-limiter.ts           # SlidingWindowRateLimiter (FIFO)
 │
 ├── tools/
-│   ├── index.ts              # registerTools() — registers all tools
-│   ├── search-tenders.ts     # search_tenders
-│   ├── get-tender-details.ts # get_tender_details
+│   ├── index.ts                  # registerTools() — registers all tools
+│   ├── search-tenders.ts         # search_tenders
+│   ├── search-tenders-params.ts  # SEARCH_TENDERS_PARAM_MAP + buildTenderSearchQuery()
+│   ├── get-tender-details.ts     # get_tender_details
 │   │
-│   ├── codes/                # Nomenclature tools
+│   ├── codes/                    # Nomenclature tools
 │   │   ├── index.ts
+│   │   ├── list-cantons.ts
 │   │   ├── search-cpv-codes.ts
 │   │   ├── search-bkp-codes.ts
 │   │   ├── search-npk-codes.ts
@@ -41,8 +45,7 @@ src/
 │   │   ├── browse-cpv-tree.ts
 │   │   ├── browse-bkp-tree.ts
 │   │   ├── browse-npk-tree.ts
-│   │   ├── browse-oag-tree.ts
-│   │   └── list-cantons.ts
+│   │   └── browse-oag-tree.ts
 │   │
 │   └── organizations/
 │       ├── index.ts
@@ -51,15 +54,17 @@ src/
 │       └── get-publication-history.ts
 │
 ├── types/
-│   ├── index.ts              # Re-exports
-│   ├── api.ts                # API response types (SimapApiError, ProjectSearchEntry, etc.)
-│   ├── common.ts             # Translation, Language, Pagination
-│   └── tools.ts              # Parameter enums (ProjectSubType, ProcessType, PubTypeFilter)
+│   ├── index.ts                  # Re-exports
+│   ├── api.ts                    # API response types (SimapApiError, ProjectSearchEntry, etc.)
+│   ├── common.ts                 # Translation, Language, Pagination
+│   ├── schemas.ts                # Shared Zod primitives & response schemas
+│   └── tools.ts                  # Parameter enums (ProjectSubType, ProcessType, PubTypeFilter)
 │
 └── utils/
-    ├── index.ts              # Re-exports
-    ├── translation.ts        # getTranslation() with fallback chain
-    └── formatting.ts         # Markdown formatting (formatProject, formatCodes, etc.)
+    ├── index.ts                  # Re-exports
+    ├── errors.ts                 # toToolErrorResult()
+    ├── translation.ts            # getTranslation() with fallback chain
+    └── formatting.ts             # Markdown formatting (formatProject, formatCodes, etc.)
 ```
 
 ## Key Patterns
