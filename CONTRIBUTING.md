@@ -87,13 +87,13 @@ git checkout -b fix/my-fix
 
 ### 4. Add a Changeset
 
-**Every PR must add a changeset** — the CI check enforces this.
+If your change is user-visible (new tool, behavior change, bug fix, public-facing doc), run:
 
 ```bash
 npx changeset
 ```
 
-The CLI prompts for a bump level (`patch` / `minor` / `major`) and a summary — start with the affected symbol/file in backticks. The resulting `.changeset/<name>.md` is committed with the rest of your change.
+Pick `patch` / `minor` / `major` and write a one-or-two-sentence summary — start with the affected symbol/file in backticks. The resulting `.changeset/<name>.md` is committed with the rest of your change. Internal-only changes (tests, CI tweaks, refactors with no user-visible effect) don't need one.
 
 See [`.changeset/README.md`](./.changeset/README.md) for the full guide.
 
@@ -232,7 +232,7 @@ docs: update README
 - [ ] Code compiles (`npm run build`)
 - [ ] Tests pass (`npm test`)
 - [ ] Linter passes (`npm run lint`)
-- [ ] Changeset added (`npx changeset`)
+- [ ] Changeset added if the change is user-visible (`npx changeset`)
 - [ ] Documentation updated if necessary
 - [ ] Commits are clean and descriptive
 

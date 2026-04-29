@@ -20,7 +20,7 @@ Fixes #
 - [ ] Linter passes (`npm run lint`)
 - [ ] Code is formatted (`npm run format:check`)
 - [ ] Added/updated tests (if applicable)
-- [ ] Added a changeset (`npx changeset`)
+- [ ] Added a changeset if the change is user-visible (`npx changeset`)
 - [ ] Updated documentation (if applicable)
 - [ ] Tested manually
 
