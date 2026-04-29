@@ -85,7 +85,19 @@ git checkout -b fix/my-fix
 - Write tests for your code
 - Commit regularly with clear messages
 
-### 4. Verify Before Pushing
+### 4. Add a Changeset
+
+**Every PR must add a changeset** — the CI check enforces this.
+
+```bash
+npx changeset
+```
+
+The CLI prompts for a bump level (`patch` / `minor` / `major`) and a summary — start with the affected symbol/file in backticks. The resulting `.changeset/<name>.md` is committed with the rest of your change.
+
+See [`.changeset/README.md`](./.changeset/README.md) for the full guide.
+
+### 5. Verify Before Pushing
 
 ```bash
 npm run lint
@@ -94,7 +106,7 @@ npm run build
 npm test
 ```
 
-### 5. Push and Open a PR
+### 6. Push and Open a PR
 
 ```bash
 git push origin feature/my-feature
@@ -220,6 +232,7 @@ docs: update README
 - [ ] Code compiles (`npm run build`)
 - [ ] Tests pass (`npm test`)
 - [ ] Linter passes (`npm run lint`)
+- [ ] Changeset added (`npx changeset`)
 - [ ] Documentation updated if necessary
 - [ ] Commits are clean and descriptive
 

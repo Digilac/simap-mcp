@@ -94,7 +94,7 @@ Tests mirror this tree under `tests/` (see [ARCHITECTURE.md](./ARCHITECTURE.md) 
 
 1. **Write tests for every new feature or tool.** Tests are mandatory.
 2. Run `npm run format` and `npm run typecheck` before committing.
-3. Update [CHANGELOG.md](./CHANGELOG.md) under `[Unreleased]` as you go (see [CHANGELOG Usage](#changelog-usage) below).
+3. **Add a changeset on every PR** (CI enforces this): `npx changeset`. See [Changesets](#changesets) below.
 4. Update [ARCHITECTURE.md](./ARCHITECTURE.md) / [SECURITY.md](./SECURITY.md) when patterns or threat model change.
 
 ## Testing
@@ -106,47 +106,29 @@ Tests mirror this tree under `tests/` (see [ARCHITECTURE.md](./ARCHITECTURE.md) 
   3. **Response formatting** — output is correctly formatted for the user.
 - For `api/client.ts` and `api/rate-limiter.ts`, cover URL building, timeout, schema validation, error mapping, debug logging, FIFO ordering, and windowing.
 
-## CHANGELOG Usage
+## Changesets
 
-The project follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/). Every user-visible change lands in [CHANGELOG.md](./CHANGELOG.md) **under `[Unreleased]` as part of the same PR that introduces it** — not at release time.
+Versioning, `CHANGELOG.md`, and GitHub Releases are driven by [changesets](https://github.com/changesets/changesets). **Every PR must include a changeset** — the `changeset` CI job enforces this (Dependabot exempted). One bullet = one concrete change; lead with the affected symbol/file/tool in backticks, then the "what" and the "why".
 
-Use these section headers, in this order:
+```bash
+npx changeset
+```
 
-- **Added** — new features (new tool, new env var, new export).
-- **Changed** — behavior change in existing functionality (parameter mapping, target bump, refactor with user-visible impact).
-- **Deprecated** — still works, but will be removed.
-- **Removed** — deleted feature or file.
-- **Fixed** — bug fix.
-- **Security** — vulnerability fix (link the GHSA advisory).
-- **Documentation** — doc-only changes worth mentioning.
+The CLI prompts for the bump level (`patch` / `minor` / `major`) and a summary, then writes `.changeset/<name>.md`. Commit it with the rest of the change.
 
-One bullet = one concrete change. Lead with the affected symbol/file/tool in backticks, then the "what" and, when non-obvious, the "why".
+Bump-level guide:
+
+- **patch** — bug fix, doc update, dependency bump, refactor with no user-visible API change.
+- **minor** — new tool, new MCP capability, new opt-in env var or parameter.
+- **major** — breaking change to a tool's input/output schema, removal of a tool, or any change that requires a consumer update.
 
 ## Release Process
 
-1. Verify everything is green: `npm run lint && npm run typecheck && npm run build && npm test`.
-2. Move entries from `[Unreleased]` to a new dated section in [CHANGELOG.md](./CHANGELOG.md). Keep an empty `[Unreleased]` header on top.
-3. Bump `version` in `package.json` **and** `server.json` (both root `version` and `packages[0].version`).
-4. Run `npm install` to update `package-lock.json`.
-5. Commit (`chore: release v<version>`), push to `main`.
-6. `gh release create v<version>` — creates the tag and triggers `publish.yml`, which publishes to npm and to the MCP Registry via `mcp-publisher`. Use the [Release Notes Template](#release-notes-template) below for the release body.
+Releases are automated by `.github/workflows/release.yml`:
 
-### Release Notes Template
+1. Merge feature/fix PRs into `main`. Each user-visible PR carries its own `.changeset/*.md`.
+2. `release.yml` opens (or updates) a **Version Packages** PR that bumps `package.json`, syncs `server.json` (via `scripts/sync-server-json.mjs`), refreshes `package-lock.json`, and consumes pending changesets into `CHANGELOG.md`.
+3. Review and merge the Version Packages PR.
+4. `release.yml` re-runs and: publishes to npm via OIDC (`changeset publish`), creates the git tag, creates the GitHub Release with PR-author credit (via `@changesets/changelog-github`), then publishes to the MCP Registry (`mcp-publisher`).
 
-```markdown
-## <emoji> <Title>
-
-<One-line summary of the release.>
-
-### <Category> (e.g. New Features, Security, Dependency Upgrades, Bug Fixes)
-
-- **Change description** — context or reason for the change
-
-### Tests
-
-- <N> tests across <N> test files — all passing
-
-**Full Changelog**: https://github.com/Digilac/simap-mcp/compare/v<previous>...v<current>
-```
-
-Emoji conventions: 🚀 New features · 🔒 Security · 📦 Dependencies · 🐛 Bug fixes · ♻️ Refactoring
+The auto-generated GitHub Release content is changesets-style (`### Patch Changes`, `### Minor Changes` with `Thanks @user!`). For headline releases, polish manually via `gh release edit` after the workflow finishes.

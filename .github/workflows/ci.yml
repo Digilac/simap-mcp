@@ -40,3 +40,22 @@ jobs:
 
       - name: Test
         run: npm test
+
+  changeset:
+    name: Changeset gate
+    if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]' && github.head_ref != 'changeset-release/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      - run: npm ci
+
+      - name: Verify a changeset is present
+        run: npx changeset status --since=origin/main
