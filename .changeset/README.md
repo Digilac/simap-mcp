@@ -1,6 +1,6 @@
 # Changesets
 
-This folder is managed by [changesets](https://github.com/changesets/changesets). **Every PR must add a changeset** — the CI check enforces this.
+This folder is managed by [changesets](https://github.com/changesets/changesets). Add a changeset on any PR that produces a user-visible change — it becomes the line in `CHANGELOG.md` and the GitHub Release. The [changeset-bot](https://github.com/apps/changeset-bot) comments on each PR with the current status.
 
 ## Adding a changeset
 
@@ -24,4 +24,4 @@ When your PR is merged into `main`:
 
 ## Dependabot PRs
 
-Dependabot is exempt from the changeset gate. If a dependency bump is worth surfacing in the changelog, the maintainer adds a changeset on top of the Dependabot PR before merging.
+Dependabot does not add changesets. If a dependency bump is worth surfacing in the changelog, the maintainer adds a changeset on top of the Dependabot PR before merging.

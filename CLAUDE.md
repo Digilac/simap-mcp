@@ -94,7 +94,7 @@ Tests mirror this tree under `tests/` (see [ARCHITECTURE.md](./ARCHITECTURE.md) 
 
 1. **Write tests for every new feature or tool.** Tests are mandatory.
 2. Run `npm run format` and `npm run typecheck` before committing.
-3. **Add a changeset on every PR** (CI enforces this): `npx changeset`. See [Changesets](#changesets) below.
+3. **Add a changeset for user-visible changes**: `npx changeset` (see [Changesets](#changesets) below). Internal-only changes (tests, CI tweaks, refactors with no user-visible effect) don't need one.
 4. Update [ARCHITECTURE.md](./ARCHITECTURE.md) / [SECURITY.md](./SECURITY.md) when patterns or threat model change.
 
 ## Testing
@@ -108,7 +108,7 @@ Tests mirror this tree under `tests/` (see [ARCHITECTURE.md](./ARCHITECTURE.md) 
 
 ## Changesets
 
-Versioning, `CHANGELOG.md`, and GitHub Releases are driven by [changesets](https://github.com/changesets/changesets). **Every PR must include a changeset** — the `changeset` CI job enforces this (Dependabot exempted). One bullet = one concrete change; lead with the affected symbol/file/tool in backticks, then the "what" and the "why".
+Versioning, `CHANGELOG.md`, and GitHub Releases are driven by [changesets](https://github.com/changesets/changesets). Add a changeset for any user-visible change; internal-only changes (tests, CI tweaks, refactors with no user-visible effect) don't need one. The [changeset-bot](https://github.com/apps/changeset-bot) comments on each PR with the current status. One bullet = one concrete change; lead with the affected symbol/file/tool in backticks, then the "what" and the "why".
 
 ```bash
 npx changeset
