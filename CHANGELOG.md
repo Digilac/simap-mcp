@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.2
+
+### Patch Changes
+
+- [#32](https://github.com/Digilac/simap-mcp/pull/32) [`d4c3516`](https://github.com/Digilac/simap-mcp/commit/d4c351602903f455f41c050f83ae61890ba89590) Thanks [@mathieumaf](https://github.com/mathieumaf)! - `README.md` — fix the broken "GitHub Actions Workflow Status" badge: it pointed at the deleted `publish.yml` (replaced by `release.yml` in the changesets migration). Now points at `ci.yml` on `main`, which is the more accurate signal of project health.
+
+- [#27](https://github.com/Digilac/simap-mcp/pull/27) [`a0e2eec`](https://github.com/Digilac/simap-mcp/commit/a0e2eecd05e3613550833753eb6661902fe3d603) Thanks [@mathieumaf](https://github.com/mathieumaf)! - Release flow now driven by [changesets](https://github.com/changesets/changesets): `package.json` and `server.json` are bumped together, `CHANGELOG.md` and the GitHub Release are generated from `.changeset/*.md` files (with PR-author credit), and publishing to npm + the MCP Registry runs from a single workflow. No change to install or usage for consumers.
+
+- [#29](https://github.com/Digilac/simap-mcp/pull/29) [`8bff80c`](https://github.com/Digilac/simap-mcp/commit/8bff80c67a516a9624bd939edd06ccbeed9f705c) Thanks [@mathieumaf](https://github.com/mathieumaf)! - Changesets are now opt-in: contributors add one only when their PR produces a user-visible change. The CI changeset gate is removed; the [changeset-bot](https://github.com/apps/changeset-bot) still comments on every PR with the current status. Dependabot PRs no longer need an admin override to merge.
+
 ## [1.2.1] - 2026-04-23
 
 ### Changed
