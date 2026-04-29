@@ -29,9 +29,20 @@ jobs:
 
       - run: npm ci
 
-      - run: npm run build
+      - name: Lint
+        run: npm run lint
 
-      - run: npm test
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test
 
       - id: changesets
         uses: changesets/action@v1
