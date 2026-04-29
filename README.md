@@ -2,7 +2,7 @@
 
 [![GitHub License](https://img.shields.io/github/license/Digilac/simap-mcp)](./LICENSE)
 [![NPM Version](https://img.shields.io/npm/v/%40digilac%2Fsimap-mcp)](https://www.npmjs.com/package/@digilac/simap-mcp)
-[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Digilac/simap-mcp/publish.yml)](https://github.com/Digilac/simap-mcp/actions/workflows/publish.yml)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Digilac/simap-mcp/ci.yml?branch=main)](https://github.com/Digilac/simap-mcp/actions/workflows/ci.yml)
 ![NPM Downloads](https://img.shields.io/npm/dw/%40digilac%2Fsimap-mcp)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Digilac/simap-mcp)
 

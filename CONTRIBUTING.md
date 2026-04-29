@@ -48,10 +48,12 @@ npm test
 | Script | Description |
 |--------|-------------|
 | `npm run build` | Compile TypeScript |
+| `npm start` | Run the built server |
 | `npm run dev` | Build + run |
 | `npm run lint` | Check code (ESLint) |
 | `npm run lint:fix` | Auto-fix lint issues |
 | `npm run format` | Format code (Prettier) |
+| `npm run format:check` | Check formatting (used in CI) |
 | `npm run typecheck` | Check types |
 | `npm test` | Run tests |
 | `npm run test:watch` | Run tests in watch mode |

@@ -12,7 +12,7 @@ MCP (Model Context Protocol) server that integrates with simap.ch, Switzerland's
 |------|---------|
 | [README.md](./README.md) | User documentation, installation, usage |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Architecture, key patterns, endpoint map |
-| [CHANGELOG.md](./CHANGELOG.md) | Keep a Changelog — bump before every release |
+| [CHANGELOG.md](./CHANGELOG.md) | Generated from `.changeset/*.md` by `@changesets/changelog-github` |
 | [SECURITY.md](./SECURITY.md) | Threat model, deployment guidance, debug mode |
 | [CONTRIBUTING.md](./CONTRIBUTING.md) | Contribution guidelines |
 
@@ -108,27 +108,8 @@ Tests mirror this tree under `tests/` (see [ARCHITECTURE.md](./ARCHITECTURE.md) 
 
 ## Changesets
 
-Versioning, `CHANGELOG.md`, and GitHub Releases are driven by [changesets](https://github.com/changesets/changesets). Add a changeset for any user-visible change; internal-only changes (tests, CI tweaks, refactors with no user-visible effect) don't need one. The [changeset-bot](https://github.com/apps/changeset-bot) comments on each PR with the current status. One bullet = one concrete change; lead with the affected symbol/file/tool in backticks, then the "what" and the "why".
-
-```bash
-npx changeset
-```
-
-The CLI prompts for the bump level (`patch` / `minor` / `major`) and a summary, then writes `.changeset/<name>.md`. Commit it with the rest of the change.
-
-Bump-level guide:
-
-- **patch** — bug fix, doc update, dependency bump, refactor with no user-visible API change.
-- **minor** — new tool, new MCP capability, new opt-in env var or parameter.
-- **major** — breaking change to a tool's input/output schema, removal of a tool, or any change that requires a consumer update.
+Versioning, `CHANGELOG.md`, and GitHub Releases are driven by [changesets](https://github.com/changesets/changesets). Add a changeset for any user-visible change with `npx changeset` — internal-only changes (tests, CI, refactors with no user-visible effect) don't need one. One bullet = one concrete change; lead with the affected symbol/file/tool in backticks, then the "what" and the "why". See [`.changeset/README.md`](./.changeset/README.md) for the bump-level guide.
 
 ## Release Process
 
-Releases are automated by `.github/workflows/release.yml`:
-
-1. Merge feature/fix PRs into `main`. Each user-visible PR carries its own `.changeset/*.md`.
-2. `release.yml` opens (or updates) a **Version Packages** PR that bumps `package.json`, syncs `server.json` (via `scripts/sync-server-json.mjs`), refreshes `package-lock.json`, and consumes pending changesets into `CHANGELOG.md`.
-3. Review and merge the Version Packages PR.
-4. `release.yml` re-runs and: publishes to npm via OIDC (`changeset publish`), creates the git tag, creates the GitHub Release with PR-author credit (via `@changesets/changelog-github`), then publishes to the MCP Registry (`mcp-publisher`).
-
-The auto-generated GitHub Release content is changesets-style (`### Patch Changes`, `### Minor Changes` with `Thanks @user!`). For headline releases, polish manually via `gh release edit` after the workflow finishes.
+Fully automated by `.github/workflows/release.yml`: merging a PR with changesets opens a **Version Packages** PR that bumps `package.json` + `server.json` and rolls changesets into `CHANGELOG.md`; merging that PR publishes to npm, creates the git tag, the GitHub Release (with `Thanks @user!` credit), and pushes to the MCP Registry. For headline releases, polish the auto-generated release notes via `gh release edit` after the workflow finishes.
