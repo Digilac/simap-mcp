@@ -1,7 +1,7 @@
 {
   "name": "@digilac/simap-mcp",
   "version": "1.2.1",
-  "mcpName" : "io.github.Digilac/simap-mcp",
+  "mcpName": "io.github.Digilac/simap-mcp",
   "description": "MCP server for simap.ch - Swiss public procurement platform",
   "type": "module",
   "main": "dist/index.js",
@@ -21,6 +21,9 @@
     "test:watch": "vitest",
     "update:check": "npx npm-check-updates --target semver",
     "update": "npx npm-check-updates --target semver -u",
+    "changeset": "changeset",
+    "version": "changeset version && node scripts/sync-server-json.mjs && npm install --package-lock-only",
+    "release": "changeset publish",
     "prepublishOnly": "npm run build"
   },
   "repository": {
@@ -53,6 +56,8 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "^0.6.0",
+    "@changesets/cli": "^2.31.0",
     "@eslint/js": "^10.0.1",
     "@types/node": "^25.6.0",
     "eslint": "^10.2.1",

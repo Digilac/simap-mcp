@@ -1,30 +1,46 @@
-name: Publish Package
+name: Release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [main]
 
 permissions:
-  id-token: write  # Required for OIDC
-  contents: read
+  contents: write       # tags + GitHub Releases
+  pull-requests: write  # Version Packages PR
+  id-token: write       # OIDC for npm + mcp-publisher
 
 jobs:
-  publish:
+  release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v6
         with:
-          node-version: '24'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+          cache: "npm"
+
       - run: npm ci
-      - run: npm run build --if-present
+
+      - run: npm run build
+
       - run: npm test
-      - run: npm publish
+
+      - id: changesets
+        uses: changesets/action@v1
+        with:
+          version: npm run version
+          publish: npm run release
+          createGithubReleases: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_CONFIG_PROVENANCE: "true"
 
       - name: Install mcp-publisher
+        if: steps.changesets.outputs.published == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -41,7 +57,9 @@ jobs:
           rm "$ASSET" checksums.txt
 
       - name: Authenticate to MCP Registry
+        if: steps.changesets.outputs.published == 'true'
         run: ./mcp-publisher login github-oidc
 
       - name: Publish server to MCP Registry
+        if: steps.changesets.outputs.published == 'true'
         run: ./mcp-publisher publish

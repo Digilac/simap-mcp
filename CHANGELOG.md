@@ -5,13 +5,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
-### Documentation
-
-- `ARCHITECTURE.md` — file-structure tree updated to match the real layout: added `api/rate-limiter.ts`, `tools/search-tenders-params.ts`, `types/schemas.ts`, and `utils/errors.ts` (all referenced in prose but missing from the tree). Overview diagram now lists `api/rate-limiter.ts` and mentions error mapping in `utils/`.
-- `CONTRIBUTING.md` — "Adding a New Tool" example rewritten to match the actual tool pattern: exports `*InputShape` / `*InputSchema` / `*Input` and routes handler errors through `toToolErrorResult()`. Previous example used a local `schema` variable and no error helper, diverging from every tool in `src/`.
-
 ## [1.2.1] - 2026-04-23
 
 ### Changed
