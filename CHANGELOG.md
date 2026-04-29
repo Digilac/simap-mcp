@@ -1,9 +1,6 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+All notable changes to this project will be documented in this file. New entries (1.2.2 onward) are generated from [`.changeset/*.md`](./.changeset/) by `@changesets/changelog-github`; older entries (≤ 1.2.1) follow [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/). This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.2.1] - 2026-04-23
 

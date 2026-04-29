@@ -9,6 +9,10 @@ permissions:
   pull-requests: write  # Version Packages PR
   id-token: write       # OIDC for npm + mcp-publisher
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -32,7 +36,7 @@ jobs:
       - id: changesets
         uses: changesets/action@v1
         with:
-          version: npm run version
+          version: npm run version-packages
           publish: npm run release
           createGithubReleases: true
         env:

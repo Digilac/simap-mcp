@@ -22,7 +22,7 @@
     "update:check": "npx npm-check-updates --target semver",
     "update": "npx npm-check-updates --target semver -u",
     "changeset": "changeset",
-    "version": "changeset version && node scripts/sync-server-json.mjs && npm install --package-lock-only",
+    "version-packages": "changeset version && node scripts/sync-server-json.mjs && npm install --package-lock-only",
     "release": "changeset publish",
     "prepublishOnly": "npm run build"
   },
