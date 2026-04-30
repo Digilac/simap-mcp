@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.2.3
+
+### Patch Changes
+
+- [#33](https://github.com/Digilac/simap-mcp/pull/33) [`ebf3a37`](https://github.com/Digilac/simap-mcp/commit/ebf3a3764945c88dddc0db1fa991ee00927f716c) Thanks [@mathieumaf](https://github.com/mathieumaf)! - `src/utils/formatting.ts` — `escapeInlineCode()` now escapes backslashes before backticks. Without this, an input like `` \` `` would render as `` \\` `` in tool output, where Markdown reads the doubled backslash as a literal `\` and the trailing backtick re-emerges un-escaped — flagged by CodeQL (`js/incomplete-sanitization`). User-visible only for tool-output strings that contain literal backslashes (terms notes, criteria notes, award decision notes).
+
+  `.github/workflows/ci.yml` — add an explicit `permissions: contents: read` block at workflow level so the `GITHUB_TOKEN` follows least privilege regardless of the repository default, matching `release.yml`. Resolves CodeQL `actions/missing-workflow-permissions`.
+
+  `tests/tools/search-cpv-codes.test.ts` — drop the local copy of `escapeInlineCode` and import the real one from `src/utils/formatting.ts`, so the test can no longer drift from the production implementation. `tests/utils/formatting.test.ts` gains direct unit coverage for `escapeInlineCode` (backticks, backslashes, the combined case, and newline collapsing).
+
+- [#35](https://github.com/Digilac/simap-mcp/pull/35) [`2b6fce2`](https://github.com/Digilac/simap-mcp/commit/2b6fce2f31a83a50b8176acfdaea7da5caebdafa) Thanks [@mathieumaf](https://github.com/mathieumaf)! - `src/utils/formatting.ts` — add `formatInlineCode()` that wraps user input in a CommonMark-safe inline code span: it picks a backtick fence one longer than the longest backtick run in the input, and pads with a space when the content starts or ends with a backtick (CommonMark §6.1). The previous helper `escapeInlineCode()` only escaped backticks with backslashes, which CommonMark treats as literal inside code spans — so a single backtick in user input would still terminate the span and break the rendering of the surrounding tool output.
+
+  `src/tools/codes/search-cpv-codes.ts`, `src/tools/codes/search-bkp-codes.ts`, `src/tools/codes/search-npk-codes.ts`, `src/tools/codes/search-oag-codes.ts`, `src/tools/organizations/search-proc-offices.ts`, `src/tools/organizations/list-institutions.ts` — switch the headline + empty-results lines from `` `${escapeInlineCode(query)}` `` to `formatInlineCode(query)`. Output is unchanged for backtick-free queries; queries containing backticks now render as a proper inline code span instead of a broken one.
+
+  `escapeInlineCode()` is kept (used by `formatPublicationDetails` for prose context — it works correctly there) and its docstring now points readers to `formatInlineCode()` for code-span use.
+
 ## 1.2.2
 
 ### Patch Changes
