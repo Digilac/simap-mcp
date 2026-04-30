@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import {
   buildSimapUrl,
+  escapeInlineCode,
   formatPublicationDetails,
 } from "../../src/utils/formatting.js";
 import { PublicationDetailsSchema } from "../../src/types/schemas.js";
@@ -49,6 +50,36 @@ describe("buildSimapUrl", () => {
   it("should build correct URL for English", () => {
     const url = buildSimapUrl(projectId, "en");
     expect(url).toBe(`https://www.simap.ch/en/project-detail/${projectId}`);
+  });
+});
+
+describe("escapeInlineCode", () => {
+  it("should escape a lone backtick", () => {
+    expect(escapeInlineCode("foo`bar")).toBe("foo\\`bar");
+  });
+
+  it("should escape a lone backslash", () => {
+    expect(escapeInlineCode("foo\\bar")).toBe("foo\\\\bar");
+  });
+
+  it("should escape backslashes before backticks so the backtick stays escaped", () => {
+    // Input: `\` (a backslash followed by a backtick).
+    // Without backslash escaping the result would be `\\\`` — Markdown reads
+    // the doubled backslash as a literal `\` and the backtick re-emerges
+    // un-escaped. Escaping the backslash first yields `\\\\\\``.
+    expect(escapeInlineCode("\\`")).toBe("\\\\\\`");
+  });
+
+  it("should collapse newlines into a single space", () => {
+    expect(escapeInlineCode("a\nb\r\nc\rd")).toBe("a b c d");
+  });
+
+  it("should leave benign input untouched", () => {
+    expect(escapeInlineCode("hello world")).toBe("hello world");
+  });
+
+  it("should return empty string for empty input", () => {
+    expect(escapeInlineCode("")).toBe("");
   });
 });
 
