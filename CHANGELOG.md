@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.4
+
+### Patch Changes
+
+- [#39](https://github.com/Digilac/simap-mcp/pull/39) [`70bef7e`](https://github.com/Digilac/simap-mcp/commit/70bef7ec02793fc7f9029f100768f30345a61a58) Thanks [@dependabot](https://github.com/apps/dependabot)! - `zod` — bump from 4.3.6 to 4.4.1. The 4.4.0 minor includes correctness fixes around tuple parsing (defaults, optional tails, explicit `undefined`), and 4.4.1 tightens tuple-hole rejection. No tuple schemas in this codebase, so behavior is unchanged for consumers.
+
 ## 1.2.3
 
 ### Patch Changes
