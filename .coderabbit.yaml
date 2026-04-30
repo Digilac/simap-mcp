@@ -1,0 +1,8 @@
+reviews:
+  auto_review:
+    enabled: true
+    ignore_title_keywords:
+      - "Version Packages"
+  ignore_users:
+    - "dependabot[bot]"
+    - "github-actions[bot]"
