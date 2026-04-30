@@ -51,7 +51,13 @@ jobs:
           publish: npm run release
           createGithubReleases: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Fine-grained PAT (Contents + Pull requests RW) so pushes to
+          # `changeset-release/main` trigger downstream `pull_request`
+          # workflows. The default GITHUB_TOKEN is suppressed by GitHub
+          # to prevent recursion, which leaves required status checks
+          # stuck "Expected — Waiting for status to be reported" on the
+          # Version Packages PR.
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
           NPM_CONFIG_PROVENANCE: "true"
 
       - name: Install mcp-publisher
