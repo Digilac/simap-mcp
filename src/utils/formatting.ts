@@ -13,16 +13,53 @@ import { getTranslation } from "./translation.js";
 const SIMAP_BASE_URL = "https://www.simap.ch";
 
 /**
- * Escapes user input for safe embedding in inline Markdown code spans.
- * Backslashes must be escaped before backticks — otherwise input like `` \` ``
- * becomes `` \\` ``, which Markdown reads as a literal `\` followed by an
+ * Defensively escapes user input for embedding into inline Markdown *prose*
+ * (i.e. plain text in list items, paragraphs — NOT inside a code span).
+ *
+ * Backslashes must be escaped before backticks: otherwise input like `` \` ``
+ * would become `` \\` ``, which Markdown reads as a literal `\` followed by an
  * un-escaped backtick. Newlines are collapsed to spaces.
+ *
+ * For embedding inside a code span, use {@link formatInlineCode} instead —
+ * CommonMark treats backslashes as literal inside code spans, so backslash
+ * escaping does nothing there.
  */
 export function escapeInlineCode(value: string): string {
   return value
     .replace(/\\/g, "\\\\")
     .replace(/`/g, "\\`")
     .replace(/[\r\n]+/g, " ");
+}
+
+/**
+ * Wraps user input in a CommonMark-safe inline code span.
+ *
+ * Per CommonMark §6.1, a code span is delimited by backtick runs of equal
+ * length, and a backtick run inside the content cannot match the fence. We
+ * pick a fence one longer than the longest run of backticks in `value`, and
+ * pad with a single space if the content starts or ends with a backtick (the
+ * pad is stripped by the parser when the content has any non-space char, so
+ * the rendering is unaffected).
+ *
+ * Newlines are collapsed to spaces; the renderer would do this anyway, but
+ * doing it here keeps tool output predictable when concatenated into
+ * multi-line blocks.
+ *
+ * Examples:
+ *   formatInlineCode("foo")        → "`foo`"
+ *   formatInlineCode("a`b")        → "``a`b``"
+ *   formatInlineCode("`x`")        → "`` `x` ``"
+ *   formatInlineCode("a``b")       → "```a``b```"
+ */
+export function formatInlineCode(value: string): string {
+  const cleaned = value.replace(/[\r\n]+/g, " ");
+  if (cleaned === "") return "` `";
+
+  const runs = cleaned.match(/`+/g) ?? [];
+  const longestRun = runs.reduce((m, r) => Math.max(m, r.length), 0);
+  const fence = "`".repeat(longestRun + 1);
+  const pad = cleaned.startsWith("`") || cleaned.endsWith("`") ? " " : "";
+  return `${fence}${pad}${cleaned}${pad}${fence}`;
 }
 
 /**

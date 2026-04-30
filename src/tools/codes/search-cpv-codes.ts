@@ -10,7 +10,7 @@ import { ENDPOINTS } from "../../api/endpoints.js";
 import type { CPVCode, CPVSearchResponse } from "../../types/api.js";
 import { CPVSearchResponseSchema } from "../../types/schemas.js";
 import { getTranslation } from "../../utils/translation.js";
-import { escapeInlineCode } from "../../utils/formatting.js";
+import { formatInlineCode } from "../../utils/formatting.js";
 import { toToolErrorResult } from "../../utils/errors.js";
 
 /**
@@ -57,7 +57,7 @@ async function handler(params: SearchCpvCodesInput) {
         content: [
           {
             type: "text" as const,
-            text: `No CPV codes found for \`${escapeInlineCode(query)}\`.`,
+            text: `No CPV codes found for ${formatInlineCode(query)}.`,
           },
         ],
       };
@@ -66,7 +66,7 @@ async function handler(params: SearchCpvCodesInput) {
     // Flatten nested structure
     const flatCodes = flattenCodes(data.codes);
 
-    let result = `# CPV Codes for \`${escapeInlineCode(query)}\`\n\n`;
+    let result = `# CPV Codes for ${formatInlineCode(query)}\n\n`;
     result += `${flatCodes.length} result(s) found.\n\n`;
 
     for (const item of flatCodes) {
