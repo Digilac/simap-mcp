@@ -9,7 +9,7 @@ import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
 import type { ProcOfficesPublicResponse, ProcOfficeType } from "../../types/api.js";
 import { ProcOfficesPublicResponseSchema } from "../../types/schemas.js";
-import { escapeInlineCode } from "../../utils/formatting.js";
+import { formatInlineCode } from "../../utils/formatting.js";
 import { toToolErrorResult } from "../../utils/errors.js";
 
 /**
@@ -86,7 +86,7 @@ async function handler(params: SearchProcOfficesInput) {
     });
 
     if (!data.procOffices || data.procOffices.length === 0) {
-      const searchDesc = search ? ` for \`${escapeInlineCode(search)}\`` : "";
+      const searchDesc = search ? ` for ${formatInlineCode(search)}` : "";
       return {
         content: [
           {
@@ -98,7 +98,7 @@ async function handler(params: SearchProcOfficesInput) {
     }
 
     let result = search
-      ? `# Procurement Offices for \`${escapeInlineCode(search)}\`\n\n`
+      ? `# Procurement Offices for ${formatInlineCode(search)}\n\n`
       : `# Procurement Offices\n\n`;
 
     result += `${data.procOffices.length} office(s) found.\n\n`;

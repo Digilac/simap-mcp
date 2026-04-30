@@ -9,6 +9,7 @@ import { dirname, resolve } from "node:path";
 import {
   buildSimapUrl,
   escapeInlineCode,
+  formatInlineCode,
   formatPublicationDetails,
 } from "../../src/utils/formatting.js";
 import { PublicationDetailsSchema } from "../../src/types/schemas.js";
@@ -80,6 +81,47 @@ describe("escapeInlineCode", () => {
 
   it("should return empty string for empty input", () => {
     expect(escapeInlineCode("")).toBe("");
+  });
+});
+
+describe("formatInlineCode", () => {
+  it("should wrap benign input in single backticks", () => {
+    expect(formatInlineCode("foo")).toBe("`foo`");
+  });
+
+  it("should pick a 2-backtick fence when input contains a single backtick", () => {
+    // CommonMark §6.1: the fence run length must differ from any backtick run
+    // in the content. A 2-backtick fence safely contains a single backtick.
+    expect(formatInlineCode("a`b")).toBe("``a`b``");
+  });
+
+  it("should pick a 3-backtick fence when input contains a 2-backtick run", () => {
+    expect(formatInlineCode("a``b")).toBe("```a``b```");
+  });
+
+  it("should pad with spaces when content starts or ends with a backtick", () => {
+    // The pad lets the parser disambiguate the fence from the content; the
+    // pad itself is stripped at render time when the content has any
+    // non-space char.
+    expect(formatInlineCode("`x`")).toBe("`` `x` ``");
+  });
+
+  it("should handle a single-backtick input by fencing with two and padding", () => {
+    expect(formatInlineCode("`")).toBe("`` ` ``");
+  });
+
+  it("should collapse newlines into a single space", () => {
+    expect(formatInlineCode("a\nb\r\nc")).toBe("`a b c`");
+  });
+
+  it("should produce a non-empty span for empty input", () => {
+    // Empty inline code spans are awkward in CommonMark; we emit `` ` ` ``
+    // (one space) which renders to an empty inline code span.
+    expect(formatInlineCode("")).toBe("` `");
+  });
+
+  it("should not pad when only the middle of the content has backticks", () => {
+    expect(formatInlineCode("foo`bar`baz")).toBe("``foo`bar`baz``");
   });
 });
 

@@ -10,7 +10,7 @@ import { ENDPOINTS } from "../../api/endpoints.js";
 import type { CodeSearchResponse } from "../../types/api.js";
 import { CodeSearchResponseSchema } from "../../types/schemas.js";
 import { getTranslation } from "../../utils/translation.js";
-import { escapeInlineCode } from "../../utils/formatting.js";
+import { formatInlineCode } from "../../utils/formatting.js";
 import { toToolErrorResult } from "../../utils/errors.js";
 
 /**
@@ -44,13 +44,13 @@ async function handler(params: SearchNpkCodesInput) {
         content: [
           {
             type: "text" as const,
-            text: `No NPK codes found for \`${escapeInlineCode(query)}\`.`,
+            text: `No NPK codes found for ${formatInlineCode(query)}.`,
           },
         ],
       };
     }
 
-    let result = `# NPK Codes for \`${escapeInlineCode(query)}\`\n\n`;
+    let result = `# NPK Codes for ${formatInlineCode(query)}\n\n`;
     result += `${data.codes.length} result(s) found.\n\n`;
 
     for (const item of data.codes) {

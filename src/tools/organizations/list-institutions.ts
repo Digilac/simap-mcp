@@ -10,7 +10,7 @@ import { ENDPOINTS } from "../../api/endpoints.js";
 import type { InstitutionsResponse, Institution } from "../../types/api.js";
 import { InstitutionsResponseSchema } from "../../types/schemas.js";
 import { getTranslation } from "../../utils/translation.js";
-import { escapeInlineCode } from "../../utils/formatting.js";
+import { formatInlineCode } from "../../utils/formatting.js";
 import { toToolErrorResult } from "../../utils/errors.js";
 
 /**
@@ -84,14 +84,14 @@ async function handler(params: ListInstitutionsInput) {
         content: [
           {
             type: "text" as const,
-            text: `No institutions found for \`${escapeInlineCode(search!)}\`.`,
+            text: `No institutions found for ${formatInlineCode(search!)}.`,
           },
         ],
       };
     }
 
     let result = search
-      ? `# Public Institutions for \`${escapeInlineCode(search)}\`\n\n`
+      ? `# Public Institutions for ${formatInlineCode(search)}\n\n`
       : `# Public Institutions\n\n`;
 
     result += `${institutions.length} institution(s) found.\n\n`;

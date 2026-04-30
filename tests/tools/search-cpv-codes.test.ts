@@ -6,7 +6,7 @@ import { describe, it, expect, vi } from "vitest";
 import type { Translation } from "../../src/types/common.js";
 import type { Language } from "../../src/types/common.js";
 import { searchCpvCodesInputSchema as schema } from "../../src/tools/codes/search-cpv-codes.js";
-import { escapeInlineCode } from "../../src/utils/formatting.js";
+import { formatInlineCode } from "../../src/utils/formatting.js";
 
 describe("search_cpv_codes schema validation", () => {
   describe("query parameter", () => {
@@ -122,7 +122,7 @@ describe("response formatting", () => {
         content: [
           {
             type: "text" as const,
-            text: `No CPV codes found for \`${escapeInlineCode(query)}\`.`,
+            text: `No CPV codes found for ${formatInlineCode(query)}.`,
           },
         ],
       };
@@ -130,7 +130,7 @@ describe("response formatting", () => {
 
     const flatCodes = flattenCodes(data.codes);
 
-    let result = `# CPV Codes for \`${escapeInlineCode(query)}\`\n\n`;
+    let result = `# CPV Codes for ${formatInlineCode(query)}\n\n`;
     result += `${flatCodes.length} result(s) found.\n\n`;
 
     for (const item of flatCodes) {
@@ -165,10 +165,11 @@ describe("response formatting", () => {
     expect(response.isError).toBeUndefined();
   });
 
-  it("should escape backticks in query for empty results", () => {
+  it("should fence backticks in query so they don't break the code span", () => {
     const response = formatResponse({ codes: [] }, "test`injection", "en");
+    // Input contains one backtick → fence is two backticks (CommonMark §6.1).
     expect(response.content[0].text).toBe(
-      "No CPV codes found for `test\\`injection`."
+      "No CPV codes found for ``test`injection``."
     );
   });
 
