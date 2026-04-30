@@ -14,10 +14,15 @@ const SIMAP_BASE_URL = "https://www.simap.ch";
 
 /**
  * Escapes user input for safe embedding in inline Markdown code spans.
- * Strips newlines and escapes backticks.
+ * Backslashes must be escaped before backticks — otherwise input like `` \` ``
+ * becomes `` \\` ``, which Markdown reads as a literal `\` followed by an
+ * un-escaped backtick. Newlines are collapsed to spaces.
  */
 export function escapeInlineCode(value: string): string {
-  return value.replace(/[`]/g, "\\`").replace(/[\r\n]+/g, " ");
+  return value
+    .replace(/\\/g, "\\\\")
+    .replace(/`/g, "\\`")
+    .replace(/[\r\n]+/g, " ");
 }
 
 /**

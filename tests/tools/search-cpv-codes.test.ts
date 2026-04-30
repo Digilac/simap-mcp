@@ -6,6 +6,7 @@ import { describe, it, expect, vi } from "vitest";
 import type { Translation } from "../../src/types/common.js";
 import type { Language } from "../../src/types/common.js";
 import { searchCpvCodesInputSchema as schema } from "../../src/tools/codes/search-cpv-codes.js";
+import { escapeInlineCode } from "../../src/utils/formatting.js";
 
 describe("search_cpv_codes schema validation", () => {
   describe("query parameter", () => {
@@ -97,10 +98,6 @@ describe("response formatting", () => {
     if (!t) return "";
     return t[lang] || t.de || t.fr || t.en || t.it || "";
   };
-
-  function escapeInlineCode(value: string): string {
-    return value.replace(/[`]/g, "\\`").replace(/[\r\n]+/g, " ");
-  }
 
   function flattenCodes(codes: CPVCode[], result: CPVCode[] = []): CPVCode[] {
     for (const code of codes) {
