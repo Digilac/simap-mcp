@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.4
+
+### Patch Changes
+
+- [#39](https://github.com/Digilac/simap-mcp/pull/39) [`70bef7e`](https://github.com/Digilac/simap-mcp/commit/70bef7ec02793fc7f9029f100768f30345a61a58) Thanks [@dependabot](https://github.com/apps/dependabot)! - `zod` — bump from 4.3.6 to 4.4.1. The 4.4.0 minor includes correctness fixes around tuple parsing (defaults, optional tails, explicit `undefined`), and 4.4.1 tightens tuple-hole rejection. No tuple schemas in this codebase, so behavior is unchanged for consumers.
+
+- [#43](https://github.com/Digilac/simap-mcp/pull/43) [`e7bdd89`](https://github.com/Digilac/simap-mcp/commit/e7bdd89692f22bed472345a35065fa969c331309) Thanks [@dependabot](https://github.com/apps/dependabot)! - `zod` — bump from 4.4.1 to 4.4.3. 4.4.2 tightens `z.discriminatedUnion` option typing and makes `z.preprocess` defer optionality to the inner schema; 4.4.3 restores `.catch()` and `preprocess` handling for absent object keys. None of these APIs are used in this codebase, so behavior is unchanged for consumers.
+
 ## 1.2.3
 
 ### Patch Changes
