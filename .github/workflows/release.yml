@@ -20,6 +20,14 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          # Persist the PAT (instead of the default GITHUB_TOKEN) in
+          # `.git/config` so that pushes to `changeset-release/main`
+          # made by `changesets/action` later in the job trigger the
+          # downstream `pull_request` workflow on the Version Packages
+          # PR. Without this, actions/checkout's `extraheader` wins and
+          # the push authenticates with GITHUB_TOKEN, which GitHub
+          # suppresses to prevent recursion.
+          token: ${{ secrets.RELEASE_PAT }}
 
       - uses: actions/setup-node@v6
         with:
@@ -65,7 +73,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          MCP_PUBLISHER_VERSION="1.7.6"
+          MCP_PUBLISHER_VERSION="1.7.8"
           ASSET="mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz"
           curl -fSL -o "$ASSET" "https://github.com/modelcontextprotocol/registry/releases/download/v${MCP_PUBLISHER_VERSION}/${ASSET}"
           curl -fSL -o checksums.txt "https://github.com/modelcontextprotocol/registry/releases/download/v${MCP_PUBLISHER_VERSION}/registry_${MCP_PUBLISHER_VERSION}_checksums.txt"
