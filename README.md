@@ -33,7 +33,7 @@ Developed by [Digilac](https://www.digilac.ch/).
 
 ## Prerequisites
 
-- **Node.js ≥ 20** (LTS or newer).
+- **Node.js ≥ 22** (LTS or newer).
 - An MCP-compatible client (Claude Code, Claude Desktop, Cursor, VS Code, Windsurf, Cline, Zed, …).
 - No simap account or API key required — the simap API is public and read-only.
 
