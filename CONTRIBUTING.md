@@ -28,7 +28,7 @@ Thank you for your interest in this project! This guide will help you contribute
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js 22+
 - npm
 - Git
 
