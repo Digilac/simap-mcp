@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.0
+
+### Minor Changes
+
+- [#45](https://github.com/Digilac/simap-mcp/pull/45) [`a6df7c6`](https://github.com/Digilac/simap-mcp/commit/a6df7c6c2308c4ef2fa14739c2badcc429911990) Thanks [@mathieumaf](https://github.com/mathieumaf)! - - `package.json` `engines.node` — bumped from `>=20` to `>=22`. Node.js 20 reached end-of-life on 2026-04-30 and no longer receives security updates; supported runtimes are now Node 22 (Active LTS) and Node 24 (Current LTS).
+  - `.github/workflows/ci.yml` — CI matrix updated to `[22, 24]`. Documentation (`README.md`, `CONTRIBUTING.md`) updated to reflect the new minimum Node version.
+
 ## 1.2.4
 
 ### Patch Changes
