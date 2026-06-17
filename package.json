@@ -65,5 +65,8 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.61.1",
     "vitest": "^4.1.9"
+  },
+  "overrides": {
+    "read-yaml-file": "^2.1.0"
   }
 }
