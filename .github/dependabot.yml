@@ -11,9 +11,17 @@ updates:
     open-pull-requests-limit: 5
     groups:
       npm-minor-patch:
+        applies-to: version-updates
         update-types:
           - "minor"
           - "patch"
+      # Security updates bypass open-pull-requests-limit and are not covered by
+      # the version-updates group, so without this every advisory on a transitive
+      # dependency opens its own lockfile-only PR.
+      npm-security:
+        applies-to: security-updates
+        patterns:
+          - "*"
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -25,6 +33,11 @@ updates:
     open-pull-requests-limit: 5
     groups:
       actions-minor-patch:
+        applies-to: version-updates
         update-types:
           - "minor"
           - "patch"
+      actions-security:
+        applies-to: security-updates
+        patterns:
+          - "*"
