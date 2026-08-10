@@ -1,8 +1,0 @@
----
-"@digilac/simap-mcp": patch
----
-
-- `@modelcontextprotocol/sdk` — bump from 1.29.0 to 1.30.0. The 1.30 minor prioritizes and formats Zod issues in server-side validation errors, so malformed tool input now produces a clearer message; the rest of the release is CI/publishing changes with no runtime effect. All 14 tools are unaffected.
-- `package-lock.json` — resolve every open security advisory in the dependency tree, bringing `npm audit` from 10 vulnerabilities (6 high, 3 moderate, 1 low) to 0: `hono` 4.12.25 → 4.13.1, `@hono/node-server` 1.19.14 → 2.1.0, `ip-address` 10.2.0 → 10.5.0, `fast-uri` 3.1.2 → 3.1.5, `body-parser` 2.2.2 → 2.3.0, `postcss` 8.5.16 → 8.5.26, `js-yaml` 4.2.0 → 4.3.1, `brace-expansion` 5.0.6 → 5.0.9, `nanoid` 3.3.15 → 3.3.18. All are transitive and none is reachable from this server: the HTTP-transport chain (`hono`, `express`, `body-parser`, `ip-address`, `fast-uri`) is pulled in by the MCP SDK but never loaded, since `src/server.ts` uses `StdioServerTransport` exclusively, and the remainder are dev-only. Consumers installing the package now get a clean audit.
-- `.github/dependabot.yml` — add an `applies-to: security-updates` group for both the npm and github-actions ecosystems, and pin the existing groups to `applies-to: version-updates`. Security updates bypass `open-pull-requests-limit` and were not covered by the previous groups, so each advisory on a transitive dependency opened its own lockfile-only PR (seven were open at once).
-- Direct dev dependencies bumped: `@changesets/cli` 2.31.0 → 2.31.1, `@types/node` 26.1.1 → 26.2.0, `eslint` 10.7.0 → 10.8.1, `prettier` 3.9.5 → 3.9.6, `typescript-eslint` 8.64.0 → 8.66.0.
