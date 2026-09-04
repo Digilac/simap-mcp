@@ -3,19 +3,20 @@
  * Search procurement offices.
  */
 
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { FastMCP } from "@prefecthq/fastmcp-ts/server";
 import { z } from "zod";
 import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
 import type { ProcOfficesPublicResponse, ProcOfficeType } from "../../types/api.js";
 import { ProcOfficesPublicResponseSchema } from "../../types/schemas.js";
 import { formatInlineCode } from "../../utils/formatting.js";
-import { toToolErrorResult } from "../../utils/errors.js";
+import { toToolErrorResult, toolErrorResult } from "../../utils/errors.js";
+import { registerTool } from "../../utils/register-tool.js";
 
 /**
- * Schema (raw shape) for search_proc_offices parameters.
+ * Schema for search_proc_offices parameters.
  */
-export const searchProcOfficesInputShape = {
+export const searchProcOfficesInputSchema = z.object({
   search: z
     .string()
     .min(3)
@@ -27,9 +28,7 @@ export const searchProcOfficesInputShape = {
     .uuid()
     .optional()
     .describe("Filter by parent institution (UUID)"),
-} as const;
-
-export const searchProcOfficesInputSchema = z.object(searchProcOfficesInputShape);
+});
 export type SearchProcOfficesInput = z.infer<typeof searchProcOfficesInputSchema>;
 
 /**
@@ -60,15 +59,9 @@ async function handler(params: SearchProcOfficesInput) {
 
   // At least one parameter is required
   if (!search && !institutionId) {
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: "Please provide at least one parameter: search or institutionId.",
-        },
-      ],
-      isError: true,
-    };
+    return toolErrorResult(
+      "Please provide at least one parameter: search or institutionId."
+    );
   }
 
   try {
@@ -87,14 +80,7 @@ async function handler(params: SearchProcOfficesInput) {
 
     if (!data.procOffices || data.procOffices.length === 0) {
       const searchDesc = search ? ` for ${formatInlineCode(search)}` : "";
-      return {
-        content: [
-          {
-            type: "text" as const,
-            text: `No procurement offices found${searchDesc}.`,
-          },
-        ],
-      };
+      return `No procurement offices found${searchDesc}.`;
     }
 
     let result = search
@@ -120,9 +106,7 @@ async function handler(params: SearchProcOfficesInput) {
 
     result += `\n*Use these IDs with the issuedByOrganizations parameter of search_tenders.*`;
 
-    return {
-      content: [{ type: "text" as const, text: result }],
-    };
+    return result;
   } catch (error) {
     return toToolErrorResult(error, {
       toolName: "search_proc_offices",
@@ -134,11 +118,14 @@ async function handler(params: SearchProcOfficesInput) {
 /**
  * Registers the search_proc_offices tool.
  */
-export function registerSearchProcOffices(server: McpServer): void {
-  server.tool(
-    "search_proc_offices",
-    "Search public procurement offices by name or institution",
-    searchProcOfficesInputShape,
+export function registerSearchProcOffices(server: FastMCP): void {
+  registerTool(
+    server,
+    {
+      name: "search_proc_offices",
+      description: "Search public procurement offices by name or institution",
+      input: searchProcOfficesInputSchema,
+    },
     handler
   );
 }

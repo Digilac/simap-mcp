@@ -3,7 +3,7 @@
  * Search public procurement tenders on simap.ch
  */
 
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { FastMCP } from "@prefecthq/fastmcp-ts/server";
 import { z } from "zod";
 import { simap } from "../api/client.js";
 import { ENDPOINTS } from "../api/endpoints.js";
@@ -11,6 +11,7 @@ import type { ProjectsSearchResponse } from "../types/api.js";
 import { ProjectsSearchResponseSchema } from "../types/schemas.js";
 import { formatProject, formatHeader } from "../utils/formatting.js";
 import { toToolErrorResult } from "../utils/errors.js";
+import { registerTool } from "../utils/register-tool.js";
 import { buildTenderSearchQuery } from "./search-tenders-params.js";
 
 /**
@@ -46,13 +47,10 @@ const SWISS_CANTONS = [
 ] as const;
 
 /**
- * Schema (raw shape) for search_tenders parameters.
- *
+ * Schema for search_tenders parameters.
  * Exported so tests can import the source of truth instead of redefining it.
- * `searchTendersInputShape` is the plain object consumed by `server.tool()`;
- * `searchTendersInputSchema` wraps it in a `z.object()` for `.safeParse()` in tests.
  */
-export const searchTendersInputShape = {
+export const searchTendersInputSchema = z.object({
   search: z
     .string()
     .min(3)
@@ -143,9 +141,7 @@ export const searchTendersInputShape = {
     .enum(["de", "fr", "it", "en"])
     .default("en")
     .describe("Preferred language for results"),
-} as const;
-
-export const searchTendersInputSchema = z.object(searchTendersInputShape);
+});
 export type SearchTendersInput = z.infer<typeof searchTendersInputSchema>;
 
 /**
@@ -162,14 +158,7 @@ async function handler(params: SearchTendersInput) {
     });
 
     if (data.projects.length === 0) {
-      return {
-        content: [
-          {
-            type: "text" as const,
-            text: "No tenders found matching these criteria.",
-          },
-        ],
-      };
+      return "No tenders found matching these criteria.";
     }
 
     let result = formatHeader("simap Search Results", data.projects.length);
@@ -185,9 +174,7 @@ async function handler(params: SearchTendersInput) {
       result += `More results available. Use lastItem: "${data.pagination.lastItem}" to retrieve the next page.*`;
     }
 
-    return {
-      content: [{ type: "text" as const, text: result }],
-    };
+    return result;
   } catch (error) {
     return toToolErrorResult(error, {
       toolName: "search_tenders",
@@ -199,11 +186,15 @@ async function handler(params: SearchTendersInput) {
 /**
  * Registers the search_tenders tool.
  */
-export function registerSearchTenders(server: McpServer): void {
-  server.tool(
-    "search_tenders",
-    "Search public tenders on simap.ch with filters by date, canton, CPV codes, and other criteria",
-    searchTendersInputShape,
+export function registerSearchTenders(server: FastMCP): void {
+  registerTool(
+    server,
+    {
+      name: "search_tenders",
+      description:
+        "Search public tenders on simap.ch with filters by date, canton, CPV codes, and other criteria",
+      input: searchTendersInputSchema,
+    },
     handler
   );
 }

@@ -3,7 +3,7 @@
  * Search OAG (Objektartengliederung) codes.
  */
 
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { FastMCP } from "@prefecthq/fastmcp-ts/server";
 import { z } from "zod";
 import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
@@ -12,16 +12,15 @@ import { CodeSearchResponseSchema } from "../../types/schemas.js";
 import { getTranslation } from "../../utils/translation.js";
 import { formatInlineCode } from "../../utils/formatting.js";
 import { toToolErrorResult } from "../../utils/errors.js";
+import { registerTool } from "../../utils/register-tool.js";
 
 /**
- * Schema (raw shape) for search_oag_codes parameters.
+ * Schema for search_oag_codes parameters.
  */
-export const searchOagCodesInputShape = {
+export const searchOagCodesInputSchema = z.object({
   query: z.string().min(1).max(500).describe("Search term (keyword or code number)"),
   lang: z.enum(["de", "fr", "it", "en"]).default("en").describe("Search language"),
-} as const;
-
-export const searchOagCodesInputSchema = z.object(searchOagCodesInputShape);
+});
 export type SearchOagCodesInput = z.infer<typeof searchOagCodesInputSchema>;
 
 /**
@@ -40,14 +39,7 @@ async function handler(params: SearchOagCodesInput) {
     });
 
     if (!data.codes || data.codes.length === 0) {
-      return {
-        content: [
-          {
-            type: "text" as const,
-            text: `No OAG codes found for ${formatInlineCode(query)}.`,
-          },
-        ],
-      };
+      return `No OAG codes found for ${formatInlineCode(query)}.`;
     }
 
     let result = `# OAG Codes for ${formatInlineCode(query)}\n\n`;
@@ -60,9 +52,7 @@ async function handler(params: SearchOagCodesInput) {
 
     result += `\n*OAG codes classify objects by type in construction projects.*`;
 
-    return {
-      content: [{ type: "text" as const, text: result }],
-    };
+    return result;
   } catch (error) {
     return toToolErrorResult(error, {
       toolName: "search_oag_codes",
@@ -74,11 +64,14 @@ async function handler(params: SearchOagCodesInput) {
 /**
  * Registers the search_oag_codes tool.
  */
-export function registerSearchOagCodes(server: McpServer): void {
-  server.tool(
-    "search_oag_codes",
-    "Search OAG (object type classification) codes by keyword or number",
-    searchOagCodesInputShape,
+export function registerSearchOagCodes(server: FastMCP): void {
+  registerTool(
+    server,
+    {
+      name: "search_oag_codes",
+      description: "Search OAG (object type classification) codes by keyword or number",
+      input: searchOagCodesInputSchema,
+    },
     handler
   );
 }

@@ -121,14 +121,13 @@ describe("get_tender_details handler — fixture-driven", () => {
   it("should expose real structured fields and no truncation marker in default output", async () => {
     stubFetchWithTender();
 
-    const result = await handler({
+    const text = await handler({
       projectId: PROJECT_ID,
       publicationId: PUBLICATION_ID,
       lang: "fr",
       fullRaw: false,
     });
 
-    const text = (result.content[0] as { text: string }).text;
     // Repro-case deadline and primary CPV must appear.
     expect(text).toContain("2026-03-05");
     expect(text).toContain("48000000");
@@ -142,14 +141,13 @@ describe("get_tender_details handler — fixture-driven", () => {
   it("should append the complete untruncated JSON when fullRaw=true", async () => {
     stubFetchWithTender();
 
-    const result = await handler({
+    const text = await handler({
       projectId: PROJECT_ID,
       publicationId: PUBLICATION_ID,
       lang: "fr",
       fullRaw: true,
     });
 
-    const text = (result.content[0] as { text: string }).text;
     expect(text).toContain("### Full Raw Response");
     expect(text).not.toContain("(truncated)");
     // The appended JSON must include every top-level key present in the

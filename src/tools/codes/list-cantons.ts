@@ -3,19 +3,19 @@
  * List all Swiss cantons.
  */
 
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { FastMCP } from "@prefecthq/fastmcp-ts/server";
 import { z } from "zod";
 import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
 import type { CantonsResponse } from "../../types/api.js";
 import { CantonsResponseSchema } from "../../types/schemas.js";
 import { toToolErrorResult } from "../../utils/errors.js";
+import { registerTool } from "../../utils/register-tool.js";
 
 /**
- * Schema (raw shape) for list_cantons parameters. Empty — no inputs.
+ * Schema for list_cantons parameters. Empty — no inputs.
  */
-export const listCantonsInputShape = {} as const;
-export const listCantonsInputSchema = z.object(listCantonsInputShape);
+export const listCantonsInputSchema = z.object({});
 export type ListCantonsInput = z.infer<typeof listCantonsInputSchema>;
 
 /**
@@ -60,14 +60,7 @@ async function handler() {
     });
 
     if (!data.cantons || data.cantons.length === 0) {
-      return {
-        content: [
-          {
-            type: "text" as const,
-            text: "No cantons found.",
-          },
-        ],
-      };
+      return "No cantons found.";
     }
 
     let result = `# Swiss Cantons\n\n`;
@@ -80,9 +73,7 @@ async function handler() {
 
     result += `\n*Use these codes with the cantons parameter of search_tenders.*`;
 
-    return {
-      content: [{ type: "text" as const, text: result }],
-    };
+    return result;
   } catch (error) {
     return toToolErrorResult(error, {
       toolName: "list_cantons",
@@ -94,11 +85,14 @@ async function handler() {
 /**
  * Registers the list_cantons tool.
  */
-export function registerListCantons(server: McpServer): void {
-  server.tool(
-    "list_cantons",
-    "List all Swiss cantons with their codes (useful for search filters)",
-    listCantonsInputShape,
+export function registerListCantons(server: FastMCP): void {
+  registerTool(
+    server,
+    {
+      name: "list_cantons",
+      description: "List all Swiss cantons with their codes (useful for search filters)",
+      input: listCantonsInputSchema,
+    },
     handler
   );
 }

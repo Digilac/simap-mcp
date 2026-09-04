@@ -6,6 +6,7 @@
  * server errors (500-599), and network/timeout issues.
  */
 
+import { ToolResult } from "@prefecthq/fastmcp-ts/server";
 import { SimapApiError } from "../types/api.js";
 
 export interface ToolErrorContext {
@@ -13,6 +14,19 @@ export interface ToolErrorContext {
   toolName: string;
   /** Short gerund describing what failed, e.g. "searching tenders". */
   action: string;
+}
+
+/**
+ * Builds a FastMCP tool result flagged as an error, carrying a single
+ * user-facing text block. Use it for every error path so tool errors are
+ * consistently returned as `isError: true` results (which the model can read
+ * and act on) rather than thrown as protocol errors.
+ */
+export function toolErrorResult(text: string): ToolResult {
+  return new ToolResult({
+    content: [{ type: "text", text }],
+    isError: true,
+  });
 }
 
 /**
@@ -41,7 +55,7 @@ function isNetworkOrTimeoutError(error: unknown): boolean {
  *
  * Always logs the underlying error to stderr for operator debugging.
  */
-export function toToolErrorResult(error: unknown, ctx: ToolErrorContext) {
+export function toToolErrorResult(error: unknown, ctx: ToolErrorContext): ToolResult {
   console.error(`${ctx.toolName} error:`, error);
 
   let text: string;
@@ -62,8 +76,5 @@ export function toToolErrorResult(error: unknown, ctx: ToolErrorContext) {
     text = `An error occurred while ${ctx.action}. Please try again.`;
   }
 
-  return {
-    content: [{ type: "text" as const, text }],
-    isError: true,
-  };
+  return toolErrorResult(text);
 }

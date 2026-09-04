@@ -3,7 +3,7 @@
  * Browse OAG (Objektartengliederung) code hierarchy.
  */
 
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { FastMCP } from "@prefecthq/fastmcp-ts/server";
 import { z } from "zod";
 import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
@@ -11,20 +11,19 @@ import type { CodeEntry, CodeSearchResponse } from "../../types/api.js";
 import { CodeTreeResponseSchema } from "../../types/schemas.js";
 import { getTranslation } from "../../utils/translation.js";
 import { toToolErrorResult } from "../../utils/errors.js";
+import { registerTool } from "../../utils/register-tool.js";
 
 /**
- * Schema (raw shape) for browse_oag_tree parameters.
+ * Schema for browse_oag_tree parameters.
  */
-export const browseOagTreeInputShape = {
+export const browseOagTreeInputSchema = z.object({
   parentCode: z
     .string()
     .regex(/^[0-9]{1,10}$/)
     .optional()
     .describe("Parent OAG code. If omitted, shows root categories"),
   lang: z.enum(["de", "fr", "it", "en"]).default("en").describe("Display language"),
-} as const;
-
-export const browseOagTreeInputSchema = z.object(browseOagTreeInputShape);
+});
 export type BrowseOagTreeInput = z.infer<typeof browseOagTreeInputSchema>;
 
 /**
@@ -54,14 +53,7 @@ async function handler(params: BrowseOagTreeInput) {
       const message = parentCode
         ? `No OAG subcategories found for code \`${parentCode}\`.`
         : `No root OAG categories found.`;
-      return {
-        content: [
-          {
-            type: "text" as const,
-            text: message,
-          },
-        ],
-      };
+      return message;
     }
 
     let result = parentCode
@@ -78,9 +70,7 @@ async function handler(params: BrowseOagTreeInput) {
 
     result += `\n*Use browse_oag_tree with a parent code to see its subcategories.*`;
 
-    return {
-      content: [{ type: "text" as const, text: result }],
-    };
+    return result;
   } catch (error) {
     return toToolErrorResult(error, {
       toolName: "browse_oag_tree",
@@ -92,11 +82,14 @@ async function handler(params: BrowseOagTreeInput) {
 /**
  * Registers the browse_oag_tree tool.
  */
-export function registerBrowseOagTree(server: McpServer): void {
-  server.tool(
-    "browse_oag_tree",
-    "Browse the OAG code hierarchy (object type classification)",
-    browseOagTreeInputShape,
+export function registerBrowseOagTree(server: FastMCP): void {
+  registerTool(
+    server,
+    {
+      name: "browse_oag_tree",
+      description: "Browse the OAG code hierarchy (object type classification)",
+      input: browseOagTreeInputSchema,
+    },
     handler
   );
 }

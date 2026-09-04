@@ -3,7 +3,7 @@
  * List public institutions that publish tenders.
  */
 
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { FastMCP } from "@prefecthq/fastmcp-ts/server";
 import { z } from "zod";
 import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
@@ -12,11 +12,12 @@ import { InstitutionsResponseSchema } from "../../types/schemas.js";
 import { getTranslation } from "../../utils/translation.js";
 import { formatInlineCode } from "../../utils/formatting.js";
 import { toToolErrorResult } from "../../utils/errors.js";
+import { registerTool } from "../../utils/register-tool.js";
 
 /**
- * Schema (raw shape) for list_institutions parameters.
+ * Schema for list_institutions parameters.
  */
-export const listInstitutionsInputShape = {
+export const listInstitutionsInputSchema = z.object({
   search: z
     .string()
     .min(3)
@@ -24,9 +25,7 @@ export const listInstitutionsInputShape = {
     .optional()
     .describe("Filter by name (min 3 characters)"),
   lang: z.enum(["de", "fr", "it", "en"]).default("en").describe("Language for names"),
-} as const;
-
-export const listInstitutionsInputSchema = z.object(listInstitutionsInputShape);
+});
 export type ListInstitutionsInput = z.infer<typeof listInstitutionsInputSchema>;
 
 /**
@@ -61,14 +60,7 @@ async function handler(params: ListInstitutionsInput) {
     });
 
     if (!data.institutions || data.institutions.length === 0) {
-      return {
-        content: [
-          {
-            type: "text" as const,
-            text: "No institutions found.",
-          },
-        ],
-      };
+      return "No institutions found.";
     }
 
     let institutions: Institution[] = data.institutions;
@@ -80,14 +72,7 @@ async function handler(params: ListInstitutionsInput) {
     }
 
     if (institutions.length === 0) {
-      return {
-        content: [
-          {
-            type: "text" as const,
-            text: `No institutions found for ${formatInlineCode(search!)}.`,
-          },
-        ],
-      };
+      return `No institutions found for ${formatInlineCode(search!)}.`;
     }
 
     let result = search
@@ -112,9 +97,7 @@ async function handler(params: ListInstitutionsInput) {
 
     result += `\n\n*Use these IDs with the issuedByOrganizations parameter of search_tenders.*`;
 
-    return {
-      content: [{ type: "text" as const, text: result }],
-    };
+    return result;
   } catch (error) {
     return toToolErrorResult(error, {
       toolName: "list_institutions",
@@ -126,11 +109,15 @@ async function handler(params: ListInstitutionsInput) {
 /**
  * Registers the list_institutions tool.
  */
-export function registerListInstitutions(server: McpServer): void {
-  server.tool(
-    "list_institutions",
-    "List Swiss public institutions (Confederation, cantons, municipalities) that publish tenders",
-    listInstitutionsInputShape,
+export function registerListInstitutions(server: FastMCP): void {
+  registerTool(
+    server,
+    {
+      name: "list_institutions",
+      description:
+        "List Swiss public institutions (Confederation, cantons, municipalities) that publish tenders",
+      input: listInstitutionsInputSchema,
+    },
     handler
   );
 }

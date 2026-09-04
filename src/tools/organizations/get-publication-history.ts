@@ -3,23 +3,22 @@
  * Get the publication history for a project.
  */
 
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { FastMCP } from "@prefecthq/fastmcp-ts/server";
 import { z } from "zod";
 import { simap } from "../../api/client.js";
 import { ENDPOINTS, SIMAP_API_BASE } from "../../api/endpoints.js";
 import { SimapApiError, type PastPublicationsResponse } from "../../types/api.js";
 import { PastPublicationsResponseSchema } from "../../types/schemas.js";
 import { toToolErrorResult } from "../../utils/errors.js";
+import { registerTool } from "../../utils/register-tool.js";
 
 /**
- * Schema (raw shape) for get_publication_history parameters.
+ * Schema for get_publication_history parameters.
  */
-export const getPublicationHistoryInputShape = {
+export const getPublicationHistoryInputSchema = z.object({
   publicationId: z.string().uuid().describe("Current publication ID (UUID)"),
   lotId: z.string().uuid().optional().describe("Lot ID (optional, to filter by lot)"),
-} as const;
-
-export const getPublicationHistoryInputSchema = z.object(getPublicationHistoryInputShape);
+});
 export type GetPublicationHistoryInput = z.infer<typeof getPublicationHistoryInputSchema>;
 
 /**
@@ -63,14 +62,7 @@ async function handler(params: GetPublicationHistoryInput) {
     );
 
     if (!data.pastPublications || data.pastPublications.length === 0) {
-      return {
-        content: [
-          {
-            type: "text" as const,
-            text: "No previous publications found for this project.",
-          },
-        ],
-      };
+      return "No previous publications found for this project.";
     }
 
     let result = `# Publication History\n\n`;
@@ -99,20 +91,11 @@ async function handler(params: GetPublicationHistoryInput) {
 
     result += `*Use get_tender_details with the publication ID to see full details.*`;
 
-    return {
-      content: [{ type: "text" as const, text: result }],
-    };
+    return result;
   } catch (error) {
     // API returns 400 when no history is available — treat as "no data", not an error
     if (error instanceof SimapApiError && error.statusCode === 400) {
-      return {
-        content: [
-          {
-            type: "text" as const,
-            text: "No history available for this publication. This may indicate it is the first publication of the project.",
-          },
-        ],
-      };
+      return "No history available for this publication. This may indicate it is the first publication of the project.";
     }
 
     return toToolErrorResult(error, {
@@ -125,11 +108,15 @@ async function handler(params: GetPublicationHistoryInput) {
 /**
  * Registers the get_publication_history tool.
  */
-export function registerGetPublicationHistory(server: McpServer): void {
-  server.tool(
-    "get_publication_history",
-    "Get the publication history for a project (corrections, awards, etc.)",
-    getPublicationHistoryInputShape,
+export function registerGetPublicationHistory(server: FastMCP): void {
+  registerTool(
+    server,
+    {
+      name: "get_publication_history",
+      description:
+        "Get the publication history for a project (corrections, awards, etc.)",
+      input: getPublicationHistoryInputSchema,
+    },
     handler
   );
 }

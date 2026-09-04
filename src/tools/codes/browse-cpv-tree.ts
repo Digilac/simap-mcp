@@ -3,7 +3,7 @@
  * Browse CPV code hierarchy.
  */
 
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { FastMCP } from "@prefecthq/fastmcp-ts/server";
 import { z } from "zod";
 import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
@@ -11,20 +11,19 @@ import type { CPVCode, CPVSearchResponse } from "../../types/api.js";
 import { CPVSearchResponseSchema } from "../../types/schemas.js";
 import { getTranslation } from "../../utils/translation.js";
 import { toToolErrorResult } from "../../utils/errors.js";
+import { registerTool } from "../../utils/register-tool.js";
 
 /**
- * Schema (raw shape) for browse_cpv_tree parameters.
+ * Schema for browse_cpv_tree parameters.
  */
-export const browseCpvTreeInputShape = {
+export const browseCpvTreeInputSchema = z.object({
   parentCode: z
     .string()
     .regex(/^[0-9]{8}$/)
     .optional()
     .describe("Parent code (8 digits). If omitted, shows root categories"),
   lang: z.enum(["de", "fr", "it", "en"]).default("en").describe("Display language"),
-} as const;
-
-export const browseCpvTreeInputSchema = z.object(browseCpvTreeInputShape);
+});
 export type BrowseCpvTreeInput = z.infer<typeof browseCpvTreeInputSchema>;
 
 /**
@@ -55,14 +54,7 @@ async function handler(params: BrowseCpvTreeInput) {
       const message = parentCode
         ? `No subcategories found for code \`${parentCode}\`.`
         : `No root CPV categories found.`;
-      return {
-        content: [
-          {
-            type: "text" as const,
-            text: message,
-          },
-        ],
-      };
+      return message;
     }
 
     const codes = getDirectChildren(data.codes);
@@ -81,9 +73,7 @@ async function handler(params: BrowseCpvTreeInput) {
 
     result += `\n*Use browse_cpv_tree with a parent code to see its subcategories.*`;
 
-    return {
-      content: [{ type: "text" as const, text: result }],
-    };
+    return result;
   } catch (error) {
     return toToolErrorResult(error, {
       toolName: "browse_cpv_tree",
@@ -95,11 +85,14 @@ async function handler(params: BrowseCpvTreeInput) {
 /**
  * Registers the browse_cpv_tree tool.
  */
-export function registerBrowseCpvTree(server: McpServer): void {
-  server.tool(
-    "browse_cpv_tree",
-    "Browse the CPV code hierarchy (shows subcategories of a parent code)",
-    browseCpvTreeInputShape,
+export function registerBrowseCpvTree(server: FastMCP): void {
+  registerTool(
+    server,
+    {
+      name: "browse_cpv_tree",
+      description: "Browse the CPV code hierarchy (shows subcategories of a parent code)",
+      input: browseCpvTreeInputSchema,
+    },
     handler
   );
 }
