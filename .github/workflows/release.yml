@@ -3,6 +3,11 @@ name: Release
 on:
   push:
     branches: [main]
+  # Manual re-run of the MCP Registry publish alone, for when npm
+  # succeeded but the registry step failed (e.g. npm propagation race).
+  # The `release` job is skipped; only `publish-registry` runs, using
+  # the version already committed in `server.json` on the default branch.
+  workflow_dispatch:
 
 permissions:
   contents: write       # tags + GitHub Releases
@@ -15,7 +20,10 @@ concurrency:
 
 jobs:
   release:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    outputs:
+      published: ${{ steps.changesets.outputs.published }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -70,8 +78,45 @@ jobs:
         env:
           NPM_CONFIG_PROVENANCE: "true"
 
+  # Registering with the MCP Registry is a separate job so a failure here
+  # never masks a successful npm publish, and so it can be retried on its
+  # own via `workflow_dispatch` without re-running the release.
+  publish-registry:
+    needs: release
+    if: >-
+      always() &&
+      (github.event_name == 'workflow_dispatch' ||
+       needs.release.outputs.published == 'true')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # On `push`, the release job has just committed the version bump
+          # through the GitHub API, so the checked-out ref is one commit
+          # behind — take the branch tip to get the bumped `server.json`.
+          ref: ${{ github.ref_name }}
+
+      - name: Wait for the npm version to be resolvable
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The MCP Registry validates that the npm package version exists
+          # before accepting the server entry. npm's registry needs a moment
+          # to serve a freshly published version, so poll before publishing.
+          PKG="$(jq -r '.packages[0].identifier' server.json)"
+          VERSION="$(jq -r '.packages[0].version' server.json)"
+          for attempt in $(seq 1 20); do
+            if npm view "${PKG}@${VERSION}" version > /dev/null 2>&1; then
+              echo "${PKG}@${VERSION} is live on npm (attempt ${attempt})"
+              exit 0
+            fi
+            echo "${PKG}@${VERSION} not on npm yet (attempt ${attempt}/20); retrying in 15s"
+            sleep 15
+          done
+          echo "::error::${PKG}@${VERSION} never appeared on npm after 5 minutes"
+          exit 1
+
       - name: Install mcp-publisher
-        if: steps.changesets.outputs.published == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -90,9 +135,20 @@ jobs:
           rm "$ASSET" checksums.txt
 
       - name: Authenticate to MCP Registry
-        if: steps.changesets.outputs.published == 'true'
         run: ./mcp-publisher login github-oidc
 
       - name: Publish server to MCP Registry
-        if: steps.changesets.outputs.published == 'true'
-        run: ./mcp-publisher publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Retry anyway: the registry re-validates against npm on its own
+          # side and can still see a stale 404 right after publication.
+          for attempt in 1 2 3; do
+            if ./mcp-publisher publish; then
+              exit 0
+            fi
+            echo "publish failed (attempt ${attempt}/3); retrying in 30s"
+            sleep 30
+          done
+          echo "::error::mcp-publisher publish failed after 3 attempts"
+          exit 1
