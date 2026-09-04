@@ -3,7 +3,7 @@
  * Get detailed information about a specific tender.
  */
 
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { FastMCP } from "@prefecthq/fastmcp-ts/server";
 import { z } from "zod";
 import { simap } from "../api/client.js";
 import { ENDPOINTS } from "../api/endpoints.js";
@@ -12,12 +12,13 @@ import type { ProjectHeader, PublicationDetails } from "../types/api.js";
 import { ProjectHeaderSchema, PublicationDetailsSchema } from "../types/schemas.js";
 import { formatProjectHeader, formatPublicationDetails } from "../utils/formatting.js";
 import { toToolErrorResult } from "../utils/errors.js";
+import { registerTool } from "../utils/register-tool.js";
 
 /**
- * Schema (raw shape) for get_tender_details parameters.
+ * Schema for get_tender_details parameters.
  * Exported so tests can import the source of truth.
  */
-export const getTenderDetailsInputShape = {
+export const getTenderDetailsInputSchema = z.object({
   projectId: z.string().uuid().describe("Project ID (UUID)"),
   publicationId: z.string().uuid().describe("Publication ID (UUID)"),
   lang: z.enum(["de", "fr", "it", "en"]).default("en").describe("Preferred language"),
@@ -27,9 +28,7 @@ export const getTenderDetailsInputShape = {
     .describe(
       "Include the complete unmodified API response as JSON at the end of the output. Verbose — only enable when the structured fields are insufficient."
     ),
-} as const;
-
-export const getTenderDetailsInputSchema = z.object(getTenderDetailsInputShape);
+});
 export type GetTenderDetailsInput = z.infer<typeof getTenderDetailsInputSchema>;
 
 /**
@@ -96,9 +95,7 @@ export async function handler(params: GetTenderDetailsInput) {
       }
     }
 
-    return {
-      content: [{ type: "text" as const, text: result }],
-    };
+    return result;
   } catch (error) {
     return toToolErrorResult(error, {
       toolName: "get_tender_details",
@@ -110,11 +107,14 @@ export async function handler(params: GetTenderDetailsInput) {
 /**
  * Registers the get_tender_details tool.
  */
-export function registerGetTenderDetails(server: McpServer): void {
-  server.tool(
-    "get_tender_details",
-    "Get detailed information about a specific tender",
-    getTenderDetailsInputShape,
+export function registerGetTenderDetails(server: FastMCP): void {
+  registerTool(
+    server,
+    {
+      name: "get_tender_details",
+      description: "Get detailed information about a specific tender",
+      input: getTenderDetailsInputSchema,
+    },
     handler
   );
 }

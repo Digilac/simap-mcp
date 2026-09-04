@@ -2,7 +2,7 @@
  * Tool registration module.
  */
 
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { FastMCP } from "@prefecthq/fastmcp-ts/server";
 
 import { registerSearchTenders } from "./search-tenders.js";
 import { registerGetTenderDetails } from "./get-tender-details.js";
@@ -12,7 +12,7 @@ import { registerOrganizationTools } from "./organizations/index.js";
 /**
  * Registers all tools on the MCP server.
  */
-export function registerTools(server: McpServer): void {
+export function registerTools(server: FastMCP): void {
   // Core tools
   registerSearchTenders(server);
   registerGetTenderDetails(server);

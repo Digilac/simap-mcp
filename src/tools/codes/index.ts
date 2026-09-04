@@ -2,7 +2,7 @@
  * Code/nomenclature tools.
  */
 
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { FastMCP } from "@prefecthq/fastmcp-ts/server";
 import { registerSearchCpvCodes } from "./search-cpv-codes.js";
 import { registerListCantons } from "./list-cantons.js";
 import { registerSearchBkpCodes } from "./search-bkp-codes.js";
@@ -16,7 +16,7 @@ import { registerBrowseOagTree } from "./browse-oag-tree.js";
 /**
  * Registers all code-related tools.
  */
-export function registerCodeTools(server: McpServer): void {
+export function registerCodeTools(server: FastMCP): void {
   // Phase 2
   registerSearchCpvCodes(server);
   registerListCantons(server);

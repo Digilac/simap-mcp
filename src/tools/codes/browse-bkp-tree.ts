@@ -3,7 +3,7 @@
  * Browse BKP (Baukostenplan) code hierarchy.
  */
 
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { FastMCP } from "@prefecthq/fastmcp-ts/server";
 import { z } from "zod";
 import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
@@ -11,20 +11,19 @@ import type { CodeEntry, CodeSearchResponse } from "../../types/api.js";
 import { CodeTreeResponseSchema } from "../../types/schemas.js";
 import { getTranslation } from "../../utils/translation.js";
 import { toToolErrorResult } from "../../utils/errors.js";
+import { registerTool } from "../../utils/register-tool.js";
 
 /**
- * Schema (raw shape) for browse_bkp_tree parameters.
+ * Schema for browse_bkp_tree parameters.
  */
-export const browseBkpTreeInputShape = {
+export const browseBkpTreeInputSchema = z.object({
   parentCode: z
     .string()
     .regex(/^[0-9]{1,3}(\.[0-9])?$/)
     .optional()
     .describe("Parent BKP code. If omitted, shows root categories"),
   lang: z.enum(["de", "fr", "it", "en"]).default("en").describe("Display language"),
-} as const;
-
-export const browseBkpTreeInputSchema = z.object(browseBkpTreeInputShape);
+});
 export type BrowseBkpTreeInput = z.infer<typeof browseBkpTreeInputSchema>;
 
 /**
@@ -54,14 +53,7 @@ async function handler(params: BrowseBkpTreeInput) {
       const message = parentCode
         ? `No BKP subcategories found for code \`${parentCode}\`.`
         : `No root BKP categories found.`;
-      return {
-        content: [
-          {
-            type: "text" as const,
-            text: message,
-          },
-        ],
-      };
+      return message;
     }
 
     let result = parentCode
@@ -79,9 +71,7 @@ async function handler(params: BrowseBkpTreeInput) {
     result += `\n*Use browse_bkp_tree with a parent code to see its subcategories.*`;
     result += `\n*Use these codes with the bkpCodes parameter of search_tenders.*`;
 
-    return {
-      content: [{ type: "text" as const, text: result }],
-    };
+    return result;
   } catch (error) {
     return toToolErrorResult(error, {
       toolName: "browse_bkp_tree",
@@ -93,11 +83,14 @@ async function handler(params: BrowseBkpTreeInput) {
 /**
  * Registers the browse_bkp_tree tool.
  */
-export function registerBrowseBkpTree(server: McpServer): void {
-  server.tool(
-    "browse_bkp_tree",
-    "Browse the BKP code hierarchy (Swiss construction cost plan)",
-    browseBkpTreeInputShape,
+export function registerBrowseBkpTree(server: FastMCP): void {
+  registerTool(
+    server,
+    {
+      name: "browse_bkp_tree",
+      description: "Browse the BKP code hierarchy (Swiss construction cost plan)",
+      input: browseBkpTreeInputSchema,
+    },
     handler
   );
 }

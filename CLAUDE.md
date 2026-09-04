@@ -8,20 +8,22 @@ MCP (Model Context Protocol) server that integrates with simap.ch, Switzerland's
 
 ## Documentation
 
-| File | Purpose |
-|------|---------|
-| [README.md](./README.md) | User documentation, installation, usage |
-| [ARCHITECTURE.md](./ARCHITECTURE.md) | Architecture, key patterns, endpoint map |
-| [CHANGELOG.md](./CHANGELOG.md) | Generated from `.changeset/*.md` by `@changesets/changelog-github` |
-| [SECURITY.md](./SECURITY.md) | Threat model, deployment guidance, debug mode |
-| [CONTRIBUTING.md](./CONTRIBUTING.md) | Contribution guidelines |
+| File                                 | Purpose                                                            |
+| ------------------------------------ | ------------------------------------------------------------------ |
+| [README.md](./README.md)             | User documentation, installation, usage                            |
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | Architecture, key patterns, endpoint map                           |
+| [CHANGELOG.md](./CHANGELOG.md)       | Generated from `.changeset/*.md` by `@changesets/changelog-github` |
+| [SECURITY.md](./SECURITY.md)         | Threat model, deployment guidance, debug mode                      |
+| [CONTRIBUTING.md](./CONTRIBUTING.md) | Contribution guidelines                                            |
 
 ## Commands
 
 ```bash
 npm run build        # Compile TypeScript (tsc)
 npm start            # Run the server
-npm run dev          # Build and run in one step
+npm run dev          # Recompile on every save (tsc --watch)
+npm run inspect      # MCP Inspector UI against dist/ (respawns the server per connection)
+npm run tools        # List tools + input schemas via the fastmcp CLI (smoke check)
 npm run lint         # Check code style
 npm run format       # Format with Prettier
 npm run format:check # Check formatting (used in CI)
@@ -64,7 +66,8 @@ src/
 │   └── schemas.ts                    # Shared Zod primitives
 └── utils/
     ├── index.ts                      # Re-exports
-    ├── errors.ts                     # toToolErrorResult()
+    ├── errors.ts                     # toToolErrorResult(), toolErrorResult()
+    ├── register-tool.ts              # registerTool() — FastMCP wrapper
     ├── translation.ts                # getTranslation() with fallback chain
     └── formatting.ts                 # Markdown formatting
 ```
@@ -73,9 +76,10 @@ Tests mirror this tree under `tests/` (see [ARCHITECTURE.md](./ARCHITECTURE.md) 
 
 ## Key Patterns
 
-- **Tool registration** — each tool exports `*InputShape` (raw Zod shape), `*InputSchema` (`z.object(shape)`), `*Input` (inferred type), and a `register*()` function. The shape is passed to `server.tool(...)`; tests import the schema directly to avoid drift.
+- **Tool registration** — the server is built on [FastMCP for TypeScript](https://github.com/PrefectHQ/fastmcp-ts) (`@prefecthq/fastmcp-ts`). Each tool exports `*InputSchema` (`z.object({...})`), `*Input` (inferred type), and a `register*()` function that takes a `FastMCP` instance and calls the shared `registerTool(server, { name, description, input: schema }, handler)` (`src/utils/register-tool.ts`) — never `server.tool()` directly. The helper advertises an input-mode JSON Schema (so `.default()` fields are not `required`) and returns validation failures as `isError` tool results with field paths instead of FastMCP's protocol errors. Handlers return Markdown strings directly (FastMCP wraps them in a text content block) or a `ToolResult` for errors — never `throw` for user-facing errors; tests import the schema directly to avoid drift.
 - **API client** — `SimapClient` (singleton `simap`) wraps `fetch`, handles URL building (via the module-level exported `buildUrl()`), timeouts, Zod response validation, and typed error mapping. It composes a `SlidingWindowRateLimiter` (default 60 req/min, FIFO-ordered, single outstanding timer).
-- **Error handling** — tool handlers route caught errors through `toToolErrorResult()` (`src/utils/errors.ts`) which distinguishes `SimapApiError` 404 / other 4xx / 5xx / network / timeout / generic. Always logs the original error to stderr first.
+- **Error handling** — tool handlers route caught errors through `toToolErrorResult()` (`src/utils/errors.ts`) which returns a FastMCP `ToolResult` (`isError: true`) and distinguishes `SimapApiError` 404 / other 4xx / 5xx / network / timeout / generic. Always logs the original error to stderr first. Application-level validation (e.g. "at least one of X/Y") uses `toolErrorResult(text)`.
+- **Transport** — stdio only. `startServer()` passes `{ transport: "stdio" }` and neutralises FastMCP's `MCP_TRANSPORT` env override (see SECURITY.md).
 - **search_tenders parameter mapping** — user→simap parameter translation lives in `src/tools/search-tenders-params.ts`, not in the handler. Defaults `publicationFrom` to today (Europe/Zurich) when no filter is provided.
 - **Debug logging** — `SIMAP_MCP_DEBUG=1` enables verbose stderr logs (URL, status, UTF-8 byte size, duration). Off by default.
 - **Translation** — `getTranslation(t, lang)` with fallback chain: requested lang → de → fr → en → it.

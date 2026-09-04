@@ -45,18 +45,20 @@ npm test
 
 ### Available Scripts
 
-| Script | Description |
-|--------|-------------|
-| `npm run build` | Compile TypeScript |
-| `npm start` | Run the built server |
-| `npm run dev` | Build + run |
-| `npm run lint` | Check code (ESLint) |
-| `npm run lint:fix` | Auto-fix lint issues |
-| `npm run format` | Format code (Prettier) |
-| `npm run format:check` | Check formatting (used in CI) |
-| `npm run typecheck` | Check types |
-| `npm test` | Run tests |
-| `npm run test:watch` | Run tests in watch mode |
+| Script                 | Description                                               |
+| ---------------------- | --------------------------------------------------------- |
+| `npm run build`        | Compile TypeScript                                        |
+| `npm start`            | Run the built server (stdio)                              |
+| `npm run dev`          | Recompile on every save (`tsc --watch`)                   |
+| `npm run inspect`      | Open the MCP Inspector UI against the current build       |
+| `npm run tools`        | List the tools + input schemas from the CLI (smoke check) |
+| `npm run lint`         | Check code (ESLint)                                       |
+| `npm run lint:fix`     | Auto-fix lint issues                                      |
+| `npm run format`       | Format code (Prettier)                                    |
+| `npm run format:check` | Check formatting (used in CI)                             |
+| `npm run typecheck`    | Check types                                               |
+| `npm test`             | Run tests                                                 |
+| `npm run test:watch`   | Run tests in watch mode                                   |
 
 ## Development Workflow
 
@@ -86,6 +88,19 @@ git checkout -b fix/my-fix
 - Follow the structure in [ARCHITECTURE.md](./ARCHITECTURE.md)
 - Write tests for your code
 - Commit regularly with clear messages
+
+The server speaks MCP over stdio, so running it alone in a terminal is not useful — it just waits for JSON-RPC on stdin. The practical loop is two terminals:
+
+```bash
+npm run dev       # terminal 1: recompiles dist/ on every save
+npm run inspect   # terminal 2: MCP Inspector UI; it respawns the server on each connection, so it always runs the latest build
+```
+
+For a quick check without the UI, `npm run tools` prints every tool with its input schema, and `fastmcp call` invokes one directly against the build:
+
+```bash
+npx fastmcp call --file dist/server.js:createServer search_cpv_codes query=software lang=fr
+```
 
 ### 4. Add a Changeset
 
@@ -130,23 +145,21 @@ touch src/tools/organizations/xxx.ts
 
 ### 2. Follow the Tool Pattern
 
-Each tool exports **three symbols** alongside the `register*()` function — the shape for `server.tool()`, the schema for tests, and the inferred input type:
+Each tool exports **two symbols** alongside the `register*()` function — the input schema and the inferred input type:
 
 ```typescript
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { FastMCP } from "@prefecthq/fastmcp-ts/server";
 import { z } from "zod";
 import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
 import { toToolErrorResult } from "../../utils/errors.js";
+import { registerTool } from "../../utils/register-tool.js";
 
-// Raw Zod shape — plain object, consumed by `server.tool()`.
-export const searchXxxInputShape = {
+// Input schema — passed as the tool `input` and used by tests via `.safeParse()`.
+export const searchXxxInputSchema = z.object({
   query: z.string().min(1).max(500).describe("Parameter description"),
   lang: z.enum(["de", "fr", "it", "en"]).default("en").describe("Search language"),
-} as const;
-
-// Wrapped schema — used by tests via `.safeParse()` to avoid drift.
-export const searchXxxInputSchema = z.object(searchXxxInputShape);
+});
 export type SearchXxxInput = z.infer<typeof searchXxxInputSchema>;
 
 async function handler(params: SearchXxxInput) {
@@ -156,10 +169,8 @@ async function handler(params: SearchXxxInput) {
       // schema: XxxResponseSchema,  // add a Zod response schema from types/schemas.ts
     });
 
-    // Format and return
-    return {
-      content: [{ type: "text" as const, text: "..." }],
-    };
+    // Format and return the Markdown text — FastMCP converts it to a text content block
+    return "...";
   } catch (error) {
     return toToolErrorResult(error, {
       toolName: "search_xxx",
@@ -168,10 +179,20 @@ async function handler(params: SearchXxxInput) {
   }
 }
 
-export function registerSearchXxx(server: McpServer): void {
-  server.tool("search_xxx", "Short description", searchXxxInputShape, handler);
+export function registerSearchXxx(server: FastMCP): void {
+  registerTool(
+    server,
+    {
+      name: "search_xxx",
+      description: "Short description",
+      input: searchXxxInputSchema,
+    },
+    handler
+  );
 }
 ```
+
+Always go through `registerTool()` rather than `server.tool()`: it advertises the JSON Schema in input mode (defaulted fields stay optional) and turns invalid arguments into an `isError` tool result with field paths (see [ARCHITECTURE.md](./ARCHITECTURE.md#tool-registration)). For user-facing errors, return `toolErrorResult(text)` / `toToolErrorResult(error, ctx)` — do not `throw`.
 
 ### 3. Register It
 
@@ -195,13 +216,13 @@ In `tests/tools/`, create a matching test file.
 
 ### Naming
 
-| Element | Convention | Example |
-|---------|------------|---------|
-| Files | kebab-case | `search-cpv.ts` |
-| Functions | camelCase | `registerSearchCpv` |
-| Classes | PascalCase | `SimapClient` |
-| Constants | UPPER_SNAKE | `SIMAP_API_BASE` |
-| MCP Tools | snake_case | `search_cpv_codes` |
+| Element   | Convention  | Example             |
+| --------- | ----------- | ------------------- |
+| Files     | kebab-case  | `search-cpv.ts`     |
+| Functions | camelCase   | `registerSearchCpv` |
+| Classes   | PascalCase  | `SimapClient`       |
+| Constants | UPPER_SNAKE | `SIMAP_API_BASE`    |
+| MCP Tools | snake_case  | `search_cpv_codes`  |
 
 ### Formatting
 
@@ -221,6 +242,7 @@ type(scope): short description
 Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`
 
 Examples:
+
 ```
 feat(tools): add search_xxx tool
 fix(api): handle timeout errors properly

@@ -3,7 +3,7 @@
  * Search CPV (Common Procurement Vocabulary) codes.
  */
 
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { FastMCP } from "@prefecthq/fastmcp-ts/server";
 import { z } from "zod";
 import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
@@ -12,16 +12,15 @@ import { CPVSearchResponseSchema } from "../../types/schemas.js";
 import { getTranslation } from "../../utils/translation.js";
 import { formatInlineCode } from "../../utils/formatting.js";
 import { toToolErrorResult } from "../../utils/errors.js";
+import { registerTool } from "../../utils/register-tool.js";
 
 /**
- * Schema (raw shape) for search_cpv_codes parameters.
+ * Schema for search_cpv_codes parameters.
  */
-export const searchCpvCodesInputShape = {
+export const searchCpvCodesInputSchema = z.object({
   query: z.string().min(1).max(500).describe("Search term (keyword or code prefix)"),
   lang: z.enum(["de", "fr", "it", "en"]).default("en").describe("Search language"),
-} as const;
-
-export const searchCpvCodesInputSchema = z.object(searchCpvCodesInputShape);
+});
 export type SearchCpvCodesInput = z.infer<typeof searchCpvCodesInputSchema>;
 
 /**
@@ -53,14 +52,7 @@ async function handler(params: SearchCpvCodesInput) {
     });
 
     if (!data.codes || data.codes.length === 0) {
-      return {
-        content: [
-          {
-            type: "text" as const,
-            text: `No CPV codes found for ${formatInlineCode(query)}.`,
-          },
-        ],
-      };
+      return `No CPV codes found for ${formatInlineCode(query)}.`;
     }
 
     // Flatten nested structure
@@ -76,9 +68,7 @@ async function handler(params: SearchCpvCodesInput) {
 
     result += `\n*Use these codes with the cpvCodes parameter of search_tenders.*`;
 
-    return {
-      content: [{ type: "text" as const, text: result }],
-    };
+    return result;
   } catch (error) {
     return toToolErrorResult(error, {
       toolName: "search_cpv_codes",
@@ -90,11 +80,15 @@ async function handler(params: SearchCpvCodesInput) {
 /**
  * Registers the search_cpv_codes tool.
  */
-export function registerSearchCpvCodes(server: McpServer): void {
-  server.tool(
-    "search_cpv_codes",
-    "Search CPV (Common Procurement Vocabulary) codes by keyword or partial code number",
-    searchCpvCodesInputShape,
+export function registerSearchCpvCodes(server: FastMCP): void {
+  registerTool(
+    server,
+    {
+      name: "search_cpv_codes",
+      description:
+        "Search CPV (Common Procurement Vocabulary) codes by keyword or partial code number",
+      input: searchCpvCodesInputSchema,
+    },
     handler
   );
 }
