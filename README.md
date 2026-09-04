@@ -33,40 +33,38 @@ Developed by [Digilac](https://www.digilac.ch/).
 
 ## Prerequisites
 
-- **Node.js ≥ 22** (LTS or newer).
-- An MCP-compatible client (Claude Code, Claude Desktop, Cursor, VS Code, Windsurf, Cline, Zed, …).
-- No simap account or API key required — the simap API is public and read-only.
+- An MCP-compatible client — **[Claude Desktop](#claude-desktop-recommended) is the easiest** if you are not a developer.
+- **Node.js ≥ 22** — *only* for clients that do not bundle it. Claude Desktop ships with its own Node.js, so there is nothing to install. For every other client, get it from [nodejs.org](https://nodejs.org/) (pick the LTS version).
+- No simap account, no API key, no payment — the simap API is public and read-only.
 
 ## Installation & Configuration
 
-The recommended way is `npx` — no global install needed. Pick your client below and copy the snippet.
+### Claude Desktop (recommended)
 
-### Claude Desktop
+1. In Claude Desktop, open **Settings → Developer → Edit Config**. This opens the folder holding `claude_desktop_config.json`:
+   - **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+   - **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+2. Open that file in a text editor and paste the block below. If the file already contains an `mcpServers` section, add only the `"simap"` entry inside it.
 
-Edit the Claude Desktop configuration file:
+   ```json
+   {
+     "mcpServers": {
+       "simap": {
+         "command": "npx",
+         "args": ["-y", "@digilac/simap-mcp"]
+       }
+     }
+   }
+   ```
 
-- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
-- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+3. Save the file, then **fully quit** Claude Desktop (macOS: ⌘Q — closing the window is not enough) and reopen it.
+4. Check it worked: the simap tools now show up under the tools icon in the message box. Ask *"List the Swiss cantons in simap"* — Claude should answer with the 26 cantons.
 
-```json
-{
-  "mcpServers": {
-    "simap": {
-      "command": "npx",
-      "args": ["-y", "@digilac/simap-mcp"]
-    }
-  }
-}
-```
+The very first launch downloads the server, which takes a few seconds. If the tools do not appear, check **Settings → Developer** for the server status and logs.
 
-Restart Claude Desktop for the change to take effect.
+### LM Studio
 
-### Other clients
-
-<details>
-<summary><b>Claude Code (CLI)</b></summary>
-
-Add to `~/.claude/settings.json`:
+LM Studio follows the same `mcp.json` notation. Open the **Program** tab in the right-hand sidebar, then **Install → Edit mcp.json**, and add:
 
 ```json
 {
@@ -79,12 +77,21 @@ Add to `~/.claude/settings.json`:
 }
 ```
 
-</details>
+> LM Studio does not bundle Node.js — install it from [nodejs.org](https://nodejs.org/) first. Tender search leans on the model's ability to chain tool calls, so results depend a lot on which local model you load.
+
+### Code editors & developer tools
 
 <details>
-<summary><b>Cursor</b></summary>
+<summary><b>Claude Code, Cursor, VS Code, Windsurf</b></summary>
 
-Global config at `~/.cursor/mcp.json` (all projects) or project-level `.cursor/mcp.json`:
+They all take the same snippet — only the file and the top-level key change:
+
+| Client | Where | Top-level key |
+| ------ | ----- | ------------- |
+| **Claude Code** | `claude mcp add simap -- npx -y @digilac/simap-mcp` | `mcpServers` |
+| **Cursor** | `~/.cursor/mcp.json` (all projects) or `.cursor/mcp.json` (one project) | `mcpServers` |
+| **VS Code** (Copilot) | `.vscode/mcp.json`, or the **MCP: Open User Configuration** command | `servers` |
+| **Windsurf** | `~/.codeium/windsurf/mcp_config.json` | `mcpServers` |
 
 ```json
 {
@@ -97,95 +104,20 @@ Global config at `~/.cursor/mcp.json` (all projects) or project-level `.cursor/m
 }
 ```
 
-Fully quit and reopen Cursor — MCP servers are only loaded at startup.
+- **Claude Code** — add `--scope user` to enable it in every project, or `--scope project` to write a `.mcp.json` shared with your team. Claude Code does **not** read `mcpServers` from `settings.json`. Verify with `claude mcp list`.
+- **VS Code** uses `servers` as the top-level key, not `mcpServers`.
+- **Cursor** loads MCP servers only at startup — quit and reopen it fully.
 
 </details>
 
 <details>
-<summary><b>VS Code (GitHub Copilot)</b></summary>
-
-Workspace config at `.vscode/mcp.json` (or open the user-level file via the **MCP: Open User Configuration** command):
-
-```json
-{
-  "servers": {
-    "simap": {
-      "command": "npx",
-      "args": ["-y", "@digilac/simap-mcp"]
-    }
-  }
-}
-```
-
-> VS Code uses `servers` as the top-level key (not `mcpServers`).
-
-</details>
-
-<details>
-<summary><b>Windsurf</b></summary>
-
-Edit `~/.codeium/windsurf/mcp_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "simap": {
-      "command": "npx",
-      "args": ["-y", "@digilac/simap-mcp"]
-    }
-  }
-}
-```
-
-</details>
-
-<details>
-<summary><b>Cline (VS Code extension)</b></summary>
-
-Open Cline's **MCP Servers** panel → **Configure** tab, then paste:
-
-```json
-{
-  "mcpServers": {
-    "simap": {
-      "command": "npx",
-      "args": ["-y", "@digilac/simap-mcp"],
-      "disabled": false
-    }
-  }
-}
-```
-
-</details>
-
-<details>
-<summary><b>Zed</b></summary>
-
-Edit the user `settings.json` (`~/.config/zed/settings.json` on macOS/Linux, `%APPDATA%\Zed\settings.json` on Windows) or a project-level `.zed/settings.json`:
-
-```json
-{
-  "context_servers": {
-    "simap": {
-      "command": "npx",
-      "args": ["-y", "@digilac/simap-mcp"]
-    }
-  }
-}
-```
-
-> Zed uses `context_servers` as the top-level key.
-
-</details>
-
-<details>
-<summary><b>Alternative: Global install</b></summary>
+<summary><b>Alternative: global install</b></summary>
 
 ```bash
 npm install -g @digilac/simap-mcp
 ```
 
-Then configure your client with the direct command:
+Then point your client at the command directly:
 
 ```json
 {
@@ -200,7 +132,7 @@ Then configure your client with the direct command:
 </details>
 
 <details>
-<summary><b>Alternative: From source</b></summary>
+<summary><b>Alternative: from source</b></summary>
 
 ```bash
 git clone https://github.com/Digilac/simap-mcp.git
@@ -209,7 +141,7 @@ npm install
 npm run build
 ```
 
-Then configure your client with the absolute path:
+Then point your client at the absolute path:
 
 ```json
 {
