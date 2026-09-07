@@ -1,8 +1,10 @@
 name: CI
 
+# Only on pull requests targeting `main`: nothing is pushed directly to
+# `main` except merges, and `release.yml` already re-runs the full
+# lint/typecheck/format/build/test suite on every push to `main`. Running
+# CI on push as well would duplicate that for no added signal.
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
 
