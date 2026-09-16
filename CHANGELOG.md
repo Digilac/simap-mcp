@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.1
+
+### Patch Changes
+
+- [#108](https://github.com/Digilac/simap-mcp/pull/108) [`43f3c75`](https://github.com/Digilac/simap-mcp/commit/43f3c7528c8cea5b718484fc5bf870b2d478ede7) Thanks [@dependabot](https://github.com/apps/dependabot)! - `@prefecthq/fastmcp-ts` and `zod` — raise the minimum supported dependency versions to 1.7.2 and 4.6.4 respectively to include upstream fixes and improvements.
+
 ## 1.4.0
 
 ### Minor Changes
