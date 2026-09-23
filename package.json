@@ -55,17 +55,17 @@
   "homepage": "https://github.com/Digilac/simap-mcp#readme",
   "dependencies": {
     "@prefecthq/fastmcp-ts": "^1.7.2",
-    "zod": "^4.6.4"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^1.0.1",
-    "@changesets/cli": "^3.0.2",
+    "@changesets/cli": "^3.0.3",
     "@eslint/js": "^10.0.1",
-    "@types/node": "^26.5.1",
-    "eslint": "^10.10.0",
-    "prettier": "^3.9.6",
+    "@types/node": "^26.6.2",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.8",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.70.0",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.1"
   }
 }
