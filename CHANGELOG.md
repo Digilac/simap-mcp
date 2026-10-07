@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.5.0
+
+### Minor Changes
+
+- [#114](https://github.com/Digilac/simap-mcp/pull/114) [`168ab0a`](https://github.com/Digilac/simap-mcp/commit/168ab0a671f0a98986660231951085fa9be971d5) Thanks [@mathieumaf](https://github.com/mathieumaf)! - `analyze_tender`: new MCP prompt that takes a simap.ch tender link and guides the model through a structured bid/no-bid analysis (scope, key dates, eligibility, award criteria, submission requirements, risks). Users only paste the link from their browser; the project ID and language are read from it, and a project number or title also works (the model then finds the project with `search_tenders`).
+
+- [#114](https://github.com/Digilac/simap-mcp/pull/114) [`168ab0a`](https://github.com/Digilac/simap-mcp/commit/168ab0a671f0a98986660231951085fa9be971d5) Thanks [@mathieumaf](https://github.com/mathieumaf)! - `get_tender_details`: `publicationId` is now optional. Without it, the tool loads the project's latest publication, so a tender can be opened from its simap.ch link, which only contains the project ID. The output now also shows the latest publication's ID, which `get_publication_history` needs.
+
+### Patch Changes
+
+- [#115](https://github.com/Digilac/simap-mcp/pull/115) [`d6a3c59`](https://github.com/Digilac/simap-mcp/commit/d6a3c597cb959986980e1427d27a74d1811e7418) Thanks [@mathieumaf](https://github.com/mathieumaf)! - `get_tender_details`: fix empty titles and missing dates in the "General Information" section. The project header schema read `title`, `lotTitle` and `publicationDate`, but simap returns the titles on the latest publication and on each lot (`title`) and the dates under `dates.publicationDate`, so the project title and lot titles were blank and dates showed `N/A` or `undefined`.
+
 ## 1.4.1
 
 ### Patch Changes
