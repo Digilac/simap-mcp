@@ -133,6 +133,9 @@ export function formatProjectHeader(
     result += `- **Date:** ${pub.publicationDate || "N/A"}\n`;
     result += `- **Number:** ${pub.publicationNumber || "N/A"}\n`;
     result += `- **Type:** ${pub.pubType || "N/A"}\n`;
+    if (pub.id) {
+      result += `- **Publication ID:** ${pub.id}\n`;
+    }
   }
 
   if (header.lots && header.lots.length > 0) {
@@ -141,6 +144,9 @@ export function formatProjectHeader(
       result += `\n#### Lot ${lot.lotNumber}: ${getTranslation(lot.lotTitle, lang)}\n`;
       if (lot.latestPublication) {
         result += `- Publication: ${lot.latestPublication.publicationNumber} (${lot.latestPublication.publicationDate})\n`;
+        if (lot.latestPublication.id) {
+          result += `- Publication ID: ${lot.latestPublication.id}\n`;
+        }
       }
     }
   }

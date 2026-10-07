@@ -3,12 +3,14 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { ToolResult } from "@prefecthq/fastmcp-ts/server";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import {
   getTenderDetailsInputSchema as schema,
   handler,
+  resolveLatestPublicationId,
 } from "../../src/tools/get-tender-details.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -39,12 +41,14 @@ const PROJECT_ID = "31367328-20d0-4786-acab-f0858c46dc82";
 const PUBLICATION_ID = "14ae742d-ab60-4553-9b1e-9d1320fe18f7";
 
 describe("get_tender_details schema validation", () => {
-  it("should accept the minimal required input", () => {
-    const result = schema.safeParse({
-      projectId: PROJECT_ID,
-      publicationId: PUBLICATION_ID,
-    });
+  it("should accept the minimal required input (projectId only)", () => {
+    const result = schema.safeParse({ projectId: PROJECT_ID });
     expect(result.success).toBe(true);
+  });
+
+  it("should reject a non-UUID publicationId", () => {
+    const result = schema.safeParse({ projectId: PROJECT_ID, publicationId: "nope" });
+    expect(result.success).toBe(false);
   });
 
   it("should reject a non-UUID projectId", () => {
@@ -155,5 +159,96 @@ describe("get_tender_details handler — fixture-driven", () => {
     for (const key of Object.keys(tender as Record<string, unknown>)) {
       expect(text).toContain(`"${key}"`);
     }
+  });
+});
+
+describe("get_tender_details handler — without publicationId", () => {
+  const tender = loadFixtureRaw("publication-details-tender.json");
+  const header = {
+    projectNumber: "15744",
+    title: { de: "Aussengestaltung", en: null, fr: null, it: null },
+    latestPublication: {
+      id: PUBLICATION_ID,
+      publicationNumber: "15744-01",
+      publicationDate: "2026-02-01",
+      pubType: "tender",
+    },
+    lots: [],
+  };
+
+  beforeEach(() => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  function stubFetch(headerBody: unknown, headerStatus = 200): ReturnType<typeof vi.fn> {
+    const fetchMock = vi.fn(async (input: string | URL) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.includes("/publication-details/")) return jsonResponse(tender);
+      if (url.includes("/project-header")) return jsonResponse(headerBody, headerStatus);
+      return jsonResponse({ error: "unexpected" }, 500);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    return fetchMock;
+  }
+
+  it("loads the latest publication from the project header", async () => {
+    const fetchMock = stubFetch(header);
+
+    const text = await handler({ projectId: PROJECT_ID, lang: "fr", fullRaw: false });
+
+    const urls = fetchMock.mock.calls.map(([input]) => String(input));
+    expect(urls.some((u) => u.includes(`/publication-details/${PUBLICATION_ID}`))).toBe(true);
+    expect(text).toContain(`**Publication ID:** ${PUBLICATION_ID}`);
+    expect(text).toContain("48000000");
+  });
+
+  it("returns an isError result when the project has no publication", async () => {
+    stubFetch({ ...header, latestPublication: null });
+
+    const result = await handler({ projectId: PROJECT_ID, lang: "en", fullRaw: false });
+
+    expect(result).toBeInstanceOf(ToolResult);
+    expect((result as ToolResult).result.isError).toBe(true);
+    expect(JSON.stringify((result as ToolResult).result.content)).toContain("no publication yet");
+  });
+
+  it("returns a not-found error when the project does not exist", async () => {
+    stubFetch({ error: "not found" }, 404);
+
+    const result = await handler({ projectId: PROJECT_ID, lang: "en", fullRaw: false });
+
+    expect(result).toBeInstanceOf(ToolResult);
+    expect((result as ToolResult).result.isError).toBe(true);
+    expect(JSON.stringify((result as ToolResult).result.content)).toMatch(/not found/i);
+  });
+});
+
+describe("resolveLatestPublicationId", () => {
+  it("uses the project-level latest publication when present", () => {
+    expect(resolveLatestPublicationId({ latestPublication: { id: "project-pub" } })).toBe(
+      "project-pub"
+    );
+  });
+
+  it("falls back to the most recent lot publication for projects with lots", () => {
+    expect(
+      resolveLatestPublicationId({
+        latestPublication: null,
+        lots: [
+          { lotNumber: 1, latestPublication: { id: "old", dates: { publicationDate: "2026-09-01" } } },
+          { lotNumber: 2, latestPublication: { id: "new", dates: { publicationDate: "2026-10-06" } } },
+          { lotNumber: 3, latestPublication: null },
+        ],
+      })
+    ).toBe("new");
+  });
+
+  it("returns undefined when neither the project nor its lots have a publication", () => {
+    expect(resolveLatestPublicationId({ latestPublication: null, lots: [] })).toBeUndefined();
   });
 });

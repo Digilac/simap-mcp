@@ -79,6 +79,7 @@ export interface ProjectHeader {
   projectSubType?: string | null;
   processType?: string | null;
   latestPublication?: {
+    id?: string | null;
     publicationDate?: string | null;
     publicationNumber?: string | null;
     pubType?: string | null;
@@ -87,8 +88,10 @@ export interface ProjectHeader {
     lotNumber: number;
     lotTitle?: Translation | null;
     latestPublication?: {
+      id?: string | null;
       publicationNumber?: string | null;
       publicationDate?: string | null;
+      dates?: { publicationDate?: string | null } | null;
     } | null;
   }> | null;
 }
