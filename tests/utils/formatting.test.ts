@@ -10,10 +10,11 @@ import {
   buildSimapUrl,
   escapeInlineCode,
   formatInlineCode,
+  formatProjectHeader,
   formatPublicationDetails,
 } from "../../src/utils/formatting.js";
-import { PublicationDetailsSchema } from "../../src/types/schemas.js";
-import type { PublicationDetails } from "../../src/types/api.js";
+import { ProjectHeaderSchema, PublicationDetailsSchema } from "../../src/types/schemas.js";
+import type { ProjectHeader, PublicationDetails } from "../../src/types/api.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FIXTURES_DIR = resolve(__dirname, "../fixtures");
@@ -244,5 +245,41 @@ describe("formatPublicationDetails — edge cases", () => {
     expect(output).toContain("Q&A Rounds");
     expect(output).toContain("https://example.com/qa");
     expect(output).not.toContain("(no date)");
+  });
+});
+
+describe("formatProjectHeader", () => {
+  function loadHeader(name: string): ProjectHeader {
+    return ProjectHeaderSchema.parse(
+      JSON.parse(readFileSync(resolve(__dirname, "../fixtures", name), "utf-8"))
+    );
+  }
+
+  it("shows the title and date of the latest publication (project without lots)", () => {
+    const output = formatProjectHeader(loadHeader("project-header-without-lots.json"), "de");
+    expect(output).toContain(
+      "- **Title:** Aussengestaltung Gletsch / BKP 411 Baumeisterarbeiten"
+    );
+    expect(output).toContain("- **Date:** 2026-10-07");
+    expect(output).not.toContain("N/A");
+  });
+
+  it("shows lot titles and dates, and takes the project title from a lot (project with lots)", () => {
+    const output = formatProjectHeader(loadHeader("project-header-with-lots.json"), "fr");
+    expect(output).toContain("- **Title:** MP 2025.04.774 - Profil sécurité système information");
+    expect(output).toContain("#### Lot 1: Consultant en gouvernance de la sécurité SI");
+    expect(output).toContain("#### Lot 2: Chef de projet en sécurité SI");
+    expect(output).toContain("- Publication: 35033-02 (2026-10-06)");
+    expect(output).not.toContain("undefined");
+  });
+
+  it("falls back to N/A when titles and dates are missing", () => {
+    const output = formatProjectHeader(
+      { lots: [{ lotNumber: 1, latestPublication: { publicationNumber: "1-01" } }] },
+      "en"
+    );
+    expect(output).toContain("- **Title:** N/A");
+    expect(output).toContain("#### Lot 1: N/A");
+    expect(output).toContain("- Publication: 1-01 (N/A)");
   });
 });

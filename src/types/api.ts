@@ -73,26 +73,23 @@ export interface ProjectsSearchResponse {
 /**
  * Project header information.
  */
+export interface ProjectHeaderPublication {
+  id?: string | null;
+  title?: Translation | null;
+  publicationNumber?: string | null;
+  pubType?: string | null;
+  dates?: { publicationDate?: string | null } | null;
+}
+
 export interface ProjectHeader {
   projectNumber?: string | null;
-  title?: Translation | null;
   projectSubType?: string | null;
   processType?: string | null;
-  latestPublication?: {
-    id?: string | null;
-    publicationDate?: string | null;
-    publicationNumber?: string | null;
-    pubType?: string | null;
-  } | null;
+  latestPublication?: ProjectHeaderPublication | null;
   lots?: Array<{
     lotNumber: number;
-    lotTitle?: Translation | null;
-    latestPublication?: {
-      id?: string | null;
-      publicationNumber?: string | null;
-      publicationDate?: string | null;
-      dates?: { publicationDate?: string | null } | null;
-    } | null;
+    title?: Translation | null;
+    latestPublication?: ProjectHeaderPublication | null;
   }> | null;
 }
 

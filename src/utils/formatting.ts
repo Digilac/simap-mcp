@@ -123,14 +123,19 @@ export function formatProjectHeader(
     result += `- **simap Link:** ${buildSimapUrl(projectId, lang)}\n`;
   }
   result += `- **Project Number:** ${header.projectNumber || "N/A"}\n`;
-  result += `- **Title:** ${getTranslation(header.title, lang)}\n`;
+  // Projects with lots have no project-level publication: fall back to the
+  // first lot's publication title.
+  const title =
+    header.latestPublication?.title ??
+    header.lots?.find((lot) => lot.latestPublication?.title)?.latestPublication?.title;
+  result += `- **Title:** ${getTranslation(title, lang) || "N/A"}\n`;
   result += `- **Type:** ${header.projectSubType || "N/A"}\n`;
   result += `- **Process:** ${header.processType || "N/A"}\n`;
 
   if (header.latestPublication) {
     const pub = header.latestPublication;
     result += `\n### Latest Publication\n`;
-    result += `- **Date:** ${pub.publicationDate || "N/A"}\n`;
+    result += `- **Date:** ${pub.dates?.publicationDate || "N/A"}\n`;
     result += `- **Number:** ${pub.publicationNumber || "N/A"}\n`;
     result += `- **Type:** ${pub.pubType || "N/A"}\n`;
     if (pub.id) {
@@ -141,11 +146,12 @@ export function formatProjectHeader(
   if (header.lots && header.lots.length > 0) {
     result += `\n### Lots (${header.lots.length})\n`;
     for (const lot of header.lots) {
-      result += `\n#### Lot ${lot.lotNumber}: ${getTranslation(lot.lotTitle, lang)}\n`;
+      result += `\n#### Lot ${lot.lotNumber}: ${getTranslation(lot.title, lang) || "N/A"}\n`;
       if (lot.latestPublication) {
-        result += `- Publication: ${lot.latestPublication.publicationNumber} (${lot.latestPublication.publicationDate})\n`;
-        if (lot.latestPublication.id) {
-          result += `- Publication ID: ${lot.latestPublication.id}\n`;
+        const pub = lot.latestPublication;
+        result += `- Publication: ${pub.publicationNumber || "N/A"} (${pub.dates?.publicationDate || "N/A"})\n`;
+        if (pub.id) {
+          result += `- Publication ID: ${pub.id}\n`;
         }
       }
     }
