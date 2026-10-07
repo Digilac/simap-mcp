@@ -67,7 +67,7 @@ export function resolveLatestPublicationId(header: ProjectHeader): string | unde
     .filter((pub): pub is NonNullable<typeof pub> & { id: string } => Boolean(pub?.id))
     .map((pub) => ({
       id: pub.id,
-      date: pub.dates?.publicationDate ?? pub.publicationDate ?? "",
+      date: pub.dates?.publicationDate ?? "",
     }));
 
   // ISO dates sort lexicographically; latest first.

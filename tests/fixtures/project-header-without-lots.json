@@ -1,0 +1,47 @@
+{
+    "projectNumber": "15744",
+    "projectType": "tender",
+    "projectSubType": "construction",
+    "processType": "open",
+    "lotsType": "without",
+    "id": "bc4a52ee-2a33-40fb-912f-d4863b9285bf",
+    "actions": {
+        "projectOther": [
+            "share"
+        ],
+        "withoutLots": {
+            "other": [
+                "pdf_export"
+            ],
+            "primary": null,
+            "secondary": null
+        },
+        "lots": null
+    },
+    "orderType": "construction",
+    "studyType": null,
+    "competitionType": null,
+    "lots": [],
+    "latestPublication": {
+        "projectType": "tender",
+        "projectSubType": "construction",
+        "processType": "open",
+        "publicationNumber": "15744-02",
+        "pubType": "abandonment",
+        "corrected": false,
+        "id": "e7a0bb01-6add-4d55-8076-99b4d542ec97",
+        "dates": {
+            "publicationDate": "2026-10-07",
+            "pubType": "abandonment"
+        },
+        "hasProjectDocuments": false,
+        "title": {
+            "de": "Aussengestaltung Gletsch / BKP 411 Baumeisterarbeiten",
+            "en": null,
+            "fr": null,
+            "it": null
+        }
+    },
+    "latestVendorDigitalSubmission": null,
+    "vendorStatus": null
+}

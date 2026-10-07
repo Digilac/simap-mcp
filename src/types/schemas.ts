@@ -124,32 +124,28 @@ export const ProjectsSearchResponseSchema = z.object({
 
 // --- Project header schemas ---
 
+// The project header has no project-level title or flat publication date:
+// titles live on each publication (`latestPublication.title`) and on each lot
+// (`lots[].title`), and dates are nested under `dates.publicationDate`.
+const HeaderPublicationSchema = z.object({
+  id: z.string().nullish(),
+  title: TranslationSchema.nullish(),
+  publicationNumber: z.string().nullish(),
+  pubType: z.string().nullish(),
+  dates: z.object({ publicationDate: z.string().nullish() }).nullish(),
+});
+
 export const ProjectHeaderSchema = z.object({
   projectNumber: z.string().nullish(),
-  title: TranslationSchema.nullish(),
   projectSubType: z.string().nullish(),
   processType: z.string().nullish(),
-  latestPublication: z
-    .object({
-      id: z.string().nullish(),
-      publicationDate: z.string().nullish(),
-      publicationNumber: z.string().nullish(),
-      pubType: z.string().nullish(),
-    })
-    .nullish(),
+  latestPublication: HeaderPublicationSchema.nullish(),
   lots: z
     .array(
       z.object({
         lotNumber: z.number(),
-        lotTitle: TranslationSchema.nullish(),
-        latestPublication: z
-          .object({
-            id: z.string().nullish(),
-            publicationNumber: z.string().nullish(),
-            publicationDate: z.string().nullish(),
-            dates: z.object({ publicationDate: z.string().nullish() }).nullish(),
-          })
-          .nullish(),
+        title: TranslationSchema.nullish(),
+        latestPublication: HeaderPublicationSchema.nullish(),
       })
     )
     .nullish(),

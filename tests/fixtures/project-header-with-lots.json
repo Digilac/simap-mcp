@@ -1,0 +1,141 @@
+{
+    "projectNumber": "35033",
+    "projectType": "tender",
+    "projectSubType": "service",
+    "processType": "open",
+    "lotsType": "with",
+    "id": "190af559-edf4-4d46-937d-d8b424a75aab",
+    "actions": {
+        "projectOther": [
+            "share"
+        ],
+        "withoutLots": null,
+        "lots": {
+            "25b14e31-5fa8-4bd1-93f8-4135bb48a3ca": {
+                "other": [
+                    "pdf_export"
+                ],
+                "primary": null,
+                "secondary": null
+            },
+            "90437dba-0bee-4c7e-bc96-c55315e62204": {
+                "other": [
+                    "pdf_export"
+                ],
+                "primary": null,
+                "secondary": null
+            },
+            "c6c63961-1f96-4d1b-aac2-ce61635430fc": {
+                "other": [
+                    "pdf_export"
+                ],
+                "primary": null,
+                "secondary": null
+            }
+        }
+    },
+    "orderType": "service",
+    "studyType": null,
+    "competitionType": null,
+    "lots": [
+        {
+            "id": "25b14e31-5fa8-4bd1-93f8-4135bb48a3ca",
+            "lotNumber": 1,
+            "title": {
+                "de": null,
+                "en": null,
+                "fr": "Consultant en gouvernance de la sécurité SI",
+                "it": null
+            },
+            "projectSubType": "service",
+            "latestPublication": {
+                "projectType": "tender",
+                "projectSubType": "service",
+                "processType": "open",
+                "publicationNumber": "35033-02",
+                "pubType": "abandonment",
+                "corrected": false,
+                "id": "2929f5fb-8cd5-4e84-be3d-34ae5efaebeb",
+                "dates": {
+                    "publicationDate": "2026-10-06",
+                    "pubType": "abandonment"
+                },
+                "hasProjectDocuments": false,
+                "title": {
+                    "de": null,
+                    "en": null,
+                    "fr": "MP 2025.04.774 - Profil sécurité système information",
+                    "it": null
+                }
+            },
+            "latestVendorDigitalSubmission": null
+        },
+        {
+            "id": "90437dba-0bee-4c7e-bc96-c55315e62204",
+            "lotNumber": 2,
+            "title": {
+                "de": null,
+                "en": null,
+                "fr": "Chef de projet en sécurité SI",
+                "it": null
+            },
+            "projectSubType": "service",
+            "latestPublication": {
+                "projectType": "tender",
+                "projectSubType": "service",
+                "processType": "open",
+                "publicationNumber": "35033-02",
+                "pubType": "abandonment",
+                "corrected": false,
+                "id": "2929f5fb-8cd5-4e84-be3d-34ae5efaebeb",
+                "dates": {
+                    "publicationDate": "2026-10-06",
+                    "pubType": "abandonment"
+                },
+                "hasProjectDocuments": false,
+                "title": {
+                    "de": null,
+                    "en": null,
+                    "fr": "MP 2025.04.774 - Profil sécurité système information",
+                    "it": null
+                }
+            },
+            "latestVendorDigitalSubmission": null
+        },
+        {
+            "id": "c6c63961-1f96-4d1b-aac2-ce61635430fc",
+            "lotNumber": 3,
+            "title": {
+                "de": null,
+                "en": null,
+                "fr": "Consultant en implémentation de la sécurité SI",
+                "it": null
+            },
+            "projectSubType": "service",
+            "latestPublication": {
+                "projectType": "tender",
+                "projectSubType": "service",
+                "processType": "open",
+                "publicationNumber": "35033-02",
+                "pubType": "abandonment",
+                "corrected": false,
+                "id": "2929f5fb-8cd5-4e84-be3d-34ae5efaebeb",
+                "dates": {
+                    "publicationDate": "2026-10-06",
+                    "pubType": "abandonment"
+                },
+                "hasProjectDocuments": false,
+                "title": {
+                    "de": null,
+                    "en": null,
+                    "fr": "MP 2025.04.774 - Profil sécurité système information",
+                    "it": null
+                }
+            },
+            "latestVendorDigitalSubmission": null
+        }
+    ],
+    "latestPublication": null,
+    "latestVendorDigitalSubmission": null,
+    "vendorStatus": null
+}
