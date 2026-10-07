@@ -8,6 +8,7 @@
 import { FastMCP } from "@prefecthq/fastmcp-ts/server";
 import { createRequire } from "node:module";
 import { registerTools } from "./tools/index.js";
+import { registerPrompts } from "./prompts/index.js";
 
 const require = createRequire(import.meta.url);
 const { version } = require("../package.json") as { version: string };
@@ -22,6 +23,7 @@ export function createServer(): FastMCP {
   });
 
   registerTools(server);
+  registerPrompts(server);
 
   return server;
 }

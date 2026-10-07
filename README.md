@@ -31,6 +31,10 @@ Developed by [Digilac](https://www.digilac.ch/).
 | `search_oag_codes` | Search OAG codes (object types) |
 | `browse_oag_tree` | Navigate OAG code hierarchy |
 
+| Prompt | Description |
+|--------|-------------|
+| `analyze_tender` | Structured bid/no-bid analysis of a tender (scope, deadlines, eligibility, award criteria, risks) |
+
 ## Prerequisites
 
 - An MCP-compatible client — **[Claude Desktop](#claude-desktop-recommended) is the easiest** if you are not a developer.
@@ -164,6 +168,8 @@ Once configured, just ask your AI assistant in natural language. Mention "in sim
 - *"Find construction tenders in canton Vaud in simap"*
 - *"Give me the details of this tender in simap"* (after a search)
 - *"Search CPV codes for IT services in simap"*
+
+Clients that support MCP prompts also expose `analyze_tender`: in Claude Code, run `/mcp__simap__analyze_tender <simap.ch link>`; in Claude Desktop, pick it from the "+" menu and paste the tender's link.
 
 ## Listed on
 

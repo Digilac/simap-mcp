@@ -65,7 +65,7 @@ describe("simap MCP server (FastMCP)", () => {
     );
     expect(required).toMatchObject({
       search_tenders: [],
-      get_tender_details: ["projectId", "publicationId"],
+      get_tender_details: ["projectId"],
       search_cpv_codes: ["query"],
       search_bkp_codes: ["query"],
       search_npk_codes: ["query"],
@@ -118,5 +118,28 @@ describe("simap MCP server (FastMCP)", () => {
     expect((result.content[0] as { text: string }).text).toContain(
       "Please provide at least one parameter"
     );
+  });
+
+  it("exposes the analyze_tender prompt with its arguments", async () => {
+    const prompts = await client.listPrompts();
+    expect(prompts.map((p) => p.name)).toEqual(["analyze_tender"]);
+    expect(prompts[0].arguments).toEqual([
+      expect.objectContaining({ name: "url", required: true }),
+    ]);
+  });
+
+  it("renders analyze_tender from a simap.ch link as a single user message", async () => {
+    const result = await client.getPrompt("analyze_tender", {
+      url: "https://www.simap.ch/fr/project-detail/11111111-1111-4111-8111-111111111111",
+    });
+    expect(result.messages).toHaveLength(1);
+    expect(result.messages[0].role).toBe("user");
+    const text = (result.messages[0].content as { text: string }).text;
+    expect(text).toContain('projectId: "11111111-1111-4111-8111-111111111111"');
+    expect(text).toContain('lang: "fr"');
+  });
+
+  it("rejects analyze_tender calls without a url", async () => {
+    await expect(client.getPrompt("analyze_tender", {})).rejects.toThrow(/url/);
   });
 });

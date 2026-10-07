@@ -8,6 +8,7 @@ Claude / AI Assistant (MCP Client)
         ▼
 simap-mcp Server (FastMCP)
   ├── tools/               → 14 tools exposed to the client
+  ├── prompts/             → 1 prompt template (analyze_tender)
   ├── api/client.ts        → centralized HTTP client
   ├── api/rate-limiter.ts  → sliding-window rate limiter (FIFO)
   └── utils/               → translation, formatting, error mapping
@@ -53,6 +54,10 @@ src/
 │       ├── search-proc-offices.ts
 │       └── get-publication-history.ts
 │
+├── prompts/
+│   ├── index.ts                  # registerPrompts() — registers all prompts
+│   └── analyze-tender.ts         # analyze_tender
+│
 ├── types/
 │   ├── index.ts                  # Re-exports
 │   ├── api.ts                    # API response types (SimapApiError, ProjectSearchEntry, etc.)
@@ -97,7 +102,13 @@ export function registerSearchTenders(server: FastMCP): void {
 
 Tools are grouped by domain (`codes/`, `organizations/`) with an `index.ts` that registers the group. Handlers return the Markdown text directly — FastMCP converts it into a text content block — or a `ToolResult` for error results (`toolErrorResult(text)` / `toToolErrorResult(error, ctx)`). Never `throw` from a handler to signal a user-facing error.
 
-`tests/server.test.ts` drives the real server through FastMCP's in-process `Client` and pins the 14 tool names, the `required` lists, and the validation-error shape.
+`tests/server.test.ts` drives the real server through FastMCP's in-process `Client` and pins the 14 tool names, the `required` lists, the validation-error shape, and the prompt list.
+
+### Prompt Registration
+
+Prompts are user-selected message templates (exposed as slash commands in Claude Code, and in the attachment menu in Claude Desktop). Each prompt file exports an args schema, a pure `build*Prompt()` function and a `register*` function that calls `server.prompt()` directly; `src/prompts/index.ts` registers them all.
+
+Prompts only produce instructions — the model then calls the existing tools (e.g. `analyze_tender` drives `get_tender_details` and `get_publication_history`), so no API logic lives in `prompts/`. MCP prompt arguments are always strings and prompts have no `isError` result: the handler validates them with Zod and throws an error naming each invalid argument, which reaches the client as a protocol error.
 
 ### API Client
 
@@ -248,7 +259,7 @@ AG, AI, AR, BE, BL, BS, FR, GE, GL, GR, JU, LU, NE, NW, OW, SG, SH, SO, SZ, TG, 
 | Parameter       | Type    | Description                                                     |
 | --------------- | ------- | --------------------------------------------------------------- |
 | `projectId`     | uuid    | Project ID                                                      |
-| `publicationId` | uuid    | Publication ID                                                  |
+| `publicationId` | uuid    | Publication ID (optional — defaults to the latest publication)  |
 | `lang`          | string  | Preferred language                                              |
 | `fullRaw`       | boolean | Append the full unmodified API response JSON (default: `false`) |
 
@@ -308,6 +319,19 @@ No parameters required.
 | --------------- | ------ | --------------------------------------- |
 | `search`        | string | Name to search (min 3 characters)       |
 | `institutionId` | uuid   | Filter by parent institution (optional) |
+
+</details>
+
+## Prompts Reference
+
+<details>
+<summary><code>analyze_tender</code> — Structured bid/no-bid analysis of a tender</summary>
+
+| Argument | Required | Description                                                                                                       |
+| -------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
+| `url`    | yes      | simap.ch link to the tender (`https://www.simap.ch/fr/project-detail/<projectId>`), or its project number / title |
+
+`parseTenderReference()` extracts the project ID and the language (`/fr/`, `/de/`…, default `en`) from the link, so users never handle UUIDs. When the input contains no project ID, the prompt asks the model to find the project with `search_tenders` first. The model then calls `get_tender_details` (without `publicationId`, so the latest publication is loaded) and `get_publication_history`, then write an eight-section analysis: overview, scope, key dates, eligibility, award criteria, submission requirements, risks, and a bid/no-bid summary.
 
 </details>
 

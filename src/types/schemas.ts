@@ -131,6 +131,7 @@ export const ProjectHeaderSchema = z.object({
   processType: z.string().nullish(),
   latestPublication: z
     .object({
+      id: z.string().nullish(),
       publicationDate: z.string().nullish(),
       publicationNumber: z.string().nullish(),
       pubType: z.string().nullish(),
@@ -143,8 +144,10 @@ export const ProjectHeaderSchema = z.object({
         lotTitle: TranslationSchema.nullish(),
         latestPublication: z
           .object({
+            id: z.string().nullish(),
             publicationNumber: z.string().nullish(),
             publicationDate: z.string().nullish(),
+            dates: z.object({ publicationDate: z.string().nullish() }).nullish(),
           })
           .nullish(),
       })

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-MCP (Model Context Protocol) server that integrates with simap.ch, Switzerland's public procurement platform. Exposes 14 tools for searching and retrieving tender information, nomenclature codes (CPV/BKP/NPK/OAG), and organization data.
+MCP (Model Context Protocol) server that integrates with simap.ch, Switzerland's public procurement platform. Exposes 14 tools and 1 prompt (`analyze_tender`) for searching and retrieving tender information, nomenclature codes (CPV/BKP/NPK/OAG), and organization data.
 
 ## Documentation
 
@@ -58,6 +58,9 @@ src/
 │       ├── list-institutions.ts
 │       ├── search-proc-offices.ts
 │       └── get-publication-history.ts
+├── prompts/
+│   ├── index.ts                      # registerPrompts()
+│   └── analyze-tender.ts             # analyze_tender
 ├── types/
 │   ├── index.ts                      # Re-exports
 │   ├── api.ts                        # API response types (SimapApiError, ...)
@@ -77,6 +80,7 @@ Tests mirror this tree under `tests/` (see [ARCHITECTURE.md](./ARCHITECTURE.md) 
 ## Key Patterns
 
 - **Tool registration** — the server is built on [FastMCP for TypeScript](https://github.com/PrefectHQ/fastmcp-ts) (`@prefecthq/fastmcp-ts`). Each tool exports `*InputSchema` (`z.object({...})`), `*Input` (inferred type), and a `register*()` function that takes a `FastMCP` instance and calls the shared `registerTool(server, { name, description, input: schema }, handler)` (`src/utils/register-tool.ts`) — never `server.tool()` directly. The helper advertises an input-mode JSON Schema (so `.default()` fields are not `required`) and returns validation failures as `isError` tool results with field paths instead of FastMCP's protocol errors. Handlers return Markdown strings directly (FastMCP wraps them in a text content block) or a `ToolResult` for errors — never `throw` for user-facing errors; tests import the schema directly to avoid drift.
+- **Prompts** — each prompt in `src/prompts/` exports an args schema, a pure `build*Prompt()` and a `register*()` that calls `server.prompt()`. Prompts only emit instructions that drive the existing tools; invalid args are thrown (prompts have no `isError` result).
 - **API client** — `SimapClient` (singleton `simap`) wraps `fetch`, handles URL building (via the module-level exported `buildUrl()`), timeouts, Zod response validation, and typed error mapping. It composes a `SlidingWindowRateLimiter` (default 60 req/min, FIFO-ordered, single outstanding timer).
 - **Error handling** — tool handlers route caught errors through `toToolErrorResult()` (`src/utils/errors.ts`) which returns a FastMCP `ToolResult` (`isError: true`) and distinguishes `SimapApiError` 404 / other 4xx / 5xx / network / timeout / generic. Always logs the original error to stderr first. Application-level validation (e.g. "at least one of X/Y") uses `toolErrorResult(text)`.
 - **Transport** — stdio only. `startServer()` passes `{ transport: "stdio" }` and neutralises FastMCP's `MCP_TRANSPORT` env override (see SECURITY.md).
