@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.5.1
+
+### Patch Changes
+
+- [#120](https://github.com/Digilac/simap-mcp/pull/120) [`4d99741`](https://github.com/Digilac/simap-mcp/commit/4d99741f2ad26204c7c98709da2cea72ea999c0e) Thanks [@mathieumaf](https://github.com/mathieumaf)! - - `@prefecthq/fastmcp-ts`: bump to `^1.8.1` so installs resolve `@modelcontextprotocol/server` / `server-legacy` `>=2.3.1` and `hono` `>=4.13.11`, clearing the GHSA-jm63-cq47-j5jp, GHSA-46jr-4wx8-v453, GHSA-rvq5-wwqv-78pq and GHSA-5r4p-p66f-jhc7 advisories (HTTP-transport only; this server runs on stdio, so not exploitable here, but `npm audit` flagged them).
+
 ## 1.5.0
 
 ### Minor Changes
