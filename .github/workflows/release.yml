@@ -118,6 +118,11 @@ jobs:
 
       - name: Install cosign
         uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+        with:
+          # The action defaults to cosign v3.0.6, which is affected by
+          # GHSA-fx35-mq7g-6g98 (identity checks bypassed via a legacy bundle).
+          # Fixed in v3.1.3 — bump manually, Dependabot does not track it.
+          cosign-release: "v3.1.4"
 
       - name: Install mcp-publisher
         shell: bash
