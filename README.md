@@ -171,6 +171,12 @@ Once configured, just ask your AI assistant in natural language. Mention "in sim
 
 Clients that support MCP prompts also expose `analyze_tender`: in Claude Code, run `/mcp__simap__analyze_tender <simap.ch link>`; in Claude Desktop, pick it from the "+" menu and paste the tender's link.
 
+### Network behaviour
+
+- **Rate limit**: requests to simap.ch are throttled to 60 per minute; extra calls wait their turn instead of failing.
+- **Caching**: reference data (cantons, institutions, CPV/BKP/NPK/OAG codes) is cached in memory for 24 hours, so repeated lookups are instant and don't use up the rate limit. Tenders and organization lookups are always fetched live. The cache is cleared when the server restarts.
+- **Retries**: transient simap failures (HTTP 408 / 429 / 5xx, network errors) are retried up to 2 times with exponential backoff, honouring `Retry-After`.
+
 ## Listed on
 
 * [Official MCP Registry](https://registry.modelcontextprotocol.io/?q=io.github.Digilac%2Fsimap-mcp)
