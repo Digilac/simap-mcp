@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.6.0
+
+### Minor Changes
+
+- [#130](https://github.com/Digilac/simap-mcp/pull/130) [`dc7eba3`](https://github.com/Digilac/simap-mcp/commit/dc7eba3bc0c95685ba25dd8fb2d834196ecfd18c) Thanks [@mathieumaf](https://github.com/mathieumaf)! - All 14 tools now advertise a human-readable `title` and MCP tool annotations (`readOnlyHint: true`, `destructiveHint: false`, `idempotentHint: true`, `openWorldHint: true`) via `registerTool()`. MCP clients can show friendlier tool names and let users auto-approve these read-only calls instead of confirming each one.
+
+- [#131](https://github.com/Digilac/simap-mcp/pull/131) [`3edd454`](https://github.com/Digilac/simap-mcp/commit/3edd454d4fd5ffd52f6070eb4f181d672496279e) Thanks [@mathieumaf](https://github.com/mathieumaf)! - `SimapClient`: retry transient simap failures (HTTP 408 / 429 / 5xx and network errors) up to 2 times with exponential backoff and jitter, honouring `Retry-After`, so a brief simap hiccup no longer surfaces as a tool error. Client errors, invalid responses and timeouts still fail immediately.
+
+### Patch Changes
+
+- [#132](https://github.com/Digilac/simap-mcp/pull/132) [`d66011d`](https://github.com/Digilac/simap-mcp/commit/d66011dfb8a6d20e568f1f2a53e8413db39891d1) Thanks [@mathieumaf](https://github.com/mathieumaf)! - - `list_cantons`, `list_institutions`, `search_{cpv,bkp,npk,oag}_codes`, `browse_{cpv,bkp,npk,oag}_tree`: responses are now cached in memory for 24 hours. This reference data rarely changes, so repeated lookups return instantly and no longer use up the 60 requests/minute budget that tender searches need. Tender and organization lookups (`search_tenders`, `get_tender_details`, `search_proc_offices`, `get_publication_history`) are not cached. The cache is cleared when the server restarts.
+  - `SimapClient.get()`: new opt-in `cacheTtlMs` option backed by `ResponseCache` (capped at 500 entries, least recently used evicted first). Concurrent identical requests share one upstream call, and errors are never cached.
+
 ## 1.5.2
 
 ### Patch Changes
