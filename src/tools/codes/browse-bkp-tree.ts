@@ -5,7 +5,7 @@
 
 import type { FastMCP } from "@prefecthq/fastmcp-ts/server";
 import { z } from "zod";
-import { simap } from "../../api/client.js";
+import { REFERENCE_DATA_TTL_MS, simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
 import type { CodeEntry, CodeSearchResponse } from "../../types/api.js";
 import { CodeTreeResponseSchema } from "../../types/schemas.js";
@@ -47,7 +47,11 @@ async function handler(params: BrowseBkpTreeInput) {
 
     const data = await simap.get<
       CodeSearchResponse & { codes: (CodeEntry & { codes?: CodeEntry[] | null })[] }
-    >(ENDPOINTS.BKP_LIST, { params: queryParams, schema: CodeTreeResponseSchema });
+    >(ENDPOINTS.BKP_LIST, {
+      params: queryParams,
+      schema: CodeTreeResponseSchema,
+      cacheTtlMs: REFERENCE_DATA_TTL_MS,
+    });
 
     if (!data.codes || data.codes.length === 0) {
       const message = parentCode

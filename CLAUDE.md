@@ -42,7 +42,8 @@ src/
 │   ├── index.ts                      # Re-exports
 │   ├── client.ts                     # SimapClient + exported buildUrl()
 │   ├── endpoints.ts                  # API endpoint constants
-│   └── rate-limiter.ts               # SlidingWindowRateLimiter (FIFO)
+│   ├── rate-limiter.ts               # SlidingWindowRateLimiter (FIFO)
+│   └── response-cache.ts             # ResponseCache (TTL + LRU) for reference data
 ├── tools/
 │   ├── index.ts                      # registerTools()
 │   ├── search-tenders.ts             # search_tenders
@@ -81,7 +82,7 @@ Tests mirror this tree under `tests/` (see [ARCHITECTURE.md](./ARCHITECTURE.md) 
 
 - **Tool registration** — the server is built on [FastMCP for TypeScript](https://github.com/PrefectHQ/fastmcp-ts) (`@prefecthq/fastmcp-ts`). Each tool exports `*InputSchema` (`z.object({...})`), `*Input` (inferred type), and a `register*()` function that takes a `FastMCP` instance and calls the shared `registerTool(server, { name, title, description, input: schema }, handler)` (`src/utils/register-tool.ts`) — never `server.tool()` directly. The helper advertises an input-mode JSON Schema (so `.default()` fields are not `required`), attaches the read-only tool annotations (`readOnlyHint: true`, …) and the `title`, and returns validation failures as `isError` tool results with field paths instead of FastMCP's protocol errors. Handlers return Markdown strings directly (FastMCP wraps them in a text content block) or a `ToolResult` for errors — never `throw` for user-facing errors; tests import the schema directly to avoid drift.
 - **Prompts** — each prompt in `src/prompts/` exports an args schema, a pure `build*Prompt()` and a `register*()` that calls `server.prompt()`. Prompts only emit instructions that drive the existing tools; invalid args are thrown (prompts have no `isError` result).
-- **API client** — `SimapClient` (singleton `simap`) wraps `fetch`, handles URL building (via the module-level exported `buildUrl()`), timeouts, Zod response validation, and typed error mapping. It composes a `SlidingWindowRateLimiter` (default 60 req/min, FIFO-ordered, single outstanding timer).
+- **API client** — `SimapClient` (singleton `simap`) wraps `fetch`, handles URL building (via the module-level exported `buildUrl()`), timeouts, Zod response validation, and typed error mapping. It composes a `SlidingWindowRateLimiter` (default 60 req/min, FIFO-ordered, single outstanding timer) and a `ResponseCache`: pass `cacheTtlMs: REFERENCE_DATA_TTL_MS` for reference data (codes, cantons, institutions), never for tenders.
 - **Error handling** — tool handlers route caught errors through `toToolErrorResult()` (`src/utils/errors.ts`) which returns a FastMCP `ToolResult` (`isError: true`) and distinguishes `SimapApiError` 404 / other 4xx / 5xx / network / timeout / generic. Always logs the original error to stderr first. Application-level validation (e.g. "at least one of X/Y") uses `toolErrorResult(text)`.
 - **Transport** — stdio only. `startServer()` passes `{ transport: "stdio" }` and neutralises FastMCP's `MCP_TRANSPORT` env override (see SECURITY.md).
 - **search_tenders parameter mapping** — user→simap parameter translation lives in `src/tools/search-tenders-params.ts`, not in the handler. Defaults `publicationFrom` to today (Europe/Zurich) when no filter is provided.
@@ -112,7 +113,7 @@ Tests mirror this tree under `tests/` (see [ARCHITECTURE.md](./ARCHITECTURE.md) 
   1. **Schema validation** — Zod accepts valid inputs and rejects invalid ones (import the real schema).
   2. **Query parameter building** — user inputs map correctly to simap API params.
   3. **Response formatting** — output is correctly formatted for the user.
-- For `api/client.ts` and `api/rate-limiter.ts`, cover URL building, timeout, schema validation, error mapping, debug logging, FIFO ordering, and windowing.
+- For `api/client.ts`, `api/rate-limiter.ts` and `api/response-cache.ts`, cover URL building, timeout, schema validation, error mapping, debug logging, FIFO ordering, windowing, TTL expiry, LRU eviction, and that errors are never cached.
 
 ## Changesets
 

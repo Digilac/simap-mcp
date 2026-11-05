@@ -5,7 +5,7 @@
 
 import type { FastMCP } from "@prefecthq/fastmcp-ts/server";
 import { z } from "zod";
-import { simap } from "../../api/client.js";
+import { REFERENCE_DATA_TTL_MS, simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
 import type { CantonsResponse } from "../../types/api.js";
 import { CantonsResponseSchema } from "../../types/schemas.js";
@@ -57,6 +57,7 @@ async function handler() {
   try {
     const data = await simap.get<CantonsResponse>(ENDPOINTS.CANTONS, {
       schema: CantonsResponseSchema,
+      cacheTtlMs: REFERENCE_DATA_TTL_MS,
     });
 
     if (!data.cantons || data.cantons.length === 0) {

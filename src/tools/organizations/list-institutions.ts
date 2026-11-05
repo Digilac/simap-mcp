@@ -5,7 +5,7 @@
 
 import type { FastMCP } from "@prefecthq/fastmcp-ts/server";
 import { z } from "zod";
-import { simap } from "../../api/client.js";
+import { REFERENCE_DATA_TTL_MS, simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
 import type { InstitutionsResponse, Institution } from "../../types/api.js";
 import { InstitutionsResponseSchema } from "../../types/schemas.js";
@@ -57,6 +57,7 @@ async function handler(params: ListInstitutionsInput) {
   try {
     const data = await simap.get<InstitutionsResponse>(ENDPOINTS.INSTITUTIONS, {
       schema: InstitutionsResponseSchema,
+      cacheTtlMs: REFERENCE_DATA_TTL_MS,
     });
 
     if (!data.institutions || data.institutions.length === 0) {

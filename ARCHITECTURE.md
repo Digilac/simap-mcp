@@ -11,6 +11,7 @@ simap-mcp Server (FastMCP)
   ├── prompts/             → 1 prompt template (analyze_tender)
   ├── api/client.ts        → centralized HTTP client
   ├── api/rate-limiter.ts  → sliding-window rate limiter (FIFO)
+  ├── api/response-cache.ts → in-memory TTL cache for reference data
   └── utils/               → translation, formatting, error mapping
         │ HTTPS
         ▼
@@ -28,7 +29,8 @@ src/
 │   ├── index.ts                  # Re-exports
 │   ├── client.ts                 # SimapClient + exported buildUrl()
 │   ├── endpoints.ts              # API endpoint constants
-│   └── rate-limiter.ts           # SlidingWindowRateLimiter (FIFO)
+│   ├── rate-limiter.ts           # SlidingWindowRateLimiter (FIFO)
+│   └── response-cache.ts         # ResponseCache (TTL + LRU, in-flight dedupe)
 │
 ├── tools/
 │   ├── index.ts                  # registerTools() — registers all tools
@@ -119,6 +121,8 @@ Prompts only produce instructions — the model then calls the existing tools (e
 The client composes a `SlidingWindowRateLimiter` (default: 60 req/min, FIFO-ordered, single outstanding timer). `buildUrl` is exported as a standalone function so it can be unit-tested without instantiating a client.
 
 Transient failures are retried (default: 2 retries, exponential backoff from 500 ms with equal jitter, each delay capped at 5 s). Retried: HTTP 408 / 429 / 5xx and network errors raised by `fetch` itself; a `Retry-After` header overrides the computed delay (still capped). Not retried: other 4xx, schema-validation failures, and the client's own timeout, so a hung upstream can't stall a tool call for several timeout periods. Every attempt goes through the rate limiter and is logged to stderr. Only GET is issued, so replays are safe. The final error is the original one (`SimapApiError` or the `fetch` error), so `toToolErrorResult()` mapping is unchanged.
+
+Caching is opt-in per call: passing `cacheTtlMs` stores the validated response in a `ResponseCache`, keyed by the full URL. The reference-data tools (`list_cantons`, `list_institutions`, `search_*_codes`, `browse_*_tree`) pass `REFERENCE_DATA_TTL_MS` (24 h); tender and organization lookups stay live. The cache wraps the retry loop: a hit skips the rate limiter, the network and any retries, and only the final successful result is stored. A hit and is logged as `GET <endpoint> (cache hit)`. Concurrent calls for the same URL share one request, errors and schema failures are never cached, and the cache is capped at 500 entries (least recently used evicted first). The cache lives in process memory only and is lost on restart.
 
 ### Translation
 
