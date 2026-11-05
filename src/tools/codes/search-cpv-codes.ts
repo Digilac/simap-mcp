@@ -5,7 +5,7 @@
 
 import type { FastMCP } from "@prefecthq/fastmcp-ts/server";
 import { z } from "zod";
-import { simap } from "../../api/client.js";
+import { REFERENCE_DATA_TTL_MS, simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
 import type { CPVCode, CPVSearchResponse } from "../../types/api.js";
 import { CPVSearchResponseSchema } from "../../types/schemas.js";
@@ -49,6 +49,7 @@ async function handler(params: SearchCpvCodesInput) {
         language: lang,
       },
       schema: CPVSearchResponseSchema,
+      cacheTtlMs: REFERENCE_DATA_TTL_MS,
     });
 
     if (!data.codes || data.codes.length === 0) {

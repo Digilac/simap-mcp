@@ -448,3 +448,126 @@ describe("SimapClient.get retries", () => {
     expect(logged).toContain("attempt 2/3");
   });
 });
+
+describe("SimapClient.get caching", () => {
+  beforeEach(() => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    delete process.env.SIMAP_MCP_DEBUG;
+  });
+
+  it("does not cache when cacheTtlMs is not set", async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ ok: true }));
+    vi.stubGlobal("fetch", fetchMock);
+    const client = newClient();
+
+    await client.get("/live");
+    await client.get("/live");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("serves repeated requests from the cache when cacheTtlMs is set", async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ n: 1 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const client = newClient();
+
+    const first = await client.get("/ref", { cacheTtlMs: 60_000 });
+    const second = await client.get("/ref", { cacheTtlMs: 60_000 });
+    expect(first).toEqual({ n: 1 });
+    expect(second).toEqual({ n: 1 });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("keys the cache on query params", async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ ok: true }));
+    vi.stubGlobal("fetch", fetchMock);
+    const client = newClient();
+
+    await client.get("/codes", { params: { parentCode: "1" }, cacheTtlMs: 60_000 });
+    await client.get("/codes", { params: { parentCode: "2" }, cacheTtlMs: 60_000 });
+    await client.get("/codes", { params: { parentCode: "1" }, cacheTtlMs: 60_000 });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not cache API errors", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(errorResponse(503, "Service Unavailable"))
+      .mockResolvedValueOnce(jsonResponse({ ok: true }));
+    vi.stubGlobal("fetch", fetchMock);
+    const client = newClient({ retries: 0 });
+
+    await expect(client.get("/ref", { cacheTtlMs: 60_000 })).rejects.toMatchObject({
+      statusCode: 503,
+    });
+    await expect(client.get("/ref", { cacheTtlMs: 60_000 })).resolves.toEqual({
+      ok: true,
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not cache responses that fail schema validation", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ n: "bad" }))
+      .mockResolvedValueOnce(jsonResponse({ n: 2 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const client = newClient();
+    const schema = z.object({ n: z.number() });
+
+    await expect(client.get("/ref", { schema, cacheTtlMs: 60_000 })).rejects.toThrow();
+    await expect(client.get("/ref", { schema, cacheTtlMs: 60_000 })).resolves.toEqual({
+      n: 2,
+    });
+  });
+
+  it("caches the successful result of a retried request", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(errorResponse(503, "Service Unavailable"))
+      .mockResolvedValueOnce(jsonResponse({ ok: true }));
+    vi.stubGlobal("fetch", fetchMock);
+    const client = newClient();
+
+    await expect(client.get("/ref", { cacheTtlMs: 60_000 })).resolves.toEqual({
+      ok: true,
+    });
+    await expect(client.get("/ref", { cacheTtlMs: 60_000 })).resolves.toEqual({
+      ok: true,
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not consume a rate-limit slot on a cache hit", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => jsonResponse({ ok: true }))
+    );
+    const limiter = new SlidingWindowRateLimiter({ maxRequests: 1000, windowMs: 60_000 });
+    const acquire = vi.spyOn(limiter, "acquire");
+    const client = new SimapClient(BASE, limiter);
+
+    await client.get("/ref", { cacheTtlMs: 60_000 });
+    await client.get("/ref", { cacheTtlMs: 60_000 });
+    expect(acquire).toHaveBeenCalledTimes(1);
+  });
+
+  it("logs cache hits to stderr", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => jsonResponse({ ok: true }))
+    );
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const client = newClient();
+
+    await client.get("/ref", { cacheTtlMs: 60_000 });
+    await client.get("/ref", { cacheTtlMs: 60_000 });
+
+    const logged = spy.mock.calls.map((c) => String(c[0]));
+    expect(logged.filter((l) => l.includes("GET /ref (cache hit)"))).toHaveLength(1);
+  });
+});

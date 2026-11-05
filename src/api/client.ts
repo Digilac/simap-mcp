@@ -6,6 +6,13 @@ import { type ZodType } from "zod";
 import { SIMAP_API_BASE } from "./endpoints.js";
 import { SimapApiError } from "../types/api.js";
 import { SlidingWindowRateLimiter } from "./rate-limiter.js";
+import { ResponseCache } from "./response-cache.js";
+
+/**
+ * TTL for reference data (cantons, institutions, CPV/BKP/NPK/OAG codes),
+ * which changes rarely. Passed as `cacheTtlMs` by the tools that read it.
+ */
+export const REFERENCE_DATA_TTL_MS = 24 * 60 * 60 * 1000;
 
 /**
  * When SIMAP_MCP_DEBUG=1 (or "true") is set, the client emits extra info
@@ -24,6 +31,12 @@ export interface RequestOptions<T = unknown> {
   params?: Record<string, string | string[] | undefined>;
   timeout?: number;
   schema?: ZodType<T>;
+  /**
+   * When set, the validated response is cached in memory for this many
+   * milliseconds, keyed by the full URL. Cache hits skip the rate limiter
+   * and the network. Errors are never cached. Leave unset for live data.
+   */
+  cacheTtlMs?: number;
 }
 
 /**
@@ -103,25 +116,59 @@ export class SimapClient {
   private readonly baseUrl: string;
   private readonly rateLimiter: SlidingWindowRateLimiter;
   private readonly retry: RetryOptions;
+  private readonly cache: ResponseCache;
 
   constructor(
     baseUrl: string = SIMAP_API_BASE,
     rateLimiter: SlidingWindowRateLimiter = new SlidingWindowRateLimiter(),
-    retry: Partial<RetryOptions> = {}
+    retry: Partial<RetryOptions> = {},
+    cache: ResponseCache = new ResponseCache()
   ) {
     this.baseUrl = baseUrl;
     this.rateLimiter = rateLimiter;
     this.retry = { ...DEFAULT_RETRY_OPTIONS, ...retry };
+    this.cache = cache;
   }
 
   /**
-   * Performs a GET request to the simap API, retrying transient failures
-   * (HTTP 408 / 429 / 5xx, network errors) with exponential backoff. Our own
-   * timeout is not retried, so a hung upstream can't stall a tool call for
-   * several timeout periods. Each attempt goes through the rate limiter.
+   * Performs a GET request to the simap API. When `cacheTtlMs` is set, a
+   * cached response is returned without touching the rate limiter or the
+   * network; otherwise (and on a cache miss) the request goes through
+   * `getWithRetry()`, and only its final successful result is cached.
    */
   async get<T>(endpoint: string, options: RequestOptions<T> = {}): Promise<T> {
     const url = buildUrl(this.baseUrl, endpoint, options.params);
+
+    if (options.cacheTtlMs === undefined || options.cacheTtlMs <= 0) {
+      return this.getWithRetry(endpoint, url, options);
+    }
+
+    const { value, hit } = this.cache.getOrLoad(url, options.cacheTtlMs, () =>
+      this.getWithRetry(endpoint, url, options)
+    );
+    if (hit) {
+      if (isDebugEnabled()) {
+        console.error(
+          `[${new Date().toISOString()}] GET ${endpoint} → ${url} (cache hit)`
+        );
+      } else {
+        console.error(`[${new Date().toISOString()}] GET ${endpoint} (cache hit)`);
+      }
+    }
+    return value;
+  }
+
+  /**
+   * Retries transient failures (HTTP 408 / 429 / 5xx, network errors) with
+   * exponential backoff. Our own timeout is not retried, so a hung upstream
+   * can't stall a tool call for several timeout periods. Each attempt goes
+   * through the rate limiter.
+   */
+  private async getWithRetry<T>(
+    endpoint: string,
+    url: string,
+    options: RequestOptions<T>
+  ): Promise<T> {
     const maxAttempts = this.retry.retries + 1;
 
     for (let attempt = 1; ; attempt++) {
