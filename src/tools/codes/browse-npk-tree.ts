@@ -87,6 +87,7 @@ export function registerBrowseNpkTree(server: FastMCP): void {
     server,
     {
       name: "browse_npk_tree",
+      title: "Browse NPK Tree",
       description: "Browse the NPK code hierarchy (standardized positions catalog)",
       input: browseNpkTreeInputSchema,
     },

@@ -69,6 +69,7 @@ export function registerSearchNpkCodes(server: FastMCP): void {
     server,
     {
       name: "search_npk_codes",
+      title: "Search NPK Codes",
       description:
         "Search NPK (standardized positions catalog) codes by keyword or number",
       input: searchNpkCodesInputSchema,

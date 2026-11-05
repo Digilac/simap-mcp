@@ -123,6 +123,7 @@ export function registerSearchProcOffices(server: FastMCP): void {
     server,
     {
       name: "search_proc_offices",
+      title: "Search Procurement Offices",
       description: "Search public procurement offices by name or institution",
       input: searchProcOfficesInputSchema,
     },

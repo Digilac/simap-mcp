@@ -90,6 +90,7 @@ export function registerListCantons(server: FastMCP): void {
     server,
     {
       name: "list_cantons",
+      title: "List Cantons",
       description: "List all Swiss cantons with their codes (useful for search filters)",
       input: listCantonsInputSchema,
     },

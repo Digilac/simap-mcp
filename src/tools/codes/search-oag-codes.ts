@@ -69,6 +69,7 @@ export function registerSearchOagCodes(server: FastMCP): void {
     server,
     {
       name: "search_oag_codes",
+      title: "Search OAG Codes",
       description: "Search OAG (object type classification) codes by keyword or number",
       input: searchOagCodesInputSchema,
     },

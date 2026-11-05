@@ -87,6 +87,7 @@ export function registerBrowseOagTree(server: FastMCP): void {
     server,
     {
       name: "browse_oag_tree",
+      title: "Browse OAG Tree",
       description: "Browse the OAG code hierarchy (object type classification)",
       input: browseOagTreeInputSchema,
     },

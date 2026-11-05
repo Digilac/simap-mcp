@@ -5,7 +5,11 @@
 import { describe, it, expect, vi } from "vitest";
 import { z } from "zod";
 import { ToolResult, type FastMCP } from "@prefecthq/fastmcp-ts/server";
-import { formatValidationError, registerTool } from "../../src/utils/register-tool.js";
+import {
+  formatValidationError,
+  READ_ONLY_TOOL_ANNOTATIONS,
+  registerTool,
+} from "../../src/utils/register-tool.js";
 
 const schema = z.object({
   id: z.string().uuid().describe("Identifier"),
@@ -14,7 +18,13 @@ const schema = z.object({
 });
 
 type Registered = {
-  config: { name: string; description: string; inputSchema?: Record<string, unknown> };
+  config: {
+    name: string;
+    title?: string;
+    description: string;
+    annotations?: Record<string, unknown>;
+    inputSchema?: Record<string, unknown>;
+  };
   handler: (args: Record<string, unknown>) => unknown;
 };
 
@@ -60,7 +70,7 @@ describe("registerTool", () => {
     const { server, registered } = fakeServer();
     registerTool(
       server,
-      { name: "my_tool", description: "Does things", input: schema },
+      { name: "my_tool", title: "My Tool", description: "Does things", input: schema },
       () => "ok"
     );
 
@@ -69,11 +79,30 @@ describe("registerTool", () => {
     expect(registered().config.description).toBe("Does things");
   });
 
+  it("advertises the title and read-only annotations", () => {
+    const { server, registered } = fakeServer();
+    registerTool(
+      server,
+      { name: "my_tool", title: "My Tool", description: "d", input: schema },
+      () => "ok"
+    );
+
+    expect(registered().config.title).toBe("My Tool");
+    expect(registered().config.annotations).toEqual({
+      title: "My Tool",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    });
+    expect(READ_ONLY_TOOL_ANNOTATIONS.readOnlyHint).toBe(true);
+  });
+
   it("advertises an input-mode JSON Schema: defaulted fields are not required", () => {
     const { server, registered } = fakeServer();
     registerTool(
       server,
-      { name: "my_tool", description: "d", input: schema },
+      { name: "my_tool", title: "My Tool", description: "d", input: schema },
       () => "ok"
     );
 
@@ -96,7 +125,7 @@ describe("registerTool", () => {
     const { server, registered } = fakeServer();
     registerTool(
       server,
-      { name: "my_tool", description: "d", input: schema },
+      { name: "my_tool", title: "My Tool", description: "d", input: schema },
       () => "ok"
     );
     expect(registered().config).not.toHaveProperty("input");
@@ -107,7 +136,7 @@ describe("registerTool", () => {
     const handler = vi.fn(
       async (params: z.output<typeof schema>) => `lang=${params.lang}`
     );
-    registerTool(server, { name: "my_tool", description: "d", input: schema }, handler);
+    registerTool(server, { name: "my_tool", title: "My Tool", description: "d", input: schema }, handler);
 
     const id = "123e4567-e89b-12d3-a456-426614174000";
     const out = await registered().handler({ id });
@@ -119,7 +148,7 @@ describe("registerTool", () => {
   it("returns an isError ToolResult with field paths on invalid input", async () => {
     const { server, registered } = fakeServer();
     const handler = vi.fn(() => "should not run");
-    registerTool(server, { name: "my_tool", description: "d", input: schema }, handler);
+    registerTool(server, { name: "my_tool", title: "My Tool", description: "d", input: schema }, handler);
 
     const out = await registered().handler({ id: "not-a-uuid", lang: "xx" });
 
@@ -141,7 +170,7 @@ describe("registerTool", () => {
     });
     registerTool(
       server,
-      { name: "my_tool", description: "d", input: schema },
+      { name: "my_tool", title: "My Tool", description: "d", input: schema },
       () => custom
     );
 

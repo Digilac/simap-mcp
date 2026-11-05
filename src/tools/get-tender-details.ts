@@ -165,6 +165,7 @@ export function registerGetTenderDetails(server: FastMCP): void {
     server,
     {
       name: "get_tender_details",
+      title: "Get Tender Details",
       description: "Get detailed information about a specific tender",
       input: getTenderDetailsInputSchema,
     },

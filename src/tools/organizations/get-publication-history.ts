@@ -113,6 +113,7 @@ export function registerGetPublicationHistory(server: FastMCP): void {
     server,
     {
       name: "get_publication_history",
+      title: "Get Publication History",
       description:
         "Get the publication history for a project (corrections, awards, etc.)",
       input: getPublicationHistoryInputSchema,
