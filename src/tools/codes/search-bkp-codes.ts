@@ -69,6 +69,7 @@ export function registerSearchBkpCodes(server: FastMCP): void {
     server,
     {
       name: "search_bkp_codes",
+      title: "Search BKP Codes",
       description: "Search BKP (Swiss construction cost plan) codes by keyword or number",
       input: searchBkpCodesInputSchema,
     },

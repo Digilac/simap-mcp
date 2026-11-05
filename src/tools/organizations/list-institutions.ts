@@ -114,6 +114,7 @@ export function registerListInstitutions(server: FastMCP): void {
     server,
     {
       name: "list_institutions",
+      title: "List Institutions",
       description:
         "List Swiss public institutions (Confederation, cantons, municipalities) that publish tenders",
       input: listInstitutionsInputSchema,

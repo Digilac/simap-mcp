@@ -87,6 +87,7 @@ export function registerSearchTenders(server: FastMCP): void {
     server,
     {
       name: "search_tenders",
+      title: "Search Tenders",
       description: "Description",
       input: searchTendersInputSchema,
     },
@@ -99,10 +100,11 @@ export function registerSearchTenders(server: FastMCP): void {
 
 - **Advertised `inputSchema`** — FastMCP calls `z.toJSONSchema()` in _output_ mode, which lists fields with `.default()` (e.g. `lang`) under `required`. The helper generates the schema in _input_ mode (`{ io: "input" }`) so defaults stay optional.
 - **Validation errors** — FastMCP rejects invalid arguments with a JSON-RPC `-32602` protocol error whose message drops the field paths. The helper runs `schema.safeParse()` itself and returns an `isError: true` tool result listing every issue with its path (`- projectId: Invalid UUID`), which the model can read and act on.
+- **Tool annotations** — every definition carries a human-readable `title` (e.g. `"Search Tenders"`). The helper advertises it as the tool `title` and attaches `READ_ONLY_TOOL_ANNOTATIONS` (`readOnlyHint: true`, `destructiveHint: false`, `idempotentHint: true`, `openWorldHint: true`), since every simap tool only reads public data. Clients use these hints for display and to skip confirmation prompts on read-only calls.
 
 Tools are grouped by domain (`codes/`, `organizations/`) with an `index.ts` that registers the group. Handlers return the Markdown text directly — FastMCP converts it into a text content block — or a `ToolResult` for error results (`toolErrorResult(text)` / `toToolErrorResult(error, ctx)`). Never `throw` from a handler to signal a user-facing error.
 
-`tests/server.test.ts` drives the real server through FastMCP's in-process `Client` and pins the 14 tool names, the `required` lists, the validation-error shape, and the prompt list.
+`tests/server.test.ts` drives the real server through FastMCP's in-process `Client` and pins the 14 tool names, their titles and read-only annotations, the `required` lists, the validation-error shape, and the prompt list.
 
 ### Prompt Registration
 

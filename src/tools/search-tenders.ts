@@ -191,6 +191,7 @@ export function registerSearchTenders(server: FastMCP): void {
     server,
     {
       name: "search_tenders",
+      title: "Search Tenders",
       description:
         "Search public tenders on simap.ch with filters by date, canton, CPV codes, and other criteria",
       input: searchTendersInputSchema,

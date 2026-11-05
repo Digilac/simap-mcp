@@ -58,6 +58,20 @@ describe("simap MCP server (FastMCP)", () => {
     }
   });
 
+  it("advertises every tool as read-only with a human-readable title", async () => {
+    const tools = await client.listTools();
+    for (const tool of tools) {
+      expect(tool.title, tool.name).toMatch(/^[A-Z][A-Za-z ]+$/);
+      expect(tool.annotations, tool.name).toEqual({
+        title: tool.title,
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      });
+    }
+  });
+
   it("advertises the expected required fields per tool", async () => {
     const tools = await client.listTools();
     const required = Object.fromEntries(

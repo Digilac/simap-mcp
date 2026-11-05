@@ -88,6 +88,7 @@ export function registerBrowseBkpTree(server: FastMCP): void {
     server,
     {
       name: "browse_bkp_tree",
+      title: "Browse BKP Tree",
       description: "Browse the BKP code hierarchy (Swiss construction cost plan)",
       input: browseBkpTreeInputSchema,
     },

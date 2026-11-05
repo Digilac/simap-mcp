@@ -15,9 +15,15 @@
  *    Many clients surface protocol errors as hard failures the model cannot
  *    read. We validate here and return an `isError: true` tool result that
  *    lists every issue with its path, so the model can self-correct.
+ *
+ * 3. **Tool annotations** — every simap tool only reads public data from
+ *    simap.ch, so each one is advertised with `readOnlyHint: true` (plus
+ *    `destructiveHint: false`, `idempotentHint: true`, `openWorldHint: true`)
+ *    and a human-readable `title`. Clients use these hints to display the tool
+ *    and to decide whether a call needs user confirmation.
  */
 
-import type { FastMCP, ToolResult } from "@prefecthq/fastmcp-ts/server";
+import type { FastMCP, ToolAnnotations, ToolResult } from "@prefecthq/fastmcp-ts/server";
 import { z } from "zod";
 import { toolErrorResult } from "./errors.js";
 
@@ -27,11 +33,24 @@ export type ToolHandlerResult = string | ToolResult;
 export interface ToolDefinition<S extends z.ZodObject> {
   /** MCP tool name (snake_case). */
   name: string;
+  /** Human-readable display name (e.g. "Search Tenders"). */
+  title: string;
   /** One-line description shown to the client. */
   description: string;
   /** Zod schema describing the tool arguments. */
   input: S;
 }
+
+/**
+ * Behavioural hints shared by every simap tool: they only read public data
+ * from simap.ch (an external, open-world system) and never modify anything.
+ */
+export const READ_ONLY_TOOL_ANNOTATIONS = {
+  readOnlyHint: true,
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: true,
+} as const satisfies ToolAnnotations;
 
 /**
  * Formats Zod issues into a single user-facing message, one issue per line
@@ -54,12 +73,14 @@ export function registerTool<S extends z.ZodObject>(
   definition: ToolDefinition<S>,
   handler: (params: z.output<S>) => Promise<ToolHandlerResult> | ToolHandlerResult
 ): void {
-  const { name, description, input } = definition;
+  const { name, title, description, input } = definition;
 
   server.tool(
     {
       name,
+      title,
       description,
+      annotations: { title, ...READ_ONLY_TOOL_ANNOTATIONS },
       inputSchema: z.toJSONSchema(input, { io: "input" }),
     },
     async (rawArgs: Record<string, unknown>) => {

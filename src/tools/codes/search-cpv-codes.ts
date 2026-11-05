@@ -85,6 +85,7 @@ export function registerSearchCpvCodes(server: FastMCP): void {
     server,
     {
       name: "search_cpv_codes",
+      title: "Search CPV Codes",
       description:
         "Search CPV (Common Procurement Vocabulary) codes by keyword or partial code number",
       input: searchCpvCodesInputSchema,

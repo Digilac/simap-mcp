@@ -90,6 +90,7 @@ export function registerBrowseCpvTree(server: FastMCP): void {
     server,
     {
       name: "browse_cpv_tree",
+      title: "Browse CPV Tree",
       description: "Browse the CPV code hierarchy (shows subcategories of a parent code)",
       input: browseCpvTreeInputSchema,
     },
