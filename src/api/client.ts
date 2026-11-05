@@ -27,27 +27,149 @@ export interface RequestOptions<T = unknown> {
 }
 
 /**
+ * Retry policy for transient failures (HTTP 408 / 429 / 5xx and network
+ * errors raised by `fetch` itself). Only GET requests are issued, so every
+ * request is idempotent and safe to replay.
+ */
+export interface RetryOptions {
+  /** Extra attempts after the first one. 0 disables retries. Default: 2. */
+  retries: number;
+  /** Delay before the first retry; doubles on each subsequent retry. Default: 500 ms. */
+  baseDelayMs: number;
+  /** Upper bound for a single delay, including a server `Retry-After`. Default: 5000 ms. */
+  maxDelayMs: number;
+}
+
+export const DEFAULT_RETRY_OPTIONS: RetryOptions = {
+  retries: 2,
+  baseDelayMs: 500,
+  maxDelayMs: 5000,
+};
+
+/** HTTP statuses worth retrying: request timeout, too many requests, server errors. */
+export function isRetryableStatus(status: number): boolean {
+  return status === 408 || status === 429 || (status >= 500 && status < 600);
+}
+
+/**
+ * Exponential backoff with "equal jitter": half of the exponential delay is
+ * fixed, the other half random, so concurrent retries don't fire in lockstep.
+ * `retryIndex` is 0 for the first retry.
+ */
+export function computeBackoffDelay(
+  retryIndex: number,
+  options: Pick<RetryOptions, "baseDelayMs" | "maxDelayMs">,
+  random: () => number = Math.random
+): number {
+  const exp = Math.min(options.maxDelayMs, options.baseDelayMs * 2 ** retryIndex);
+  return Math.round(exp / 2 + random() * (exp / 2));
+}
+
+/**
+ * Parses a `Retry-After` header (delta-seconds or HTTP date) into
+ * milliseconds. Returns undefined when absent or unparseable.
+ */
+export function parseRetryAfter(
+  header: string | null,
+  now: number = Date.now()
+): number | undefined {
+  if (header === null) return undefined;
+  const trimmed = header.trim();
+  if (/^\d+$/.test(trimmed)) return Number(trimmed) * 1000;
+  const date = Date.parse(trimmed);
+  if (Number.isNaN(date)) return undefined;
+  return Math.max(0, date - now);
+}
+
+/**
+ * Error raised by `fetch` itself (DNS, connection refused/reset, TLS…), as
+ * opposed to an HTTP error status or our own timeout. Internal marker used to
+ * decide whether to retry; the original error is rethrown to callers.
+ */
+class TransientNetworkError extends Error {
+  constructor(public readonly original: unknown) {
+    super("transient network error");
+  }
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
  * simap API client.
  */
 export class SimapClient {
   private readonly baseUrl: string;
   private readonly rateLimiter: SlidingWindowRateLimiter;
+  private readonly retry: RetryOptions;
 
   constructor(
     baseUrl: string = SIMAP_API_BASE,
-    rateLimiter: SlidingWindowRateLimiter = new SlidingWindowRateLimiter()
+    rateLimiter: SlidingWindowRateLimiter = new SlidingWindowRateLimiter(),
+    retry: Partial<RetryOptions> = {}
   ) {
     this.baseUrl = baseUrl;
     this.rateLimiter = rateLimiter;
+    this.retry = { ...DEFAULT_RETRY_OPTIONS, ...retry };
   }
 
   /**
-   * Performs a GET request to the simap API.
+   * Performs a GET request to the simap API, retrying transient failures
+   * (HTTP 408 / 429 / 5xx, network errors) with exponential backoff. Our own
+   * timeout is not retried, so a hung upstream can't stall a tool call for
+   * several timeout periods. Each attempt goes through the rate limiter.
    */
   async get<T>(endpoint: string, options: RequestOptions<T> = {}): Promise<T> {
+    const url = buildUrl(this.baseUrl, endpoint, options.params);
+    const maxAttempts = this.retry.retries + 1;
+
+    for (let attempt = 1; ; attempt++) {
+      try {
+        return await this.attempt(endpoint, url, options);
+      } catch (err) {
+        const original = err instanceof TransientNetworkError ? err.original : err;
+        const delay = this.retryDelay(err, attempt - 1);
+        if (attempt >= maxAttempts || delay === undefined) {
+          throw original;
+        }
+        const reason =
+          err instanceof SimapApiError ? `HTTP ${err.statusCode}` : "network error";
+        console.error(
+          `  ↻ retrying GET ${endpoint} in ${delay}ms after ${reason} (attempt ${attempt + 1}/${maxAttempts})`
+        );
+        await sleep(delay);
+      }
+    }
+  }
+
+  /**
+   * Returns the delay before the next retry, or undefined if `err` is not
+   * retryable. A server-provided `Retry-After` wins over the computed backoff
+   * (both capped at `maxDelayMs`).
+   */
+  private retryDelay(err: unknown, retryIndex: number): number | undefined {
+    if (err instanceof TransientNetworkError) {
+      return computeBackoffDelay(retryIndex, this.retry);
+    }
+    if (err instanceof SimapApiError && isRetryableStatus(err.statusCode)) {
+      const retryAfter = err.retryAfterMs;
+      if (retryAfter !== undefined) return Math.min(retryAfter, this.retry.maxDelayMs);
+      return computeBackoffDelay(retryIndex, this.retry);
+    }
+    return undefined;
+  }
+
+  /**
+   * One HTTP round-trip: rate-limit, fetch, map errors, parse and validate.
+   */
+  private async attempt<T>(
+    endpoint: string,
+    url: string,
+    options: RequestOptions<T>
+  ): Promise<T> {
     await this.rateLimiter.acquire();
 
-    const url = buildUrl(this.baseUrl, endpoint, options.params);
     const debug = isDebugEnabled();
     const startedAt = Date.now();
 
@@ -61,19 +183,29 @@ export class SimapClient {
     const timeoutId = setTimeout(() => controller.abort(), options.timeout ?? 30000);
 
     try {
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-        },
-        signal: controller.signal,
-      });
+      let response: Response;
+      try {
+        response = await fetch(url, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+          signal: controller.signal,
+        });
+      } catch (err) {
+        // Our own timeout fired: not retried (see get()).
+        if (controller.signal.aborted) throw err;
+        throw new TransientNetworkError(err);
+      }
 
       if (!response.ok) {
+        // Release the connection before a possible retry.
+        await response.body?.cancel().catch(() => {});
         throw new SimapApiError(
           `API Error: ${response.status} ${response.statusText}`,
           response.status,
-          endpoint
+          endpoint,
+          parseRetryAfter(response.headers.get("retry-after"))
         );
       }
 

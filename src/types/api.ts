@@ -11,7 +11,9 @@ export class SimapApiError extends Error {
   constructor(
     message: string,
     public readonly statusCode: number,
-    public readonly endpoint: string
+    public readonly endpoint: string,
+    /** Parsed `Retry-After` header, in milliseconds, when the server sent one. */
+    public readonly retryAfterMs?: number
   ) {
     super(message);
     this.name = "SimapApiError";
