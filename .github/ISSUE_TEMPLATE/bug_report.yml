@@ -34,7 +34,7 @@ body:
     id: version
     attributes:
       label: simap-mcp version
-      description: With `npx -y @digilac/simap-mcp` this is the latest release. Otherwise run `npm ls -g @digilac/simap-mcp`.
+      description: The server prints it when it starts, in your client's MCP logs (`starting simap v1.7.0`). If you cannot find it, give the command from your client's configuration, or write "unknown".
       placeholder: "1.7.0"
     validations:
       required: true
@@ -49,7 +49,7 @@ body:
         - VS Code
         - Windsurf
         - LM Studio
-        - Other (say which below)
+        - Other (name it under "What happened")
     validations:
       required: true
   - type: input

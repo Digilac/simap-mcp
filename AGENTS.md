@@ -37,7 +37,7 @@ npm run test:live    # Every tool once against the real simap API (scheduled wee
 
 ## Source Layout
 
-The annotated file tree is in [ARCHITECTURE.md](./ARCHITECTURE.md#file-structure). It lives there only, so it cannot drift from a copy here. In short: `src/api/` is the simap HTTP client, `src/tools/` the 14 tools (`codes/` and `organizations/` group the reference-data ones), `src/prompts/` and `src/skills/` the prompt and the Skill, `src/types/` the Zod schemas and types, `src/utils/` the shared helpers.
+The annotated file tree is in [ARCHITECTURE.md](./ARCHITECTURE.md#file-structure). It lives there only, so it cannot drift from a copy here. In short: `src/api/` is the simap HTTP client, `src/tools/` the 14 tools (`codes/` holds the nomenclature and canton tools, `organizations/` the institution, procurement-office and publication-history tools), `src/prompts/` and `src/skills/` the prompt and the Skill, `src/types/` the Zod schemas and types, `src/utils/` the shared helpers.
 
 Tests live under `tests/`, one folder per area (`api/`, `tools/`, `prompts/`, `skills/`, `utils/`) plus `tests/server.test.ts`. Tool tests are flat in `tests/tools/`, whatever the tool's subfolder in `src/`. `tests/live/` holds the live smoke tests, which `npm test` does not run.
 
@@ -97,7 +97,7 @@ How to prove a change here. The server only reads the public simap API: there ar
 - **The server, as shipped.** `npx fastmcp call --command "node dist/index.js" list_cantons` starts the real entry point over stdio. Use it to prove a change to `src/index.ts`, `src/server.ts` or the transport.
 - **Live calls reach the production simap API.** It is public and read-only, so a handful of calls is fine. Never loop over it or load-test it.
 - **Regression tests.** `tests/server.test.ts` drives the tools, the prompt and the Skill through an in-process MCP client, with no network.
-- **Live smoke tests.** `npm run test:live` calls every tool once against simap (about 14 requests) and fails when a tool can no longer read what simap returns. Run it after changing a response schema in `src/types/schemas.ts`. `.github/workflows/live-smoke.yml` runs it every Monday.
+- **Live smoke tests.** `npm run test:live` calls every tool against simap (about 16 requests) and fails when a tool can no longer read what simap returns. Run it after changing a response schema in `src/types/schemas.ts`. `.github/workflows/live-smoke.yml` runs it every Monday.
 - **Off limits:** `npm run release`, `npm publish`, `mcp-publisher publish`, and starting `release.yml` by hand. The first two publish to npm, where a version number can never be reused and can rarely be removed; the last two publish to the MCP Registry. To prove a packaging change, run:
   - `npm pack --dry-run`: the tarball it lists must contain only `dist/`, `package.json`, `README.md` and `LICENSE`.
   - `node scripts/sync-server-json.mjs && git diff --exit-code server.json`: it must print `server.json already at <version>` and leave no diff. The script rewrites `server.json` when it is out of sync, so the diff is the check.

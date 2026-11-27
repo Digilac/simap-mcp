@@ -3,7 +3,9 @@ name: Live smoke
 # Calls every tool once against the real simap API. simap changes its
 # responses without notice, and the unit tests run on captured payloads, so
 # this is the only check that fails when a tool can no longer read simap.
-# A failed scheduled run notifies the maintainers by email.
+# GitHub notifies one person of a failed scheduled run: whoever last edited
+# the `cron` line below, if their account has Actions notifications on. It
+# also disables scheduled workflows after 60 days without repository activity.
 on:
   schedule:
     - cron: "17 5 * * 1" # Mondays, 05:17 UTC

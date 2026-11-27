@@ -8,7 +8,7 @@
  * as soon as a tool can no longer read what simap returns.
  *
  * They are not part of `npm test`: they need the network and depend on a
- * third party. They only assert the shape of the output, never its content.
+ * third party. They assert that each tool returned rows, never which ones.
  */
 
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
@@ -47,18 +47,21 @@ describe("reference data", () => {
   });
 
   it("list_institutions", async () => {
-    expect(await call("list_institutions")).toMatch(/\S/);
+    expect(await call("list_institutions")).toMatch(/\d+ institution\(s\) found/);
   });
 
   it("search_proc_offices", async () => {
-    expect(await call("search_proc_offices", { search: "Zürich" })).toMatch(/\S/);
+    const text = await call("search_proc_offices", { search: "Zürich" });
+    expect(text).toMatch(/\d+ office\(s\) found/);
   });
 });
 
+// Every assertion below needs at least one row: an empty answer would skip the
+// row schemas, which is where simap's changes break the tools.
 describe.each(["cpv", "bkp", "npk", "oag"])("%s codes", (key) => {
   it(`search_${key}_codes`, async () => {
     const text = await call(`search_${key}_codes`, { query: "bau", lang: "de" });
-    expect(text).toMatch(/\d+ result\(s\) found|No [A-Z]+ codes found/);
+    expect(text).toMatch(/\d+ result\(s\) found/);
   });
 
   it(`browse_${key}_tree`, async () => {
@@ -69,24 +72,39 @@ describe.each(["cpv", "bkp", "npk", "oag"])("%s codes", (key) => {
 
 describe("tenders", () => {
   let projectId: string | undefined;
-  let publicationId: string | undefined;
+  let awardPublicationId: string | undefined;
 
   it("search_tenders", async () => {
     const text = await call("search_tenders", { publicationFrom: daysAgo(14) });
     expect(text).toMatch(/\d+ result\(s\)/);
     projectId = /\*\*Project ID:\*\* (\S+)/.exec(text)?.[1];
-    publicationId = /\*\*Publication ID:\*\* (\S+)/.exec(text)?.[1];
     expect(projectId, "no project in the last 14 days").toMatch(UUID);
-    expect(publicationId).toMatch(UUID);
+  });
+
+  it("search_tenders, filtered by publication type", async () => {
+    const text = await call("search_tenders", {
+      publicationFrom: daysAgo(14),
+      pubTypes: ["award_tender"],
+    });
+    awardPublicationId = /\*\*Publication ID:\*\* (\S+)/.exec(text)?.[1];
+    expect(awardPublicationId, "no award in the last 14 days").toMatch(UUID);
   });
 
   it("get_tender_details", async ({ skip }) => {
     if (!projectId) skip();
-    expect(await call("get_tender_details", { projectId })).toContain("simap Link");
+    // The header alone is not enough: the tool returns it without an error
+    // when the publication details cannot be read.
+    const text = await call("get_tender_details", { projectId });
+    expect(text).toContain("## Publication Details");
   });
 
   it("get_publication_history", async ({ skip }) => {
-    if (!publicationId) skip();
-    expect(await call("get_publication_history", { publicationId })).toMatch(/\S/);
+    if (!awardPublicationId) skip();
+    // An award follows a tender, so it has a history. The tool answers a
+    // publication without one, and any HTTP 400, with a plain sentence.
+    const text = await call("get_publication_history", {
+      publicationId: awardPublicationId,
+    });
+    expect(text).toMatch(/\d+ previous publication\(s\)/);
   });
 });
