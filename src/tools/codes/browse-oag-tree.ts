@@ -11,8 +11,10 @@ const tool = defineBrowseTreeTool({
   acronym: "OAG",
   description: "Browse the OAG code hierarchy (object type classification)",
   endpoint: ENDPOINTS.OAG_LIST,
-  parentCodePattern: /^[0-9]{1,10}$/,
-  parentCodeDescription: "Parent OAG code. If omitted, shows root categories",
+  // OAG codes are dotted: `1`, `1.2`, `1.10`, `4.4.2`.
+  parentCodePattern: /^[0-9]{1,3}(\.[0-9]{1,3}){0,3}$/,
+  parentCodeDescription:
+    "Parent OAG code, e.g. 1 or 1.2. If omitted, shows root categories",
 });
 
 export const browseOagTreeInputSchema = tool.inputSchema;

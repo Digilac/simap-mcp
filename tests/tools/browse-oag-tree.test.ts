@@ -28,9 +28,18 @@ describe("browse_oag_tree schema validation", () => {
       expect(result.success).toBe(false);
     });
 
-    it("should reject codes with decimal points", () => {
-      const result = schema.safeParse({ parentCode: "1.1" });
-      expect(result.success).toBe(false);
+    it("should accept the dotted codes simap uses below the first level", () => {
+      for (const parentCode of ["1.1", "1.10", "4.4.2"]) {
+        const result = schema.safeParse({ parentCode });
+        expect(result.success, parentCode).toBe(true);
+      }
+    });
+
+    it("should reject malformed dotted codes", () => {
+      for (const parentCode of ["1.", ".1", "1..2", "1.a"]) {
+        const result = schema.safeParse({ parentCode });
+        expect(result.success, parentCode).toBe(false);
+      }
     });
   });
 

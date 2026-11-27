@@ -23,6 +23,8 @@ export const PaginationSchema = z.object({
 const CodeNodeBaseSchema = z.object({
   code: z.string(),
   label: TranslationSchema,
+  /** Set by the list endpoints, which return one level and no `codes`. */
+  hasChildren: z.boolean().nullish(),
 });
 
 type CodeNode = z.infer<typeof CodeNodeBaseSchema> & {
@@ -30,7 +32,7 @@ type CodeNode = z.infer<typeof CodeNodeBaseSchema> & {
 };
 
 /** A nomenclature code with its children, at any depth. */
-export const CodeNodeSchema: z.ZodType<CodeNode> = CodeNodeBaseSchema.extend({
+const CodeNodeSchema: z.ZodType<CodeNode> = CodeNodeBaseSchema.extend({
   codes: z.lazy(() => z.array(CodeNodeSchema)).nullish(),
 });
 
@@ -39,7 +41,8 @@ export const CodeNodeSchema: z.ZodType<CodeNode> = CodeNodeBaseSchema.extend({
  *
  * simap answers a search with the matching codes nested under their parent
  * categories, so the children must be kept: a flat schema would silently
- * reduce every search to its top-level categories.
+ * reduce every search to its top-level categories. A list answers with one
+ * level only and flags the codes that have children with `hasChildren`.
  */
 export const CodeTreeResponseSchema = z.object({
   codes: z.array(CodeNodeSchema),

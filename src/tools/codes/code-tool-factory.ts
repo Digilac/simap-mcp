@@ -152,7 +152,8 @@ export function defineBrowseTreeTool(config: BrowseTreeToolConfig) {
         : `# Root ${acronym} Categories\n\n`;
       result += `${data.codes.length} category(ies) found.\n\n`;
       for (const item of data.codes) {
-        const hasChildren = item.codes && item.codes.length > 0;
+        // List endpoints flag parents with `hasChildren`; they send no `codes`.
+        const hasChildren = item.hasChildren === true || (item.codes?.length ?? 0) > 0;
         const label = getTranslation(item.label, lang);
         result += `- **${item.code}** - ${label}${hasChildren ? " 📂" : ""}\n`;
       }

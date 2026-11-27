@@ -58,7 +58,7 @@ const SYSTEMS: CodeSystem[] = [
   {
     key: "oag",
     name: "OAG",
-    parentCode: "5",
+    parentCode: "1.10",
     invalidParentCode: "abc",
     searchFooter: "*OAG codes classify objects by type in construction projects.*",
     browseFooter: "*Use browse_oag_tree with a parent code to see its subcategories.*",
@@ -81,6 +81,14 @@ const TREE = {
       codes: [{ code: "110", label: { de: "Rohbau", fr: "Gros œuvre" } }],
     },
     { code: "200", label: { de: "Technik", fr: "Technique" }, codes: [] },
+  ],
+};
+
+/** One level, as the list endpoints answer: parents are flagged, not nested. */
+const LIST = {
+  codes: [
+    { code: "100", label: { de: "Bau", fr: "Construction" }, hasChildren: true },
+    { code: "200", label: { de: "Technik", fr: "Technique" }, hasChildren: false },
   ],
 };
 
@@ -177,7 +185,7 @@ describe.each(SYSTEMS)("$name code tools", (system) => {
 
   describe(browseTool, () => {
     it("lists the root categories and marks those with children", async () => {
-      fetchMock.mockResolvedValue(jsonResponse(TREE));
+      fetchMock.mockResolvedValue(jsonResponse(LIST));
 
       const { text, isError } = await call(browseTool, { lang: "de" });
 
