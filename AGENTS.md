@@ -139,4 +139,4 @@ Versioning, `CHANGELOG.md`, and GitHub Releases are driven by [changesets](https
 
 ## Release Process
 
-Fully automated by `.github/workflows/release.yml`: merging a PR with changesets opens a **Version Packages** PR that bumps `package.json` + `server.json` and rolls changesets into `CHANGELOG.md`; merging that PR publishes to npm, creates the git tag, the GitHub Release (with `Thanks @user!` credit), and pushes to the MCP Registry. For headline releases, polish the auto-generated release notes via `gh release edit` after the workflow finishes.
+Fully automated by `.github/workflows/release.yml`: merging a PR with changesets opens a **Version Packages** PR that bumps `package.json` + `server.json` and rolls changesets into `CHANGELOG.md`. It is opened by `github-actions[bot]`, so a maintainer must click **Approve workflows to run** on it before its checks start. Merging that PR publishes to npm, creates the git tag, the GitHub Release (with `Thanks @user!` credit), and pushes to the MCP Registry. For headline releases, polish the auto-generated release notes via `gh release edit` after the workflow finishes.

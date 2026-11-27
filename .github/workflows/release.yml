@@ -30,15 +30,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-          # Check out with the PAT (instead of the default GITHUB_TOKEN).
-          # Since changesets/action v2 the release
-          # commit and tags are pushed through the GitHub API with the
-          # `github-token` input rather than the Git CLI, so this is a
-          # fallback for any remaining Git CLI operation in the job —
-          # it keeps them authenticated as the PAT owner, whose pushes
-          # do trigger downstream `pull_request` workflows (GitHub
-          # suppresses those for GITHUB_TOKEN to prevent recursion).
-          token: ${{ secrets.RELEASE_PAT }}
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -66,14 +57,16 @@ jobs:
       - id: changesets
         uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
-          # Fine-grained PAT (Contents + Pull requests RW) so pushes to
-          # `changeset-release/main` trigger downstream `pull_request`
-          # workflows. The default GITHUB_TOKEN is suppressed by GitHub
-          # to prevent recursion, which leaves required status checks
-          # stuck "Expected — Waiting for status to be reported" on the
-          # Version Packages PR. Since v2 the token must be passed
-          # through this input — the GITHUB_TOKEN env var is ignored.
-          github-token: ${{ secrets.RELEASE_PAT }}
+          # No `github-token`: the action defaults to this job's
+          # GITHUB_TOKEN, so the Version Packages PR, its commit, the tags
+          # and the GitHub Release are authored by github-actions[bot] and
+          # no personal token is stored in the repository.
+          #
+          # GitHub does not start workflows for a push made with
+          # GITHUB_TOKEN: on the Version Packages PR the CI runs wait for
+          # a maintainer to click "Approve workflows to run". The required
+          # checks report once that is done. Every update of the PR needs
+          # the click again.
           version-script: npm run version-packages
           publish-script: npm run release
           create-github-releases: true

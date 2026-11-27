@@ -25,7 +25,7 @@ The package is published to npm and listed in the MCP Registry by `.github/workf
 | The user's queries (search terms, cantons, codes, tender IDs)              | They reveal which tenders a company is considering.                   |
 | The integrity of tool output                                               | The model acts on it; wrong or injected text misleads a bid decision. |
 | The published package (`@digilac/simap-mcp` on npm) and its registry entry | Every user runs it, often unpinned through `npx -y`.                  |
-| The release credentials (`RELEASE_PAT`, npm and registry OIDC trust)       | They can publish a new version.                                       |
+| The release credentials (npm and registry OIDC trust)                      | They can publish a new version. No long-lived token is stored.        |
 
 The server holds no secrets of its own: it reads no API key, token or password.
 
