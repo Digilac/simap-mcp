@@ -35,6 +35,10 @@ Developed by [Digilac](https://www.digilac.ch/).
 |--------|-------------|
 | `analyze_tender` | Structured bid/no-bid analysis of a tender (scope, deadlines, eligibility, award criteria, risks) |
 
+| Skill | Description |
+|-------|-------------|
+| `simap-workflow` | How to chain the tools: pick codes and cantons, search, open results, check the publication history, and analyze a tender |
+
 ## Prerequisites
 
 - An MCP-compatible client — **[Claude Desktop](#claude-desktop-recommended) is the easiest** if you are not a developer.
@@ -170,6 +174,8 @@ Once configured, just ask your AI assistant in natural language. Mention "in sim
 - *"Search CPV codes for IT services in simap"*
 
 Clients that support MCP prompts also expose `analyze_tender`: in Claude Code, run `/mcp__simap__analyze_tender <simap.ch link>`; in Claude Desktop, pick it from the "+" menu and paste the tender's link.
+
+The server also publishes the `simap-workflow` Skill through the [MCP Skills extension](https://github.com/modelcontextprotocol/ext-skills). A client that supports it can load the Skill on its own when you ask about Swiss tenders, so the assistant knows which tools to chain and in which order. Support is still in beta. As of November 2026, Claude Code (v2.1.331 or later) loads Skills from MCP servers you add; Claude Desktop's chat does not yet. VS Code (1.147 or later) also loads Skills from MCP servers, but its docs only show HTTP servers so far. If a Claude Code session does not pick up the Skill, the cold `npx -y` start may be too slow: switch to the [global install](#installation--configuration) (`"command": "simap-mcp"`) and reconnect. Any MCP client can still read the same text as the resource `skill://simap-workflow/SKILL.md`.
 
 ### Network behaviour
 

@@ -9,6 +9,7 @@ Claude / AI Assistant (MCP Client)
 simap-mcp Server (FastMCP)
   ├── tools/               → 14 tools exposed to the client
   ├── prompts/             → 1 prompt template (analyze_tender)
+  ├── skills/              → 1 Skill (simap-workflow, MCP Skills extension)
   ├── api/client.ts        → centralized HTTP client
   ├── api/rate-limiter.ts  → sliding-window rate limiter (FIFO)
   ├── api/response-cache.ts → in-memory TTL cache for reference data
@@ -58,7 +59,11 @@ src/
 │
 ├── prompts/
 │   ├── index.ts                  # registerPrompts() — registers all prompts
-│   └── analyze-tender.ts         # analyze_tender
+│   └── analyze-tender.ts         # analyze_tender (+ shared TENDER_ANALYSIS_SECTIONS / _RULES)
+│
+├── skills/
+│   ├── index.ts                  # registerSkills() — publishes the Skill catalog
+│   └── simap-workflow.ts         # simap-workflow Skill (SKILL.md built in code)
 │
 ├── types/
 │   ├── index.ts                  # Re-exports
@@ -106,13 +111,26 @@ export function registerSearchTenders(server: FastMCP): void {
 
 Tools are grouped by domain (`codes/`, `organizations/`) with an `index.ts` that registers the group. Handlers return the Markdown text directly — FastMCP converts it into a text content block — or a `ToolResult` for error results (`toolErrorResult(text)` / `toToolErrorResult(error, ctx)`). Never `throw` from a handler to signal a user-facing error.
 
-`tests/server.test.ts` drives the real server through FastMCP's in-process `Client` and pins the 14 tool names, their titles and read-only annotations, the `required` lists, the validation-error shape, and the prompt list.
+`tests/server.test.ts` drives the real server through FastMCP's in-process `Client` and pins the 14 tool names, their titles and read-only annotations, the `required` lists, the validation-error shape, the prompt list, and the published Skill (over both a legacy and a modern 2026-07-28 connection).
 
 ### Prompt Registration
 
 Prompts are user-selected message templates (exposed as slash commands in Claude Code, and in the attachment menu in Claude Desktop). Each prompt file exports an args schema, a pure `build*Prompt()` function and a `register*` function that calls `server.prompt()` directly; `src/prompts/index.ts` registers them all.
 
 Prompts only produce instructions — the model then calls the existing tools (e.g. `analyze_tender` drives `get_tender_details` and `get_publication_history`), so no API logic lives in `prompts/`. MCP prompt arguments are always strings and prompts have no `isError` result: the handler validates them with Zod and throws an error naming each invalid argument, which reaches the client as a protocol error.
+
+### Skill Registration
+
+Skills are published through the [MCP Skills extension](https://github.com/modelcontextprotocol/ext-skills) (`io.modelcontextprotocol/skills`) with FastMCP's `server.skills()`. `src/skills/index.ts` passes a loader that builds the catalog with `Skill.create()` on the first request and reuses it, since the content is static and `Skill.create()` is async.
+
+The `simap-workflow` Skill builds its `SKILL.md` in code (`buildSimapWorkflowInstructions()`), not from a file on disk: the analysis part interpolates `TENDER_ANALYSIS_SECTIONS` and `TENDER_ANALYSIS_RULES` from `src/prompts/analyze-tender.ts`, so the Skill and the `analyze_tender` prompt cannot drift apart. Like prompts, the Skill only documents the existing tools and adds no API logic.
+
+What clients see:
+
+- **Modern connections (2026-07-28) that opt into the extension** list it with `skills/list` and read it with `skills/get` / `resources/read`, each file verified against its SHA-256 digest.
+- **Every other connection** still sees the server advertise the extension, and `resources/list` returns `skill://simap-workflow/SKILL.md` (plus its `_manifest`) as plain resources that any client can read.
+
+`tests/skills/simap-workflow.test.ts` checks the frontmatter limits and that the body embeds the prompt's analysis verbatim; `tests/server.test.ts` checks discovery, the verified read, and that the Skill names every tool and only tools that exist.
 
 ### API Client
 
@@ -340,6 +358,21 @@ No parameters required.
 | `url`    | yes      | simap.ch link to the tender (`https://www.simap.ch/fr/project-detail/<projectId>`), or its project number / title |
 
 `parseTenderReference()` extracts the project ID and the language (`/fr/`, `/de/`…, default `en`) from the link, so users never handle UUIDs. When the input contains no project ID, the prompt asks the model to find the project with `search_tenders` first. The model then calls `get_tender_details` (without `publicationId`, so the latest publication is loaded) and `get_publication_history`, then write an eight-section analysis: overview, scope, key dates, eligibility, award criteria, submission requirements, risks, and a bid/no-bid summary.
+
+</details>
+
+## Skills Reference
+
+<details>
+<summary><code>simap-workflow</code> — How to chain the simap tools</summary>
+
+URI: `skill://simap-workflow/SKILL.md` (single file). Steps:
+
+1. Choose the filters: CPV / BKP codes (`search_*_codes`, `browse_*_tree`), cantons (`list_cantons`), buyer (`search_proc_offices`, `list_institutions` → `issuedByOrganizations`), contract kind. NPK / OAG codes are explained as reading aids, since `search_tenders` cannot filter on them.
+2. Search with `search_tenders`, including the today-only (Europe/Zurich) default when no filter is given, and `lastItem` pagination.
+3. Open the results with `get_tender_details`.
+4. Check corrections, cancellations and awards with `get_publication_history`.
+5. Analyze with the eight sections and rules shared with `analyze_tender`.
 
 </details>
 
