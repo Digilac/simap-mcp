@@ -97,7 +97,7 @@ export interface ProjectHeader {
 
 /**
  * CPV code object as returned inline in publication details
- * (single code + label, not to be confused with the array-based CPVCode).
+ * (a single code and its label, unlike the nested lists the code endpoints return).
  */
 export interface PublicationCpvCode {
   code: string;
@@ -197,38 +197,6 @@ export interface PublicationDetails {
     }> | null;
   } | null;
   [key: string]: unknown;
-}
-
-/**
- * CPV code entry from search results.
- * Note: API returns nested structure with `label` for translations.
- */
-export interface CPVCode {
-  code: string;
-  label: Translation;
-  codes?: CPVCode[] | null;
-}
-
-/**
- * Response from CPV code search endpoint.
- */
-export interface CPVSearchResponse {
-  codes: CPVCode[];
-}
-
-/**
- * Generic code entry for BKP, NPK, OAG nomenclatures.
- */
-export interface CodeEntry {
-  code: string;
-  label: Translation;
-}
-
-/**
- * Generic response for code search endpoints (BKP, NPK, OAG).
- */
-export interface CodeSearchResponse {
-  codes: CodeEntry[];
 }
 
 /**

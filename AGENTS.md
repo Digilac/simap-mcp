@@ -53,6 +53,7 @@ src/
 │   ├── get-tender-details.ts         # get_tender_details
 │   ├── codes/
 │   │   ├── index.ts
+│   │   ├── code-tool-factory.ts      # defineSearchCodesTool() / defineBrowseTreeTool()
 │   │   ├── list-cantons.ts           # list_cantons
 │   │   ├── search-{cpv,bkp,npk,oag}-codes.ts
 │   │   └── browse-{cpv,bkp,npk,oag}-tree.ts
