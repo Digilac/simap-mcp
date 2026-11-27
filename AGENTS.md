@@ -32,7 +32,7 @@ npm run typecheck    # tsc --noEmit on src/, tests/ and scripts/
 npm test             # Run tests with vitest
 npm run test:watch   # Run tests in watch mode
 npm run test:coverage # Tests + coverage thresholds (used in CI)
-npm run test:live    # Every tool once against the real simap API (scheduled weekly)
+npm run test:live    # Every tool against the real simap API (scheduled weekly)
 ```
 
 ## Source Layout

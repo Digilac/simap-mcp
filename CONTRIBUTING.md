@@ -7,11 +7,9 @@ Thank you for your interest in this project! This guide will help you contribute
 ### Reporting a Bug
 
 1. Check that the bug hasn't already been reported in the [Issues](../../issues)
-2. Create a new issue with:
-   - Clear description of the problem
-   - Steps to reproduce
-   - Expected vs actual behavior
-   - Node.js version and OS
+2. Open a **Bug report** issue. The form asks for what it needs: the tool and its arguments, the server version and your MCP client.
+
+For a security problem, do not open an issue: use the private report described in [SECURITY.md](./SECURITY.md).
 
 ### Proposing a Feature
 
@@ -60,7 +58,7 @@ npm test
 | `npm test`              | Run tests                                                 |
 | `npm run test:watch`    | Run tests in watch mode                                   |
 | `npm run test:coverage` | Run tests with coverage thresholds (used in CI)           |
-| `npm run test:live`     | Call every tool once against the real simap API           |
+| `npm run test:live`     | Call every tool against the real simap API                |
 
 ## Development Workflow
 

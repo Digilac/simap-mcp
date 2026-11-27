@@ -1,5 +1,5 @@
 /**
- * Live smoke tests: every tool, once, against the real simap API.
+ * Live smoke tests: every tool against the real simap API.
  *
  * simap changes its responses without notice (new enum values, new fields).
  * The unit tests run on captured payloads, so they stay green when that
@@ -72,7 +72,7 @@ describe.each(["cpv", "bkp", "npk", "oag"])("%s codes", (key) => {
 
 describe("tenders", () => {
   let projectId: string | undefined;
-  let awardPublicationId: string | undefined;
+  let awardPublicationIds: string[] = [];
 
   it("search_tenders", async () => {
     const text = await call("search_tenders", { publicationFrom: daysAgo(14) });
@@ -86,8 +86,10 @@ describe("tenders", () => {
       publicationFrom: daysAgo(14),
       pubTypes: ["award_tender"],
     });
-    awardPublicationId = /\*\*Publication ID:\*\* (\S+)/.exec(text)?.[1];
-    expect(awardPublicationId, "no award in the last 14 days").toMatch(UUID);
+    awardPublicationIds = [...text.matchAll(/\*\*Publication ID:\*\* (\S+)/g)]
+      .map((match) => match[1])
+      .slice(0, 3);
+    expect(awardPublicationIds[0], "no award in the last 14 days").toMatch(UUID);
   });
 
   it("get_tender_details", async ({ skip }) => {
@@ -99,12 +101,16 @@ describe("tenders", () => {
   });
 
   it("get_publication_history", async ({ skip }) => {
-    if (!awardPublicationId) skip();
+    if (awardPublicationIds.length === 0) skip();
     // An award follows a tender, so it has a history. The tool answers a
-    // publication without one, and any HTTP 400, with a plain sentence.
-    const text = await call("get_publication_history", {
-      publicationId: awardPublicationId,
-    });
-    expect(text).toMatch(/\d+ previous publication\(s\)/);
+    // publication without one, and any HTTP 400, with a plain sentence, so the
+    // count is what proves a history was read. One award in three is enough:
+    // a single award can lack a history without the tool being broken.
+    const answers: string[] = [];
+    for (const publicationId of awardPublicationIds) {
+      answers.push(await call("get_publication_history", { publicationId }));
+      if (/\d+ previous publication\(s\)/.test(answers.at(-1) ?? "")) return;
+    }
+    expect.fail(`no award had a history:\n${answers.join("\n")}`);
   });
 });
