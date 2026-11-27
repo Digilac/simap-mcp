@@ -126,7 +126,7 @@ The tier to state in a pull request description. Nothing checks it automatically
   - What defines the checks: `tsconfig*.json`, `eslint.config.js`, `vitest.config.ts`, `.prettierrc`, `.prettierignore`.
   - The only outbound network path and the transport: `src/api/client.ts`, `src/api/endpoints.ts`, `src/server.ts`, `src/utils/register-tool.ts`.
   - The public contract, wherever it lives: renaming or removing a tool, prompt, Skill or parameter, or making an optional parameter required.
-  - Files that steer review and shipping: `AGENTS.md`, the `CLAUDE.md` symlink, `SECURITY.md`, `docs/security/threat-model.md`, `.coderabbit.yaml`.
+  - Files that steer review and shipping: `AGENTS.md`, the `CLAUDE.md` symlink, `SECURITY.md`, `docs/security/threat-model.md`.
 - **Low**
   - Docs: `README.md`, `ARCHITECTURE.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `.changeset/*.md`, `.github/ISSUE_TEMPLATE/**`, `.github/PULL_REQUEST_TEMPLATE.md`.
   - Tests: `tests/**`.
