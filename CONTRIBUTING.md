@@ -49,7 +49,7 @@ npm test
 | ----------------------- | --------------------------------------------------------- |
 | `npm run build`         | Compile TypeScript                                        |
 | `npm start`             | Run the built server (stdio)                              |
-| `npm run dev`           | Recompile on every save (`tsc --watch`)                   |
+| `npm run dev`           | Recompile `dist/` on every save                           |
 | `npm run inspect`       | Open the MCP Inspector UI against the current build       |
 | `npm run tools`         | List the tools + input schemas from the CLI (smoke check) |
 | `npm run lint`          | Check code (ESLint, whole repo, warnings fail)            |

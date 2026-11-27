@@ -21,7 +21,7 @@ MCP (Model Context Protocol) server that integrates with simap.ch, Switzerland's
 ```bash
 npm run build        # Compile src/ to dist/ (tsc -p tsconfig.build.json)
 npm start            # Run the server
-npm run dev          # Recompile on every save (tsc --watch)
+npm run dev          # Recompile on every save (tsc -p tsconfig.build.json --watch)
 npm run inspect      # MCP Inspector UI against dist/ (respawns the server per connection)
 npm run tools        # List tools + input schemas via the fastmcp CLI (smoke check)
 npm run lint         # ESLint on the whole repo; warnings fail
