@@ -43,7 +43,7 @@ A change that breaks one of these is a security change, whatever its size:
 5. **stdout is the protocol.** Logs go to stderr. Query values (search terms, filters) are logged only under `SIMAP_MCP_DEBUG`. The default logs hold the endpoint path, which includes tender and publication IDs, and on failure the raw error, which can quote part of simap's response.
 6. **User input is validated before use.** Tool arguments are parsed by Zod, and user-supplied IDs placed in a URL path are validated as UUIDs.
 7. **Read-only tools.** Every tool only reads public data and is advertised with `readOnlyHint`.
-8. **Releases come from `main`.** Only `.github/workflows/release.yml` publishes: to npm on a push to `main`, with provenance, and to the MCP Registry from `main` only (a manual run on any other branch is skipped). That nothing reaches `main` without a pull request and passing checks is a GitHub ruleset, configured outside this repository.
+8. **Releases come from `main`.** Only `.github/workflows/release.yml` publishes: to npm on a push to `main`, with provenance, and to the MCP Registry from `main` only (a manual run on any other branch is skipped). Maintainers with write access are trusted: they can edit a workflow on a branch. What binds publishing to `main` for everyone else is configured outside this repository, in the GitHub ruleset that requires a pull request and passing checks and in the npm publishing configuration.
 
 ## What to Report
 

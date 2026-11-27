@@ -30,8 +30,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-          # Persist the PAT (instead of the default GITHUB_TOKEN) in
-          # `.git/config`. Since changesets/action v2 the release
+          # Check out with the PAT (instead of the default GITHUB_TOKEN).
+          # Since changesets/action v2 the release
           # commit and tags are pushed through the GitHub API with the
           # `github-token` input rather than the Git CLI, so this is a
           # fallback for any remaining Git CLI operation in the job —
@@ -97,6 +97,11 @@ jobs:
       contents: read # checkout
       id-token: write # OIDC for mcp-publisher
     steps:
+      # The `if:` above compares without regard to case, so a branch named
+      # `Main` would pass it. The shell comparison is exact.
+      - name: Refuse any ref but main
+        run: test "$GITHUB_REF" = "refs/heads/main"
+
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # On `push`, the release job has just committed the version bump
