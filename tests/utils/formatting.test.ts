@@ -13,7 +13,10 @@ import {
   formatProjectHeader,
   formatPublicationDetails,
 } from "../../src/utils/formatting.js";
-import { ProjectHeaderSchema, PublicationDetailsSchema } from "../../src/types/schemas.js";
+import {
+  ProjectHeaderSchema,
+  PublicationDetailsSchema,
+} from "../../src/types/schemas.js";
 import type { ProjectHeader, PublicationDetails } from "../../src/types/api.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -25,9 +28,7 @@ const FIXTURES_DIR = resolve(__dirname, "../fixtures");
  * fixture keeps matching the schema as the latter evolves.
  */
 function loadFixture(name: string): PublicationDetails {
-  const raw = JSON.parse(
-    readFileSync(resolve(FIXTURES_DIR, name), "utf-8")
-  ) as unknown;
+  const raw = JSON.parse(readFileSync(resolve(FIXTURES_DIR, name), "utf-8")) as unknown;
   return PublicationDetailsSchema.parse(raw) as PublicationDetails;
 }
 
@@ -225,10 +226,11 @@ describe("formatPublicationDetails — empty input", () => {
 
 describe("formatPublicationDetails — edge cases", () => {
   it("should fall back to procurement.cpvCode when base.cpvCode lacks a code", () => {
-    const details: PublicationDetails = {
+    // simap can omit `code` even though the type requires it, hence the cast.
+    const details = {
       base: { cpvCode: { label: { en: "Partial label" } } },
       procurement: { cpvCode: { code: "45200000", label: { en: "Real label" } } },
-    };
+    } as PublicationDetails;
     const output = formatPublicationDetails(details, "en");
     expect(output).toContain("### CPV");
     expect(output).toContain("45200000");
@@ -256,7 +258,10 @@ describe("formatProjectHeader", () => {
   }
 
   it("shows the title and date of the latest publication (project without lots)", () => {
-    const output = formatProjectHeader(loadHeader("project-header-without-lots.json"), "de");
+    const output = formatProjectHeader(
+      loadHeader("project-header-without-lots.json"),
+      "de"
+    );
     expect(output).toContain(
       "- **Title:** Aussengestaltung Gletsch / BKP 411 Baumeisterarbeiten"
     );
@@ -266,7 +271,9 @@ describe("formatProjectHeader", () => {
 
   it("shows lot titles and dates, and takes the project title from a lot (project with lots)", () => {
     const output = formatProjectHeader(loadHeader("project-header-with-lots.json"), "fr");
-    expect(output).toContain("- **Title:** MP 2025.04.774 - Profil sécurité système information");
+    expect(output).toContain(
+      "- **Title:** MP 2025.04.774 - Profil sécurité système information"
+    );
     expect(output).toContain("#### Lot 1: Consultant en gouvernance de la sécurité SI");
     expect(output).toContain("#### Lot 2: Chef de projet en sécurité SI");
     expect(output).toContain("- Publication: 35033-02 (2026-10-06)");

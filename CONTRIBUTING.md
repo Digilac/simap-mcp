@@ -45,20 +45,21 @@ npm test
 
 ### Available Scripts
 
-| Script                 | Description                                               |
-| ---------------------- | --------------------------------------------------------- |
-| `npm run build`        | Compile TypeScript                                        |
-| `npm start`            | Run the built server (stdio)                              |
-| `npm run dev`          | Recompile on every save (`tsc --watch`)                   |
-| `npm run inspect`      | Open the MCP Inspector UI against the current build       |
-| `npm run tools`        | List the tools + input schemas from the CLI (smoke check) |
-| `npm run lint`         | Check code (ESLint)                                       |
-| `npm run lint:fix`     | Auto-fix lint issues                                      |
-| `npm run format`       | Format code (Prettier)                                    |
-| `npm run format:check` | Check formatting (used in CI)                             |
-| `npm run typecheck`    | Check types                                               |
-| `npm test`             | Run tests                                                 |
-| `npm run test:watch`   | Run tests in watch mode                                   |
+| Script                  | Description                                               |
+| ----------------------- | --------------------------------------------------------- |
+| `npm run build`         | Compile TypeScript                                        |
+| `npm start`             | Run the built server (stdio)                              |
+| `npm run dev`           | Recompile on every save (`tsc --watch`)                   |
+| `npm run inspect`       | Open the MCP Inspector UI against the current build       |
+| `npm run tools`         | List the tools + input schemas from the CLI (smoke check) |
+| `npm run lint`          | Check code (ESLint, whole repo, warnings fail)            |
+| `npm run lint:fix`      | Auto-fix lint issues                                      |
+| `npm run format`        | Format the whole repo (Prettier)                          |
+| `npm run format:check`  | Check formatting (used in CI)                             |
+| `npm run typecheck`     | Check types (`src/` and `tests/`)                         |
+| `npm test`              | Run tests                                                 |
+| `npm run test:watch`    | Run tests in watch mode                                   |
+| `npm run test:coverage` | Run tests with coverage thresholds (used in CI)           |
 
 ## Development Workflow
 
@@ -119,9 +120,12 @@ See [`.changeset/README.md`](./.changeset/README.md) for the full guide.
 ```bash
 npm run lint
 npm run typecheck
+npm run format:check
 npm run build
-npm test
+npm run test:coverage
 ```
+
+These are the same commands CI runs. Lint, formatting and type checks cover `tests/` and `scripts/` as well as `src/`.
 
 ### 6. Push and Open a PR
 

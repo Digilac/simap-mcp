@@ -65,7 +65,10 @@ describe("query parameter building", () => {
   /**
    * Helper function that mirrors the query building logic
    */
-  function buildQueryParams(params: { query: string; lang: string }): Record<string, string> {
+  function buildQueryParams(params: {
+    query: string;
+    lang: string;
+  }): Record<string, string> {
     return {
       query: params.query,
       language: params.lang,
@@ -148,29 +151,19 @@ describe("response formatting", () => {
   it("should return exact empty results message when no codes found", () => {
     const response = formatResponse({ codes: [] }, "nonexistent", "en");
     expect(response.content).toHaveLength(1);
-    expect(response.content[0].text).toBe(
-      "No CPV codes found for `nonexistent`."
-    );
+    expect(response.content[0].text).toBe("No CPV codes found for `nonexistent`.");
   });
 
   it("should return empty results message for null-like codes array", () => {
-    const response = formatResponse(
-      { codes: [] },
-      "something",
-      "fr"
-    );
-    expect(response.content[0].text).toBe(
-      "No CPV codes found for `something`."
-    );
+    const response = formatResponse({ codes: [] }, "something", "fr");
+    expect(response.content[0].text).toBe("No CPV codes found for `something`.");
     expect(response.isError).toBeUndefined();
   });
 
   it("should fence backticks in query so they don't break the code span", () => {
     const response = formatResponse({ codes: [] }, "test`injection", "en");
     // Input contains one backtick → fence is two backticks (CommonMark §6.1).
-    expect(response.content[0].text).toBe(
-      "No CPV codes found for ``test`injection``."
-    );
+    expect(response.content[0].text).toBe("No CPV codes found for ``test`injection``.");
   });
 
   it("should include correct result count for successful search", () => {
@@ -186,9 +179,7 @@ describe("response formatting", () => {
 
   it("should format code list with correct structure", () => {
     const data = {
-      codes: [
-        { code: "72000000", label: { en: "IT services" } },
-      ],
+      codes: [{ code: "72000000", label: { en: "IT services" } }],
     };
     const response = formatResponse(data, "IT", "en");
     const text = response.content[0].text;
@@ -212,9 +203,7 @@ describe("response formatting", () => {
             {
               code: "72300000",
               label: { en: "Data services" },
-              codes: [
-                { code: "72310000", label: { en: "Data processing" } },
-              ],
+              codes: [{ code: "72310000", label: { en: "Data processing" } }],
             },
           ],
         },
@@ -264,7 +253,12 @@ describe("response formatting", () => {
       codes: [
         {
           code: "72000000",
-          label: { de: "IT-Dienste", fr: "Services IT", en: "IT services", it: "Servizi IT" },
+          label: {
+            de: "IT-Dienste",
+            fr: "Services IT",
+            en: "IT services",
+            it: "Servizi IT",
+          },
         },
       ],
     };

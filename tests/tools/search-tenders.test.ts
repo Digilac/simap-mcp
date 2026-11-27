@@ -69,7 +69,10 @@ describe("search_tenders schema validation", () => {
     });
 
     it("should reject issuedByOrganizations exceeding max length", () => {
-      const uuids = Array.from({ length: 51 }, () => "123e4567-e89b-12d3-a456-426614174000");
+      const uuids = Array.from(
+        { length: 51 },
+        () => "123e4567-e89b-12d3-a456-426614174000"
+      );
       const result = schema.safeParse({ issuedByOrganizations: uuids });
       expect(result.success).toBe(false);
     });
@@ -258,7 +261,9 @@ describe("query parameter building (buildTenderSearchQuery)", () => {
   });
 
   it("should map pubTypes to newestPubTypes", () => {
-    const result = buildTenderSearchQuery(input({ pubTypes: ["tender", "award_tender"] }));
+    const result = buildTenderSearchQuery(
+      input({ pubTypes: ["tender", "award_tender"] })
+    );
     expect(result.newestPubTypes).toEqual(["tender", "award_tender"]);
   });
 

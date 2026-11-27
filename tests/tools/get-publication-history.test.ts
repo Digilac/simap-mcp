@@ -122,9 +122,7 @@ describe("response formatting", () => {
   /**
    * Helper function that mirrors the response formatting logic
    */
-  function formatPublicationHistory(
-    publications: PastPublicationEntry[]
-  ): string {
+  function formatPublicationHistory(publications: PastPublicationEntry[]): string {
     let result = `# Historique des publications\n\n`;
     result += `${publications.length} publication(s) antérieure(s).\n\n`;
 

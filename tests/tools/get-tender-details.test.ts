@@ -22,9 +22,7 @@ const FIXTURES_DIR = resolve(__dirname, "../fixtures");
  * API would return it, without ever coupling to the schema.
  */
 function loadFixtureRaw(name: string): unknown {
-  return JSON.parse(
-    readFileSync(resolve(FIXTURES_DIR, name), "utf-8")
-  ) as unknown;
+  return JSON.parse(readFileSync(resolve(FIXTURES_DIR, name), "utf-8")) as unknown;
 }
 
 /**
@@ -202,7 +200,9 @@ describe("get_tender_details handler — without publicationId", () => {
     const text = await handler({ projectId: PROJECT_ID, lang: "fr", fullRaw: false });
 
     const urls = fetchMock.mock.calls.map(([input]) => String(input));
-    expect(urls.some((u) => u.includes(`/publication-details/${PUBLICATION_ID}`))).toBe(true);
+    expect(urls.some((u) => u.includes(`/publication-details/${PUBLICATION_ID}`))).toBe(
+      true
+    );
     expect(text).toContain(`**Publication ID:** ${PUBLICATION_ID}`);
     expect(text).toContain("48000000");
   });
@@ -214,7 +214,9 @@ describe("get_tender_details handler — without publicationId", () => {
 
     expect(result).toBeInstanceOf(ToolResult);
     expect((result as ToolResult).result.isError).toBe(true);
-    expect(JSON.stringify((result as ToolResult).result.content)).toContain("no publication yet");
+    expect(JSON.stringify((result as ToolResult).result.content)).toContain(
+      "no publication yet"
+    );
   });
 
   it("returns a not-found error when the project does not exist", async () => {
@@ -240,8 +242,14 @@ describe("resolveLatestPublicationId", () => {
       resolveLatestPublicationId({
         latestPublication: null,
         lots: [
-          { lotNumber: 1, latestPublication: { id: "old", dates: { publicationDate: "2026-09-01" } } },
-          { lotNumber: 2, latestPublication: { id: "new", dates: { publicationDate: "2026-10-06" } } },
+          {
+            lotNumber: 1,
+            latestPublication: { id: "old", dates: { publicationDate: "2026-09-01" } },
+          },
+          {
+            lotNumber: 2,
+            latestPublication: { id: "new", dates: { publicationDate: "2026-10-06" } },
+          },
           { lotNumber: 3, latestPublication: null },
         ],
       })
@@ -249,6 +257,8 @@ describe("resolveLatestPublicationId", () => {
   });
 
   it("returns undefined when neither the project nor its lots have a publication", () => {
-    expect(resolveLatestPublicationId({ latestPublication: null, lots: [] })).toBeUndefined();
+    expect(
+      resolveLatestPublicationId({ latestPublication: null, lots: [] })
+    ).toBeUndefined();
   });
 });

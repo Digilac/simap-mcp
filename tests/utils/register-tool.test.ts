@@ -136,7 +136,11 @@ describe("registerTool", () => {
     const handler = vi.fn(
       async (params: z.output<typeof schema>) => `lang=${params.lang}`
     );
-    registerTool(server, { name: "my_tool", title: "My Tool", description: "d", input: schema }, handler);
+    registerTool(
+      server,
+      { name: "my_tool", title: "My Tool", description: "d", input: schema },
+      handler
+    );
 
     const id = "123e4567-e89b-12d3-a456-426614174000";
     const out = await registered().handler({ id });
@@ -148,7 +152,11 @@ describe("registerTool", () => {
   it("returns an isError ToolResult with field paths on invalid input", async () => {
     const { server, registered } = fakeServer();
     const handler = vi.fn(() => "should not run");
-    registerTool(server, { name: "my_tool", title: "My Tool", description: "d", input: schema }, handler);
+    registerTool(
+      server,
+      { name: "my_tool", title: "My Tool", description: "d", input: schema },
+      handler
+    );
 
     const out = await registered().handler({ id: "not-a-uuid", lang: "xx" });
 

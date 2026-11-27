@@ -59,7 +59,10 @@ describe("search_bkp_codes schema validation", () => {
 });
 
 describe("query parameter building", () => {
-  function buildQueryParams(params: { query: string; lang: string }): Record<string, string> {
+  function buildQueryParams(params: {
+    query: string;
+    lang: string;
+  }): Record<string, string> {
     return {
       query: params.query,
       language: params.lang,
