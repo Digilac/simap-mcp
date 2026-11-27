@@ -3,6 +3,7 @@
  */
 
 import type { Translation, Pagination } from "./common.js";
+import type { KNOWN_PROC_OFFICE_TYPES } from "./schemas.js";
 
 /**
  * Custom error for simap API errors.
@@ -287,15 +288,14 @@ export interface PastPublicationsResponse {
 }
 
 /**
- * Procurement office type.
+ * Procurement office type with a known label.
  */
-export type ProcOfficeType =
-  | "federal"
-  | "cantonal"
-  | "inter_cantonal"
-  | "communal"
-  | "other_communal"
-  | "international";
+export type KnownProcOfficeType = (typeof KNOWN_PROC_OFFICE_TYPES)[number];
+
+/**
+ * Procurement office type as returned by simap: a known value or any new one.
+ */
+export type ProcOfficeType = KnownProcOfficeType | (string & {});
 
 /**
  * Procurement office public data.

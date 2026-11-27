@@ -7,7 +7,12 @@ import type { FastMCP } from "@prefecthq/fastmcp-ts/server";
 import { z } from "zod";
 import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
-import type { ProcOfficesPublicResponse, ProcOfficeType } from "../../types/api.js";
+import type {
+  KnownProcOfficeType,
+  ProcOfficePublicData,
+  ProcOfficesPublicResponse,
+  ProcOfficeType,
+} from "../../types/api.js";
 import { ProcOfficesPublicResponseSchema } from "../../types/schemas.js";
 import { formatInlineCode } from "../../utils/formatting.js";
 import { toToolErrorResult, toolErrorResult } from "../../utils/errors.js";
@@ -37,24 +42,67 @@ export type SearchProcOfficesInput = z.infer<typeof searchProcOfficesInputSchema
 const MAX_RESULTS = 50;
 
 /**
- * Maps proc office type to a human-readable English label.
+ * Human-readable English labels for the office types simap is known to return.
  */
-function getTypeLabel(type: ProcOfficeType): string {
-  const labels: Record<ProcOfficeType, string> = {
-    federal: "Federal",
-    cantonal: "Cantonal",
-    inter_cantonal: "Inter-cantonal",
-    communal: "Communal",
-    other_communal: "Other communal",
-    international: "International",
-  };
-  return labels[type] || type;
+const TYPE_LABELS: Record<KnownProcOfficeType, string> = {
+  federal: "Federal",
+  central_federation: "Federal (central administration)",
+  decentral_federation: "Federal (decentralised administration)",
+  other_federation: "Other federal",
+  cantonal: "Cantonal",
+  other_cantonal: "Other cantonal",
+  inter_cantonal: "Inter-cantonal",
+  communal: "Communal",
+  other_communal: "Other communal",
+  international: "International",
+};
+
+/**
+ * Maps a proc office type to a human-readable English label. A type simap
+ * added after this list was written is shown as-is, as inline code.
+ */
+export function getProcOfficeTypeLabel(type: ProcOfficeType): string {
+  return Object.hasOwn(TYPE_LABELS, type)
+    ? TYPE_LABELS[type as KnownProcOfficeType]
+    : formatInlineCode(type);
+}
+
+/**
+ * Formats the matching procurement offices as Markdown.
+ */
+export function formatProcOffices(
+  procOffices: ProcOfficePublicData[],
+  search?: string
+): string {
+  let result = search
+    ? `# Procurement Offices for ${formatInlineCode(search)}\n\n`
+    : `# Procurement Offices\n\n`;
+
+  result += `${procOffices.length} office(s) found.\n\n`;
+
+  const displayed = procOffices.slice(0, MAX_RESULTS);
+  for (const office of displayed) {
+    result += `## ${office.name}\n\n`;
+    result += `- **ID:** \`${office.id}\`\n`;
+    result += `- **Type:** ${getProcOfficeTypeLabel(office.type)}\n`;
+    result += `- **Institution ID:** \`${office.institutionId}\`\n`;
+    result += `- **Competence Centre ID:** \`${office.compCentreId}\`\n`;
+    result += "\n";
+  }
+
+  if (procOffices.length > MAX_RESULTS) {
+    result += `\n*${procOffices.length - MAX_RESULTS} additional office(s) not displayed. Refine your search.*`;
+  }
+
+  result += `\n*Use these IDs with the issuedByOrganizations parameter of search_tenders.*`;
+
+  return result;
 }
 
 /**
  * Handler for search_proc_offices.
  */
-async function handler(params: SearchProcOfficesInput) {
+export async function handler(params: SearchProcOfficesInput) {
   const { search, institutionId } = params;
 
   // At least one parameter is required
@@ -83,30 +131,7 @@ async function handler(params: SearchProcOfficesInput) {
       return `No procurement offices found${searchDesc}.`;
     }
 
-    let result = search
-      ? `# Procurement Offices for ${formatInlineCode(search)}\n\n`
-      : `# Procurement Offices\n\n`;
-
-    result += `${data.procOffices.length} office(s) found.\n\n`;
-
-    const displayed = data.procOffices.slice(0, MAX_RESULTS);
-    for (const office of displayed) {
-      const typeLabel = getTypeLabel(office.type);
-      result += `## ${office.name}\n\n`;
-      result += `- **ID:** \`${office.id}\`\n`;
-      result += `- **Type:** ${typeLabel}\n`;
-      result += `- **Institution ID:** \`${office.institutionId}\`\n`;
-      result += `- **Competence Centre ID:** \`${office.compCentreId}\`\n`;
-      result += "\n";
-    }
-
-    if (data.procOffices.length > MAX_RESULTS) {
-      result += `\n*${data.procOffices.length - MAX_RESULTS} additional office(s) not displayed. Refine your search.*`;
-    }
-
-    result += `\n*Use these IDs with the issuedByOrganizations parameter of search_tenders.*`;
-
-    return result;
+    return formatProcOffices(data.procOffices, search);
   } catch (error) {
     return toToolErrorResult(error, {
       toolName: "search_proc_offices",
