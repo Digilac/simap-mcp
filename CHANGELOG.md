@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.7.1
+
+### Patch Changes
+
+- [#148](https://github.com/Digilac/simap-mcp/pull/148) [`8872d89`](https://github.com/Digilac/simap-mcp/commit/8872d890fb5d6d861dccff32bcea36179fae8bdd) Thanks [@mathieumaf](https://github.com/mathieumaf)! - `browse_cpv_tree`: the message for a parent code without subcategories now names the nomenclature (`No CPV subcategories found for code …`), like `browse_bkp_tree`, `browse_npk_tree` and `browse_oag_tree`. The eight nomenclature tools now share one implementation (`src/tools/codes/code-tool-factory.ts`), so their wording can no longer drift apart.
+
+- [#149](https://github.com/Digilac/simap-mcp/pull/149) [`49d5b3c`](https://github.com/Digilac/simap-mcp/commit/49d5b3c6b1f0b0ef96146fbb3758462348d91f92) Thanks [@mathieumaf](https://github.com/mathieumaf)! - `search_bkp_codes`, `search_npk_codes`, `search_oag_codes`: list the codes that match the search. simap returns the matches nested under their parent categories, and these three tools dropped everything below the top level, so searching BKP for "Beton" returned "1 - Vorbereitungsarbeiten" and never "211.5 - Beton- und Stahlbetonarbeiten". All code endpoints now share one response schema (`CodeTreeResponseSchema`) that keeps the children, as `search_cpv_codes` already did.
+
+- [#149](https://github.com/Digilac/simap-mcp/pull/149) [`49d5b3c`](https://github.com/Digilac/simap-mcp/commit/49d5b3c6b1f0b0ef96146fbb3758462348d91f92) Thanks [@mathieumaf](https://github.com/mathieumaf)! - `browse_oag_tree`: accept the dotted codes simap uses below the first level (`1.2`, `1.10`, `4.4.2`). The `parentCode` parameter only allowed digits, so nothing under a top-level OAG category could be opened.
+
+- [#149](https://github.com/Digilac/simap-mcp/pull/149) [`49d5b3c`](https://github.com/Digilac/simap-mcp/commit/49d5b3c6b1f0b0ef96146fbb3758462348d91f92) Thanks [@mathieumaf](https://github.com/mathieumaf)! - `browse_cpv_tree`, `browse_bkp_tree`, `browse_npk_tree`, `browse_oag_tree`: mark the categories that have subcategories with 📂. simap flags them with `hasChildren`, which the tools ignored, so the marker never appeared and nothing told the model which categories it could open.
+
 ## 1.7.0
 
 ### Minor Changes
