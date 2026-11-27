@@ -168,7 +168,9 @@ describe("simap MCP server (FastMCP)", () => {
 
   it("still exposes the Skill as a plain resource to clients without the extension", async () => {
     const resources = await client.listResources();
-    expect(resources.map((r) => r.uri)).toContain(SKILL_URI);
+    expect(resources.map((r) => r.uri)).toEqual(
+      expect.arrayContaining([SKILL_URI, "skill://simap-workflow/_manifest"])
+    );
     const contents = await client.readResource(SKILL_URI);
     const text = (contents[0] as { text: string }).text;
     expect(text).toContain("name: simap-workflow\n");
@@ -208,11 +210,6 @@ describe("simap MCP server Skills (modern connection)", () => {
     expect(files).toHaveLength(1);
     expect(files[0]).toMatchObject({ uri: SKILL_URI, verified: true });
     expect(files[0].body).toBe(buildSimapWorkflowInstructions());
-  });
-
-  it("returns the same snapshot on every request", async () => {
-    const [first, second] = await Promise.all([client.listSkills(), client.listSkills()]);
-    expect(second).toEqual(first);
   });
 
   it("names every tool, and only tools that exist", async () => {

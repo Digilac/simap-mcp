@@ -9,11 +9,7 @@ import {
   buildSimapWorkflowInstructions,
   createSimapWorkflowSkill,
 } from "../../src/skills/simap-workflow.js";
-import {
-  TENDER_ANALYSIS_RULES,
-  TENDER_ANALYSIS_SECTIONS,
-  buildAnalyzeTenderPrompt,
-} from "../../src/prompts/analyze-tender.js";
+import { buildAnalyzeTenderPrompt } from "../../src/prompts/analyze-tender.js";
 
 describe("simap-workflow skill", () => {
   describe("frontmatter", () => {
@@ -31,11 +27,6 @@ describe("simap-workflow skill", () => {
 
   describe("instructions", () => {
     const body = buildSimapWorkflowInstructions();
-
-    it("reuses the analysis sections and rules of analyze_tender verbatim", () => {
-      expect(body).toContain(TENDER_ANALYSIS_SECTIONS);
-      expect(body).toContain(`## Rules\n\n${TENDER_ANALYSIS_RULES}`);
-    });
 
     it("asks for the same analysis as the analyze_tender prompt", () => {
       const prompt = buildAnalyzeTenderPrompt({

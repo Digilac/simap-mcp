@@ -37,21 +37,21 @@ The simap tools read Switzerland's public procurement platform, simap.ch. They a
 - **Subject.** \`search_tenders\` filters on CPV codes (\`cpvCodes\`, 8 digits) and, for construction, BKP codes (\`bkpCodes\`). Find them with \`search_cpv_codes\` or \`browse_cpv_tree\`, and \`search_bkp_codes\` or \`browse_bkp_tree\`. When several codes fit, pass them all.
 - **NPK and OAG codes.** \`search_npk_codes\`, \`browse_npk_tree\`, \`search_oag_codes\` and \`browse_oag_tree\` explain construction positions and object types. \`search_tenders\` has no filter for them: use them to read a tender, or to pick words for a \`search\` text.
 - **Region.** \`cantons\` takes two-letter codes such as \`BE\`, \`VD\`, \`GE\` or \`ZH\`. Call \`list_cantons\` when unsure.
-- **Buyer.** Find the procurement office with \`search_proc_offices\`, by name or by an \`institutionId\` from \`list_institutions\`. Pass the office ID in \`issuedByOrganizations\`.
-- **Kind of contract.** \`projectSubTypes\` (construction, service, supply, competitions and studies), \`processTypes\` (open, selective, invitation, direct, no_process) and \`pubTypes\` (tender, award_tender, correction, revocation and others).
+- **Buyer.** \`issuedByOrganizations\` takes an institution ID from \`list_institutions\` (every office of that institution) or a procurement office ID from \`search_proc_offices\` (that office only).
+- **Kind of contract.** \`projectSubTypes\` (construction, service, supply, competitions, studies and requests for information), \`processTypes\` (open, selective, invitation, direct, no_process) and \`pubTypes\` (tender, award_tender, correction, revocation and others).
 
 ## 2. Search
 
 Call \`search_tenders\` with these filters.
 
-- **Dates.** \`publicationFrom\` and \`publicationUntil\` (\`YYYY-MM-DD\`) filter on the date of the latest publication. With no filter at all, the tool only returns what was published today (Europe/Zurich). Any other filter turns that default off, so a search on a canton or a code alone covers every date. Set \`publicationFrom\` when the user wants current tenders, for example the last 30 days.
+- **Dates.** \`publicationFrom\` and \`publicationUntil\` (\`YYYY-MM-DD\`) filter on the date of the latest publication. With no filter at all, the tool only returns what was published today (Europe/Zurich). Any other filter turns that default off, so a search on a canton or a code alone covers every date. Set \`publicationFrom\` when the user wants recent publications. A recent publication can be an award, and an older call for tenders can still be open: add \`pubTypes: ["tender"]\` for calls for tenders, and check the submission deadline in the details.
 - **Text.** \`search\` needs at least 3 characters.
 - **Language.** \`lang\` (\`de\`, \`fr\`, \`it\`, \`en\`; default \`en\`) picks the language of titles. Use the user's language.
-- **Pages.** When the output ends with "More results available", call again with the same filters and the \`lastItem\` it gives.
+- **Pages.** When the output ends with "More results available", call again with the same filters and the \`lastItem\` it gives. If the first call had no filter, pass today's date as \`publicationFrom\` on the next pages too: \`lastItem\` counts as a filter and would turn the today-only default off.
 
 ## 3. Open the results
 
-Call \`get_tender_details\` with the "Project ID" of each result worth a closer look. Leave \`publicationId\` out to get the latest publication. Set \`fullRaw\` only when the structured fields are not enough.
+Call \`get_tender_details\` with the "Project ID" of each result worth a closer look. Leave \`publicationId\` out to get the latest publication. For a project with lots, that is the most recently published lot: to read another lot, call again with the "Publication ID" listed under it. Set \`fullRaw\` only when the structured fields are not enough.
 
 ## 4. Check the history
 

@@ -368,9 +368,9 @@ No parameters required.
 
 URI: `skill://simap-workflow/SKILL.md` (single file). Steps:
 
-1. Choose the filters: CPV / BKP codes (`search_*_codes`, `browse_*_tree`), cantons (`list_cantons`), buyer (`search_proc_offices`, `list_institutions` → `issuedByOrganizations`), contract kind. NPK / OAG codes are explained as reading aids, since `search_tenders` cannot filter on them.
-2. Search with `search_tenders`, including the today-only (Europe/Zurich) default when no filter is given, and `lastItem` pagination.
-3. Open the results with `get_tender_details`.
+1. Choose the filters: CPV / BKP codes (`search_*_codes`, `browse_*_tree`), cantons (`list_cantons`), buyer (institution ID from `list_institutions` or office ID from `search_proc_offices` → `issuedByOrganizations`), contract kind. NPK / OAG codes are explained as reading aids, since `search_tenders` cannot filter on them.
+2. Search with `search_tenders`, including the today-only (Europe/Zurich) default when no filter is given, and `lastItem` pagination (which must carry that date explicitly).
+3. Open the results with `get_tender_details` (one call per lot when needed).
 4. Check corrections, cancellations and awards with `get_publication_history`.
 5. Analyze with the eight sections and rules shared with `analyze_tender`.
 
