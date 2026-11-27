@@ -30,6 +30,14 @@ Relevant concerns include:
 - Input validation issues
 - Unexpected data exposure through tool outputs
 
+### Published Skill
+
+The server publishes one Skill (`simap-workflow`) through the MCP Skills extension, so it advertises the `io.modelcontextprotocol/skills` extension and lists `skill://simap-workflow/SKILL.md` and `skill://simap-workflow/_manifest` as resources. This adds no new data flow:
+
+- The Skill is an in-memory snapshot built from constants in the source code. It does not read the filesystem, the network or any user input, and its content is the same for every client.
+- Only those two URIs resolve. Any other URI, including `..` and percent-encoded traversal attempts, is answered with "Resource not found".
+- Its text is instructions for the model, written by this project and reviewed like the `analyze_tender` prompt it shares its analysis with. Like the prompt, it only describes how to use the read-only tools.
+
 ## Best Practices for Users
 
 - Keep the package updated to the latest version

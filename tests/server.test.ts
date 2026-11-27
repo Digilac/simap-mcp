@@ -3,13 +3,18 @@
  * in-process client (no stdio, no network).
  *
  * These guard the MCP contract that clients see: the 14 tool names, the
- * advertised `inputSchema` (defaults must not be `required`), and the shape of
- * validation errors (tool results the model can read, not protocol errors).
+ * advertised `inputSchema` (defaults must not be `required`), the shape of
+ * validation errors (tool results the model can read, not protocol errors),
+ * and the simap-workflow Skill (MCP Skills extension).
  */
 
 import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { Client } from "@prefecthq/fastmcp-ts/client";
 import { createServer } from "../src/server.js";
+import { buildSimapWorkflowInstructions } from "../src/skills/simap-workflow.js";
+
+const SKILLS_EXTENSION = "io.modelcontextprotocol/skills";
+const SKILL_URI = "skill://simap-workflow/SKILL.md";
 
 const EXPECTED_TOOLS = [
   "search_tenders",
@@ -155,5 +160,69 @@ describe("simap MCP server (FastMCP)", () => {
 
   it("rejects analyze_tender calls without a url", async () => {
     await expect(client.getPrompt("analyze_tender", {})).rejects.toThrow(/url/);
+  });
+
+  it("advertises the Skills extension", () => {
+    expect(client.getServerCapabilities()?.extensions).toHaveProperty([SKILLS_EXTENSION]);
+  });
+
+  it("still exposes the Skill as a plain resource to clients without the extension", async () => {
+    const resources = await client.listResources();
+    expect(resources.map((r) => r.uri)).toEqual(
+      expect.arrayContaining([SKILL_URI, "skill://simap-workflow/_manifest"])
+    );
+    const contents = await client.readResource(SKILL_URI);
+    const text = (contents[0] as { text: string }).text;
+    expect(text).toContain("name: simap-workflow\n");
+    expect(text.endsWith(buildSimapWorkflowInstructions())).toBe(true);
+  });
+});
+
+describe("simap MCP server Skills (modern connection)", () => {
+  let client: Client;
+
+  beforeAll(async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    client = await Client.connect(createServer(), {
+      versionNegotiation: { mode: { pin: "2026-07-28" } },
+      capabilities: { extensions: { [SKILLS_EXTENSION]: {} } },
+    });
+  });
+
+  afterAll(async () => {
+    await client.close();
+    vi.restoreAllMocks();
+  });
+
+  it("lists exactly the simap-workflow Skill", async () => {
+    expect(client.supportsSkills()).toBe(true);
+    const skills = await client.listSkills();
+    expect(skills).toHaveLength(1);
+    expect(skills[0]).toMatchObject({
+      uri: SKILL_URI,
+      frontmatter: { name: "simap-workflow" },
+    });
+    expect(skills[0].frontmatter.description).toMatch(/simap\.ch/);
+  });
+
+  it("serves a verified SKILL.md whose body is the shared instructions", async () => {
+    const { files } = await client.readSkill(SKILL_URI);
+    expect(files).toHaveLength(1);
+    expect(files[0]).toMatchObject({ uri: SKILL_URI, verified: true });
+    expect(files[0].body).toBe(buildSimapWorkflowInstructions());
+  });
+
+  it("names every tool, and only tools that exist", async () => {
+    const tools = (await client.listTools()).map((t) => t.name).sort();
+    const body = buildSimapWorkflowInstructions();
+    const referenced = [
+      ...new Set(
+        [...body.matchAll(/`([a-z]+(?:_[a-z]+)+)`/g)]
+          .map((m) => m[1])
+          .filter((name) => /^(search|get|list|browse)_/.test(name))
+      ),
+    ].sort();
+    expect(referenced).toEqual(tools);
+    expect(body).toContain("`analyze_tender`");
   });
 });

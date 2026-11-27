@@ -50,28 +50,12 @@ export function parseTenderReference(input: string): TenderReference {
 }
 
 /**
- * Builds the prompt text for analyze_tender. Exported for tests.
+ * The eight sections of a bid/no-bid analysis, as Markdown `###` headings.
+ *
+ * Shared with the `simap-workflow` Skill (`src/skills/simap-workflow.ts`) so
+ * the prompt and the Skill always ask for the same analysis.
  */
-export function buildAnalyzeTenderPrompt(args: AnalyzeTenderArgs): string {
-  const { projectId, lang } = parseTenderReference(args.url);
-
-  const findTender = projectId
-    ? `1. Call \`get_tender_details\` with \`projectId: "${projectId}"\` and \`lang: "${lang}"\`. Leave \`publicationId\` out: the tool then loads the latest publication.`
-    : `1. The input below is not a simap.ch tender link. Treat it as a project number or title: call \`search_tenders\` with it as \`search\` text (no date filter) to find the project. If several projects match, list them and ask me which one to analyze before going further. Then call \`get_tender_details\` with the project ID you found and \`lang: "${lang}"\`.
-
-   Input: ${args.url}`;
-
-  return `Analyze the following public tender from simap.ch and help me decide whether to bid.
-
-## Steps
-
-${findTender}
-2. Call \`get_publication_history\` with the "Publication ID" shown in the output (under "Latest Publication", or under each lot for projects with lots; call it once per distinct ID) to check for corrections, cancellations or an award that change this tender.
-3. Write the analysis below using only the data returned by these tools.
-
-## Analysis
-
-### 1. Overview
+export const TENDER_ANALYSIS_SECTIONS = `### 1. Overview
 Title, contracting authority, procurement type (construction / service / supply), procedure type, CPV codes, place of performance, and whether the contract falls under international agreements (WTO/GPA).
 
 ### 2. Scope
@@ -93,14 +77,44 @@ Accepted languages, submission format and channel, required documents, offer val
 Unusual or restrictive conditions, ambiguities worth raising during the Q&A period, and any amendment found in the publication history.
 
 ### 8. Bid / no-bid summary
-Three to five bullet points summarising the opportunity, the main effort drivers and the main risks.
+Three to five bullet points summarising the opportunity, the main effort drivers and the main risks.`;
 
-## Rules
-
-- Never invent information. When a field is missing from the tool output, write "Not specified in the publication".
+/**
+ * Rules the model follows while writing the analysis, as a Markdown list.
+ * Shared with the `simap-workflow` Skill, like {@link TENDER_ANALYSIS_SECTIONS}.
+ */
+export const TENDER_ANALYSIS_RULES = `- Never invent information. When a field is missing from the tool output, write "Not specified in the publication".
 - Quote amounts, dates and criteria exactly as published.
 - If the latest publication is a cancellation or an award, say so at the top of the analysis.
 - If a tool returns an error, report it and stop instead of guessing.`;
+
+/**
+ * Builds the prompt text for analyze_tender. Exported for tests.
+ */
+export function buildAnalyzeTenderPrompt(args: AnalyzeTenderArgs): string {
+  const { projectId, lang } = parseTenderReference(args.url);
+
+  const findTender = projectId
+    ? `1. Call \`get_tender_details\` with \`projectId: "${projectId}"\` and \`lang: "${lang}"\`. Leave \`publicationId\` out: the tool then loads the latest publication.`
+    : `1. The input below is not a simap.ch tender link. Treat it as a project number or title: call \`search_tenders\` with it as \`search\` text (no date filter) to find the project. If several projects match, list them and ask me which one to analyze before going further. Then call \`get_tender_details\` with the project ID you found and \`lang: "${lang}"\`.
+
+   Input: ${args.url}`;
+
+  return `Analyze the following public tender from simap.ch and help me decide whether to bid.
+
+## Steps
+
+${findTender}
+2. Call \`get_publication_history\` with the "Publication ID" shown in the output (under "Latest Publication", or under each lot for projects with lots; call it once per distinct ID) to check for corrections, cancellations or an award that change this tender.
+3. Write the analysis below using only the data returned by these tools.
+
+## Analysis
+
+${TENDER_ANALYSIS_SECTIONS}
+
+## Rules
+
+${TENDER_ANALYSIS_RULES}`;
 }
 
 /**
