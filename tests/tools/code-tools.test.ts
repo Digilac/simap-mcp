@@ -128,13 +128,10 @@ describe.each(SYSTEMS)("$name code tools", (system) => {
       expect(fetchMock.mock.calls[0][0]).toBe(
         `${API}/codes/v1/${key}/search?query=bau&language=fr`
       );
-      // Only the CPV search schema keeps nested results; the other three drop them.
+      // simap nests the matches under their parents: the child must be listed.
       const expected =
-        key === "cpv"
-          ? `# CPV Codes for \`bau\`\n\n3 result(s) found.\n\n` +
-            `- **100** - Construction\n- **110** - Gros œuvre\n- **200** - Technique\n`
-          : `# ${name} Codes for \`bau\`\n\n2 result(s) found.\n\n` +
-            `- **100** - Construction\n- **200** - Technique\n`;
+        `# ${name} Codes for \`bau\`\n\n3 result(s) found.\n\n` +
+        `- **100** - Construction\n- **110** - Gros œuvre\n- **200** - Technique\n`;
       expect(text).toBe(`${expected}\n${system.searchFooter}`);
     });
 
