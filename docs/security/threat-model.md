@@ -15,7 +15,7 @@ user ── MCP host + model ──stdio──> simap-mcp ──HTTPS GET──>
 
 The package is published to npm and listed in the MCP Registry by `.github/workflows/release.yml`.
 
-**Unverified deployment assumptions.** The repository cannot establish how a host sandboxes the process, what the host does with stderr, or whether an operator wraps the server in a network-facing proxy. The model below assumes a local, single-user host.
+**Unverified assumptions.** The repository cannot establish how a host sandboxes the process, what the host does with stderr, or whether an operator wraps the server in a network-facing proxy. The model below assumes a local, single-user host. It also relies on settings held by GitHub and npm rather than by this repository: the ruleset on `main` and the npm publishing configuration.
 
 ## Assets
 
@@ -40,28 +40,28 @@ The server holds no secrets of its own: it reads no API key, token or password.
 
 ## Entry points and untrusted input
 
-| Entry point                                    | Code                                                                    | Handling                                                                                                                                                                                                             |
-| ---------------------------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tool arguments (14 tools)                      | `src/utils/register-tool.ts`, each `*InputSchema` in `src/tools/**`     | Parsed by Zod before the handler runs. Invalid input returns an `isError` result.                                                                                                                                    |
-| IDs placed in a URL path                       | `src/api/endpoints.ts`, `get_tender_details`, `get_publication_history` | Validated as UUIDs by the input schema before interpolation.                                                                                                                                                         |
-| Query values                                   | `buildUrl()` in `src/api/client.ts`                                     | Encoded through `URLSearchParams`.                                                                                                                                                                                   |
-| Prompt argument (`analyze_tender` URL)         | `src/prompts/analyze-tender.ts`                                         | The user who invokes the prompt supplies it. A project ID and language are extracted from a simap link; any other text is echoed into the prompt as search input. The prompt emits instructions and fetches nothing. |
-| simap responses                                | `src/api/client.ts`, `src/types/schemas.ts`                             | JSON only, validated by Zod. Unknown fields are kept (`.passthrough()`) so upstream additions do not break tools.                                                                                                    |
-| Environment variables                          | `src/server.ts`, `src/api/client.ts`                                    | The server's own code reads only `SIMAP_MCP_DEBUG` and `MCP_TRANSPORT`, and forces `MCP_TRANSPORT` back to `stdio`. FastMCP's HTTP variables therefore have no effect (see SECURITY.md).                             |
-| Skill resources (`skill://simap-workflow/...`) | `src/skills/**`                                                         | Built from constants in memory; no filesystem or network read.                                                                                                                                                       |
+| Entry point                                    | Code                                                                    | Handling                                                                                                                                                                                                                                                                        |
+| ---------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tool arguments (14 tools)                      | `src/utils/register-tool.ts`, each `*InputSchema` in `src/tools/**`     | Parsed by Zod before the handler runs. Invalid input returns an `isError` result.                                                                                                                                                                                               |
+| IDs placed in a URL path                       | `src/api/endpoints.ts`, `get_tender_details`, `get_publication_history` | IDs supplied by the user are validated as UUIDs by the input schema before interpolation. When `publicationId` is omitted, `get_tender_details` takes the ID from simap's project header, where it is only checked to be a string (see known limits).                           |
+| Query values                                   | `buildUrl()` in `src/api/client.ts`                                     | Encoded through `URLSearchParams`.                                                                                                                                                                                                                                              |
+| Prompt argument (`analyze_tender` URL)         | `src/prompts/analyze-tender.ts`                                         | The user who invokes the prompt supplies it. A project ID is taken from a simap link or, failing that, from the first UUID anywhere in the text; only when there is none is the text echoed into the prompt as search input. The prompt emits instructions and fetches nothing. |
+| simap responses                                | `src/api/client.ts`, `src/types/schemas.ts`                             | JSON only, validated by Zod. A field the schema does not list is dropped, except in the tender schemas, which use `.passthrough()` to keep unknown fields so that `fullRaw` can return them. Neither case fails the tool.                                                       |
+| Environment variables                          | `src/server.ts`, `src/api/client.ts`                                    | The server's own code reads only `SIMAP_MCP_DEBUG` and `MCP_TRANSPORT`, and forces `MCP_TRANSPORT` back to `stdio`. FastMCP's HTTP variables therefore have no effect (see SECURITY.md).                                                                                        |
+| Skill resources (`skill://simap-workflow/...`) | `src/skills/**`                                                         | Built from constants in memory; no filesystem or network read.                                                                                                                                                                                                                  |
 
 ## Trust boundaries
 
 1. **Host ↔ server (stdio).** stdout is the JSON-RPC stream. Anything else written there breaks the protocol, so all logging goes to stderr.
-2. **Server ↔ simap (HTTPS).** The base URL is the constant `SIMAP_API_BASE`. No argument or environment variable can change the host, so the server cannot be pointed at another target. Only `GET` is issued.
+2. **Server ↔ simap (HTTPS).** Every request starts at the constant `SIMAP_API_BASE`. No argument or environment variable can change where a request starts, and only `GET` is issued. `fetch` follows redirects with its default settings, so simap.ch itself can send a request to another address.
 3. **simap content ↔ model.** Tender text is third-party content returned to the model as Markdown. The server escapes user input it echoes back, but it does not and cannot remove instructions hidden in a tender. Every tool is read-only and advertised as such (`readOnlyHint`), which bounds what an injected instruction can make this server do. What the host's other tools do with that text is outside this repository.
-4. **Repository ↔ users (release).** Merging to `main` is the only way to publish. npm publication uses OIDC with provenance; the registry publisher binary is verified with cosign before it runs.
+4. **Repository ↔ users (release).** Only `.github/workflows/release.yml` publishes. npm publication runs on a push to `main` and uses OIDC with provenance. Registry publication runs from `main` only, including when the workflow is started by hand, and the publisher binary is verified with cosign before it runs. That a push to `main` requires a pull request with passing checks is a GitHub ruleset: a hosted setting this repository cannot show.
 
 ## Sensitive data flows
 
-- **Queries leave the machine** only towards `www.simap.ch`, over HTTPS.
-- **Queries reach the logs** only when `SIMAP_MCP_DEBUG` is set: the default log line is the endpoint path without its query string. Tender and publication IDs are part of that path. Hosts often retain stderr.
-- **Nothing is written to disk.** Reference data is cached in memory (`ResponseCache`, 500 entries, 24 hours) and lost on exit. Tenders are never cached.
+- **Queries leave the machine** in HTTPS requests that start at `www.simap.ch` (see boundary 2 for redirects).
+- **Queries reach the logs** only when `SIMAP_MCP_DEBUG` is set: the default log line is the endpoint path without its query string. Tender and publication IDs are part of that path. On failure the raw error is logged as well, and it can quote part of simap's response. Hosts often retain stderr.
+- **Nothing is written to disk.** Reference data is cached in memory (`ResponseCache`, 500 entries, 24 hours) under its full URL, so the terms of a code search stay in the process's memory until the entry expires or the process exits. Tenders are never cached.
 
 ## Privileged operations
 
@@ -72,5 +72,7 @@ The privileged operations are in the release pipeline: publishing to npm, creati
 ## Known limits and accepted risks
 
 - **Prompt injection through tender text** is not filtered (boundary 3). Accepted: the tools are read-only, and filtering free text would corrupt legitimate tenders.
-- **Response size is not capped.** A very large simap response is parsed in full. Accepted while the only upstream is simap; the 30-second timeout and the rate limiter (60 requests per minute) bound the request rate, not the size.
-- **`npx -y` runs the latest published version.** A compromised release reaches users on their next start. Mitigated by provenance, required checks on `main`, and pinned actions in the release workflow; users who need more can pin a version.
+- **Redirects are followed** (boundary 2). A redirect from simap.ch would take a request, and the query it carries, to another address. Accepted while simap.ch is the only upstream; refusing redirects in `src/api/client.ts` would close it.
+- **IDs taken from simap responses are not validated** before they go into a URL path (`get_tender_details` without `publicationId`). They can only change the path of a request to simap, not its host.
+- **Response size is not capped.** A very large simap response is parsed in full. Accepted while the only upstream is simap; the 30-second timeout and the rate limiter (60 requests per minute for each server process, retries included) bound the request rate, not the size.
+- **`npx -y` runs the latest published version.** A compromised release reaches users on their next start. Mitigated by provenance, by pinned actions in the release workflow, and by the ruleset that requires a pull request and passing checks on `main` (a hosted setting); users who need more can pin a version.

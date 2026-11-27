@@ -125,28 +125,32 @@ Tests mirror this tree under `tests/` (see [ARCHITECTURE.md](./ARCHITECTURE.md) 
 
 How to prove a change here. The server only reads the public simap API: there are no credentials, no user data and nothing to seed.
 
-- **Checks.** CI runs all five on Node 22, 24 and 26. Each must exit 0:
-  - `npm run lint` prints nothing.
-  - `npm run typecheck` prints nothing.
+- **Checks.** CI runs all five on Node 22, 24 and 26. Each must exit 0 with no diagnostics after npm's script header:
+  - `npm run lint`
+  - `npm run typecheck`
   - `npm run format:check` ends with `All matched files use Prettier code style!`.
-  - `npm run build` prints nothing and writes `dist/`.
+  - `npm run build` writes `dist/`.
   - `npm run test:coverage` passes every test and meets the coverage thresholds.
-- **The real server.** Run `npm run build` first, then:
+- **The server, in process.** Run `npm run build` first. `--file dist/server.js:createServer` loads the server without its stdio startup:
   - `npm run tools` lists the 14 tools with their input schemas. Use it to prove a registration or schema change.
   - `npx fastmcp call --file dist/server.js:createServer list_cantons` makes one live call and prints the table of 26 cantons. Swap in the tool you changed and its arguments, for example `search_cpv_codes query=software lang=fr`.
+  - The same command takes a prompt name with its arguments (`analyze_tender url=<simap link>`) or a resource URI (`skill://simap-workflow/SKILL.md`) and prints the prompt or the Skill. Neither touches the network.
   - Prefix a call with `SIMAP_MCP_DEBUG=1` to see the full outbound URL on stderr. Use it to prove a parameter mapping.
+- **The server, as shipped.** `npx fastmcp call --command "node dist/index.js" list_cantons` starts the real entry point over stdio. Use it to prove a change to `src/index.ts`, `src/server.ts` or the transport.
 - **Live calls reach the production simap API.** It is public and read-only, so a handful of calls is fine. Never loop over it or load-test it.
-- **Prompts and the Skill** have no CLI entry point. `tests/server.test.ts` drives them through an in-process MCP client, with no network.
-- **Off limits:** `npm run release`, `npm publish`, `mcp-publisher publish`, and starting `release.yml` by hand. They publish to npm and the MCP Registry, and a published version cannot be removed. To prove a packaging change, run `npm pack --dry-run` (it lists the tarball and must contain only `dist/`, `package.json`, `README.md` and `LICENSE`) and `node scripts/sync-server-json.mjs` (it must report `server.json` in sync).
+- **Regression tests.** `tests/server.test.ts` drives the tools, the prompt and the Skill through an in-process MCP client, with no network.
+- **Off limits:** `npm run release`, `npm publish`, `mcp-publisher publish`, and starting `release.yml` by hand. The first two publish to npm, where a version number can never be reused and can rarely be removed; the last two publish to the MCP Registry. To prove a packaging change, run:
+  - `npm pack --dry-run`: the tarball it lists must contain only `dist/`, `package.json`, `README.md` and `LICENSE`.
+  - `node scripts/sync-server-json.mjs && git diff --exit-code server.json`: it must print `server.json already at <version>` and leave no diff. The script rewrites `server.json` when it is out of sync, so the diff is the check.
 
 ## Code Review Rules
 
 Flag a change when:
 
 - **It writes to stdout.** stdout carries the MCP JSON-RPC stream, so a `console.log` or any other print in `src/` corrupts it and disconnects the client. Logs go to stderr with `console.error`.
-- **It throws from a tool handler.** A user-facing failure must come back as an `isError` tool result through `toToolErrorResult()` or `toolErrorResult()`. A throw, or a tool registered with `server.tool()` instead of `registerTool()`, becomes a protocol error the model cannot read.
-- **It rejects a valid simap response.** simap adds fields and enum values without notice (#144). A response schema that is strict where it used to be open (`.passthrough()`, `.nullish()`, open strings) turns an upstream addition into a failing tool.
-- **It trusts input.** User input placed in a URL path must be validated first (the IDs are UUIDs), and query values must go through `buildUrl()`. Search terms and full URLs may reach the logs only under `SIMAP_MCP_DEBUG`. User text echoed into Markdown goes through `formatInlineCode()` or `escapeInlineCode()`.
+- **It throws from a tool handler.** A user-facing failure must come back through `toToolErrorResult()` or `toolErrorResult()`. FastMCP turns a throw into an `isError` result that carries the raw exception message, so the user gets an internal error string instead of the guidance those helpers write. A tool registered with `server.tool()` anywhere but `src/utils/register-tool.ts` loses the input-mode schema, the read-only annotations and the field-level validation errors.
+- **It rejects or drops simap data.** simap adds fields and enum values without notice (#144). Tightening a response schema (an enum where a string was, a field made required) turns an upstream addition into a failing tool. Removing `.passthrough()` fails nothing but silently drops the unknown fields that `fullRaw` returns.
+- **It trusts input.** User input placed in a URL path must be validated first (the IDs are UUIDs), and query values must go through `buildUrl()`. A new log line must not carry query values (search terms, filters) outside `SIMAP_MCP_DEBUG`. User text echoed into Markdown goes through `formatInlineCode()` or `escapeInlineCode()`.
 - **It breaks deployed clients.** Renaming or removing a tool, prompt, Skill or parameter, or making an optional parameter required, breaks every client configured against the published package. It needs a `major` changeset.
 
 Skip `CHANGELOG.md`: changesets generates it. Review `package-lock.json`: it picks the dependency versions that run.
@@ -155,20 +159,20 @@ Cite file:line for every finding, and post at most 3 nits.
 
 ## Risk
 
-The tier of a pull request, read by the PR workflow. When paths overlap, the higher tier wins.
+The tier to state in a pull request description. Nothing checks it automatically: it tells the reviewer how much care a change needs. When paths overlap, the higher tier wins.
 
 - **High**
   - CI and release: `.github/workflows/**`, `.github/dependabot.yml`, `.changeset/config.json`, `scripts/**`, `server.json`.
   - Dependencies: `package.json`, `package-lock.json`.
-  - What defines the checks: `tsconfig*.json`, `eslint.config.js`, `vitest.config.ts`.
+  - What defines the checks: `tsconfig*.json`, `eslint.config.js`, `vitest.config.ts`, `.prettierrc`, `.prettierignore`.
   - The only outbound network path and the transport: `src/api/client.ts`, `src/api/endpoints.ts`, `src/server.ts`, `src/utils/register-tool.ts`.
   - The public contract, wherever it lives: renaming or removing a tool, prompt, Skill or parameter, or making an optional parameter required.
-  - Files that steer review and shipping: `AGENTS.md`, `SECURITY.md`, `docs/security/threat-model.md`, `.coderabbit.yaml`.
+  - Files that steer review and shipping: `AGENTS.md`, the `CLAUDE.md` symlink, `SECURITY.md`, `docs/security/threat-model.md`, `.coderabbit.yaml`.
 - **Low**
   - Docs: `README.md`, `ARCHITECTURE.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `.changeset/*.md`, `.github/ISSUE_TEMPLATE/**`, `.github/PULL_REQUEST_TEMPLATE.md`.
   - Tests: `tests/**`.
   - Not docs: `src/prompts/**`, `src/skills/**` and tool `description` strings. The model loads them at runtime, so they are Medium.
-- **Medium:** everything else, which is the rest of `src/**`.
+- **Medium:** everything else.
 
 ## Changesets
 

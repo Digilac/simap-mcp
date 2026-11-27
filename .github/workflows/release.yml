@@ -85,8 +85,11 @@ jobs:
   # own via `workflow_dispatch` without re-running the release.
   publish-registry:
     needs: release
+    # Only ever from `main`: a manual run started on another branch would
+    # otherwise publish that branch's `server.json`.
     if: >-
       always() &&
+      github.ref == 'refs/heads/main' &&
       (github.event_name == 'workflow_dispatch' ||
        needs.release.outputs.published == 'true')
     runs-on: ubuntu-latest
