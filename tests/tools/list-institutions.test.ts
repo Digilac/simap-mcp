@@ -162,9 +162,7 @@ describe("response formatting", () => {
   }
 
   it("should format institutions with IDs", () => {
-    const institutions: Institution[] = [
-      { id: "123", name: { fr: "Test Institution" } },
-    ];
+    const institutions: Institution[] = [{ id: "123", name: { fr: "Test Institution" } }];
     const result = formatInstitutions(institutions);
 
     expect(result).toContain("**Test Institution**");

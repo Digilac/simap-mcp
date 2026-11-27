@@ -230,7 +230,7 @@ describe("SimapClient.get", () => {
   });
 
   it("includes query params in the final URL", async () => {
-    const fetchMock = vi.fn(async () => jsonResponse({ ok: true }));
+    const fetchMock = vi.fn(async (_url: string) => jsonResponse({ ok: true }));
     vi.stubGlobal("fetch", fetchMock);
 
     const client = newClient();
@@ -238,7 +238,7 @@ describe("SimapClient.get", () => {
       params: { q: "hello", cantons: ["VD", "GE"] },
     });
 
-    const calledUrl = fetchMock.mock.calls[0][0] as string;
+    const calledUrl = fetchMock.mock.calls[0][0];
     expect(calledUrl).toContain("q=hello");
     expect(calledUrl).toContain("cantons=VD");
     expect(calledUrl).toContain("cantons=GE");

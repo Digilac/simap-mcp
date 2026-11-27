@@ -40,9 +40,7 @@ function jsonResponse(body: unknown, status = 200): Response {
   });
 }
 
-function office(
-  overrides: Partial<ProcOfficePublicData> = {}
-): ProcOfficePublicData {
+function office(overrides: Partial<ProcOfficePublicData> = {}): ProcOfficePublicData {
   return {
     id: "office-123",
     name: "Test Office",
@@ -130,9 +128,7 @@ describe("proc office type label mapping", () => {
   });
 
   it("should show an unknown type as-is in inline code", () => {
-    expect(getProcOfficeTypeLabel("future_office_type")).toBe(
-      "`future_office_type`"
-    );
+    expect(getProcOfficeTypeLabel("future_office_type")).toBe("`future_office_type`");
   });
 
   it("should not resolve Object.prototype keys as labels", () => {

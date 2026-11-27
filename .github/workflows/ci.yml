@@ -1,12 +1,12 @@
 name: CI
 
-# Only on pull requests targeting `main`: nothing is pushed directly to
-# `main` except merges, and `release.yml` already re-runs the full
-# lint/typecheck/format/build/test suite on every push to `main`. Running
-# CI on push as well would duplicate that for no added signal.
+# On every pull request, whatever its base, so stacked PRs are checked too.
+# Not on push: nothing is pushed directly to `main` except merges, and
+# `release.yml` already re-runs the full lint/typecheck/format/build/test
+# suite on every push to `main`. Running CI on push as well would duplicate
+# that for no added signal.
 on:
   pull_request:
-    branches: [main]
 
 permissions:
   contents: read
@@ -43,5 +43,5 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Test
-        run: npm test
+      - name: Test (with coverage thresholds)
+        run: npm run test:coverage

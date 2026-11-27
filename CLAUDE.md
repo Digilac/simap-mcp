@@ -19,17 +19,18 @@ MCP (Model Context Protocol) server that integrates with simap.ch, Switzerland's
 ## Commands
 
 ```bash
-npm run build        # Compile TypeScript (tsc)
+npm run build        # Compile src/ to dist/ (tsc -p tsconfig.build.json)
 npm start            # Run the server
-npm run dev          # Recompile on every save (tsc --watch)
+npm run dev          # Recompile on every save (tsc -p tsconfig.build.json --watch)
 npm run inspect      # MCP Inspector UI against dist/ (respawns the server per connection)
 npm run tools        # List tools + input schemas via the fastmcp CLI (smoke check)
-npm run lint         # Check code style
-npm run format       # Format with Prettier
+npm run lint         # ESLint on the whole repo; warnings fail
+npm run format       # Format the whole repo with Prettier
 npm run format:check # Check formatting (used in CI)
-npm run typecheck    # tsc --noEmit
+npm run typecheck    # tsc --noEmit on src/, tests/ and scripts/
 npm test             # Run tests with vitest
 npm run test:watch   # Run tests in watch mode
+npm run test:coverage # Tests + coverage thresholds (used in CI)
 ```
 
 ## Source Layout
@@ -100,13 +101,13 @@ Tests mirror this tree under `tests/` (see [ARCHITECTURE.md](./ARCHITECTURE.md) 
 - **Classes / Types**: PascalCase (`SimapClient`, `ProjectSearchEntry`)
 - **MCP tools**: snake_case (`search_tenders`)
 - **Constants**: UPPER_SNAKE (`SIMAP_API_BASE`)
-- **TypeScript**: strict mode is enforced (`tsconfig.json`). Never use `any` — prefer `unknown` and narrow.
+- **TypeScript**: strict mode is enforced (`tsconfig.json`, which type-checks `src/`, `tests/` and `scripts/`; `tsconfig.build.json` emits `src/` only). Never use `any` — prefer `unknown` and narrow; ESLint rejects it.
 - **Commits**: Conventional Commits format — `type(scope): short description`. Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`. Example: `feat(tools): add search_xxx tool`.
 
 ## Development Workflow
 
 1. **Write tests for every new feature or tool.** Tests are mandatory.
-2. Run `npm run format` and `npm run typecheck` before committing.
+2. Run `npm run format`, `npm run lint` and `npm run typecheck` before committing. They cover `src/`, `tests/` and `scripts/`.
 3. **Add a changeset for user-visible changes**: `npx changeset` (see [Changesets](#changesets) below). Internal-only changes (tests, CI tweaks, refactors with no user-visible effect) don't need one.
 4. Update [ARCHITECTURE.md](./ARCHITECTURE.md) / [SECURITY.md](./SECURITY.md) when patterns or threat model change.
 

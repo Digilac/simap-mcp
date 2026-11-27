@@ -10,9 +10,9 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write       # tags + GitHub Releases
-  pull-requests: write  # Version Packages PR
-  id-token: write       # OIDC for npm + mcp-publisher
+  contents: write # tags + GitHub Releases
+  pull-requests: write # Version Packages PR
+  id-token: write # OIDC for npm + mcp-publisher
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

@@ -32,7 +32,9 @@ describe("analyze_tender", () => {
 
     it("ignores query strings and fragments", () => {
       expect(
-        parseTenderReference(`https://simap.ch/de/project-detail/${PROJECT_ID}?tab=docs#lot-1`)
+        parseTenderReference(
+          `https://simap.ch/de/project-detail/${PROJECT_ID}?tab=docs#lot-1`
+        )
       ).toEqual({ projectId: PROJECT_ID, lang: "de" });
     });
 
@@ -41,7 +43,10 @@ describe("analyze_tender", () => {
     });
 
     it("falls back to a bare UUID and the en language", () => {
-      expect(parseTenderReference(PROJECT_ID)).toEqual({ projectId: PROJECT_ID, lang: "en" });
+      expect(parseTenderReference(PROJECT_ID)).toEqual({
+        projectId: PROJECT_ID,
+        lang: "en",
+      });
     });
 
     it("returns no project ID for free text", () => {
@@ -68,7 +73,9 @@ describe("analyze_tender", () => {
     });
 
     it("instructs the model to check the publication history", () => {
-      expect(buildAnalyzeTenderPrompt({ url: URL_FR })).toContain("`get_publication_history`");
+      expect(buildAnalyzeTenderPrompt({ url: URL_FR })).toContain(
+        "`get_publication_history`"
+      );
     });
 
     it("lists every analysis section", () => {
@@ -100,7 +107,9 @@ describe("analyze_tender", () => {
     });
 
     it("throws an error naming the invalid argument", () => {
-      expect(() => handler({})).toThrow(/Invalid arguments for prompt analyze_tender:\n- url: /);
+      expect(() => handler({})).toThrow(
+        /Invalid arguments for prompt analyze_tender:\n- url: /
+      );
     });
   });
 });

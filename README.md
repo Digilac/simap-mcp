@@ -14,35 +14,35 @@ Developed by [Digilac](https://www.digilac.ch/).
 
 ## Features
 
-| Tool | Description |
-|------|-------------|
-| `search_tenders` | Search tenders with filters (text, dates, types, cantons, CPV) |
-| `get_tender_details` | Get full details of a specific tender |
-| `search_cpv_codes` | Search CPV codes (Common Procurement Vocabulary) |
-| `browse_cpv_tree` | Navigate CPV code hierarchy |
-| `list_cantons` | List all Swiss cantons |
-| `list_institutions` | List Swiss public institutions |
-| `get_publication_history` | Get publication history for a project |
-| `search_proc_offices` | Search public procurement offices |
-| `search_bkp_codes` | Search BKP codes (construction) |
-| `browse_bkp_tree` | Navigate BKP code hierarchy |
-| `search_npk_codes` | Search NPK codes (standardized positions) |
-| `browse_npk_tree` | Navigate NPK code hierarchy |
-| `search_oag_codes` | Search OAG codes (object types) |
-| `browse_oag_tree` | Navigate OAG code hierarchy |
+| Tool                      | Description                                                    |
+| ------------------------- | -------------------------------------------------------------- |
+| `search_tenders`          | Search tenders with filters (text, dates, types, cantons, CPV) |
+| `get_tender_details`      | Get full details of a specific tender                          |
+| `search_cpv_codes`        | Search CPV codes (Common Procurement Vocabulary)               |
+| `browse_cpv_tree`         | Navigate CPV code hierarchy                                    |
+| `list_cantons`            | List all Swiss cantons                                         |
+| `list_institutions`       | List Swiss public institutions                                 |
+| `get_publication_history` | Get publication history for a project                          |
+| `search_proc_offices`     | Search public procurement offices                              |
+| `search_bkp_codes`        | Search BKP codes (construction)                                |
+| `browse_bkp_tree`         | Navigate BKP code hierarchy                                    |
+| `search_npk_codes`        | Search NPK codes (standardized positions)                      |
+| `browse_npk_tree`         | Navigate NPK code hierarchy                                    |
+| `search_oag_codes`        | Search OAG codes (object types)                                |
+| `browse_oag_tree`         | Navigate OAG code hierarchy                                    |
 
-| Prompt | Description |
-|--------|-------------|
+| Prompt           | Description                                                                                       |
+| ---------------- | ------------------------------------------------------------------------------------------------- |
 | `analyze_tender` | Structured bid/no-bid analysis of a tender (scope, deadlines, eligibility, award criteria, risks) |
 
-| Skill | Description |
-|-------|-------------|
+| Skill            | Description                                                                                                               |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `simap-workflow` | How to chain the tools: pick codes and cantons, search, open results, check the publication history, and analyze a tender |
 
 ## Prerequisites
 
 - An MCP-compatible client — **[Claude Desktop](#claude-desktop-recommended) is the easiest** if you are not a developer.
-- **Node.js ≥ 22** — *only* for clients that do not bundle it. Claude Desktop ships with its own Node.js, so there is nothing to install. For every other client, get it from [nodejs.org](https://nodejs.org/) (pick the LTS version).
+- **Node.js ≥ 22** — _only_ for clients that do not bundle it. Claude Desktop ships with its own Node.js, so there is nothing to install. For every other client, get it from [nodejs.org](https://nodejs.org/) (pick the LTS version).
 - No simap account, no API key, no payment — the simap API is public and read-only.
 
 ## Installation & Configuration
@@ -66,7 +66,7 @@ Developed by [Digilac](https://www.digilac.ch/).
    ```
 
 3. Save the file, then **fully quit** Claude Desktop (macOS: ⌘Q — closing the window is not enough) and reopen it.
-4. Check it worked: the simap tools now show up under the tools icon in the message box. Ask *"List the Swiss cantons in simap"* — Claude should answer with the 26 cantons.
+4. Check it worked: the simap tools now show up under the tools icon in the message box. Ask _"List the Swiss cantons in simap"_ — Claude should answer with the 26 cantons.
 
 The very first launch downloads the server, which takes a few seconds. If the tools do not appear, check **Settings → Developer** for the server status and logs.
 
@@ -94,12 +94,12 @@ LM Studio follows the same `mcp.json` notation. Open the **Program** tab in the 
 
 They all take the same snippet — only the file and the top-level key change:
 
-| Client | Where | Top-level key |
-| ------ | ----- | ------------- |
-| **Claude Code** | `claude mcp add simap -- npx -y @digilac/simap-mcp` | `mcpServers` |
-| **Cursor** | `~/.cursor/mcp.json` (all projects) or `.cursor/mcp.json` (one project) | `mcpServers` |
-| **VS Code** (Copilot) | `.vscode/mcp.json`, or the **MCP: Open User Configuration** command | `servers` |
-| **Windsurf** | `~/.codeium/windsurf/mcp_config.json` | `mcpServers` |
+| Client                | Where                                                                   | Top-level key |
+| --------------------- | ----------------------------------------------------------------------- | ------------- |
+| **Claude Code**       | `claude mcp add simap -- npx -y @digilac/simap-mcp`                     | `mcpServers`  |
+| **Cursor**            | `~/.cursor/mcp.json` (all projects) or `.cursor/mcp.json` (one project) | `mcpServers`  |
+| **VS Code** (Copilot) | `.vscode/mcp.json`, or the **MCP: Open User Configuration** command     | `servers`     |
+| **Windsurf**          | `~/.codeium/windsurf/mcp_config.json`                                   | `mcpServers`  |
 
 ```json
 {
@@ -168,10 +168,10 @@ Then point your client at the absolute path:
 
 Once configured, just ask your AI assistant in natural language. Mention "in simap" to make sure the assistant routes the request through the MCP server:
 
-- *"Show me new tenders published today in simap"*
-- *"Find construction tenders in canton Vaud in simap"*
-- *"Give me the details of this tender in simap"* (after a search)
-- *"Search CPV codes for IT services in simap"*
+- _"Show me new tenders published today in simap"_
+- _"Find construction tenders in canton Vaud in simap"_
+- _"Give me the details of this tender in simap"_ (after a search)
+- _"Search CPV codes for IT services in simap"_
 
 Clients that support MCP prompts also expose `analyze_tender`: in Claude Code, run `/mcp__simap__analyze_tender <simap.ch link>`; in Claude Desktop, pick it from the "+" menu and paste the tender's link.
 
@@ -185,12 +185,12 @@ The server also publishes the `simap-workflow` Skill through the [MCP Skills ext
 
 ## Listed on
 
-* [Official MCP Registry](https://registry.modelcontextprotocol.io/?q=io.github.Digilac%2Fsimap-mcp)
-* [Awesome MCP Servers](https://mcpservers.org/servers/digilac/simap-mcp)
-* [LobeHub](https://lobehub.com/mcp/digilac-simap-mcp)
-* [MCP.so](https://mcp.so/server/simap-mcp-server/Digilac)
-* [MCP Market](https://mcpmarket.com/server/simap)
-* [MCP Marketplace](https://mcp-marketplace.io/server/io-github-digilac-simap-mcp)
+- [Official MCP Registry](https://registry.modelcontextprotocol.io/?q=io.github.Digilac%2Fsimap-mcp)
+- [Awesome MCP Servers](https://mcpservers.org/servers/digilac/simap-mcp)
+- [LobeHub](https://lobehub.com/mcp/digilac-simap-mcp)
+- [MCP.so](https://mcp.so/server/simap-mcp-server/Digilac)
+- [MCP Market](https://mcpmarket.com/server/simap)
+- [MCP Marketplace](https://mcp-marketplace.io/server/io-github-digilac-simap-mcp)
 
 ## Contributing
 
