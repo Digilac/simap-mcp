@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.7.0
+
+### Minor Changes
+
+- [#142](https://github.com/Digilac/simap-mcp/pull/142) [`f66534b`](https://github.com/Digilac/simap-mcp/commit/f66534b41fab0db6aac2b7f04e2d405265f1c4ce) Thanks [@mathieumaf](https://github.com/mathieumaf)! - - `simap-workflow` Skill: the server now publishes a Skill through the MCP Skills extension (`skill://simap-workflow/SKILL.md`). It tells the agent how to chain the tools: pick CPV/BKP codes, cantons and the buyer, run `search_tenders` (including its today-only default), open results with `get_tender_details`, check `get_publication_history`, then write the bid/no-bid analysis. Clients without the extension that support MCP resources can read the same text as a plain resource.
+  - `analyze_tender`: its analysis sections and rules now come from constants shared with the Skill, so the two always ask for the same analysis. The prompt text is unchanged.
+
+### Patch Changes
+
+- [#145](https://github.com/Digilac/simap-mcp/pull/145) [`6c939b9`](https://github.com/Digilac/simap-mcp/commit/6c939b98b40d0e66c7ca38e941b2a8b263df3135) Thanks [@mathieumaf](https://github.com/mathieumaf)! - `search_proc_offices`: fix the tool failing on most searches ([#144](https://github.com/Digilac/simap-mcp/issues/144)). simap now returns procurement office types the response schema rejected (`other_cantonal`, `central_federation`, `decentral_federation`, `other_federation`), and one such office made the whole response invalid. The schema now accepts any type, the four new values get labels, and a type simap adds later is shown as-is instead of breaking the tool.
+
 ## 1.6.0
 
 ### Minor Changes
