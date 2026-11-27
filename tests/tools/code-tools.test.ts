@@ -128,7 +128,7 @@ describe.each(SYSTEMS)("$name code tools", (system) => {
       expect(fetchMock.mock.calls[0][0]).toBe(
         `${API}/codes/v1/${key}/search?query=bau&language=fr`
       );
-      // Only CPV search results are nested; the other three are flat lists.
+      // Only the CPV search schema keeps nested results; the other three drop them.
       const expected =
         key === "cpv"
           ? `# CPV Codes for \`bau\`\n\n3 result(s) found.\n\n` +

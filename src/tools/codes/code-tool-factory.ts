@@ -85,7 +85,7 @@ export function defineSearchCodesTool(config: SearchCodesToolConfig) {
         cacheTtlMs: REFERENCE_DATA_TTL_MS,
       });
 
-      if (!data.codes || data.codes.length === 0) {
+      if (data.codes.length === 0) {
         return `No ${acronym} codes found for ${formatInlineCode(query)}.`;
       }
 
@@ -149,7 +149,7 @@ export function defineBrowseTreeTool(config: BrowseTreeToolConfig) {
         cacheTtlMs: REFERENCE_DATA_TTL_MS,
       });
 
-      if (!data.codes || data.codes.length === 0) {
+      if (data.codes.length === 0) {
         return parentCode
           ? `No ${acronym} subcategories found for code \`${parentCode}\`.`
           : `No root ${acronym} categories found.`;

@@ -13,7 +13,7 @@ const tool = defineSearchCodesTool({
   description:
     "Search CPV (Common Procurement Vocabulary) codes by keyword or partial code number",
   endpoint: ENDPOINTS.CPV_SEARCH,
-  // The only nomenclature whose search results are nested.
+  // The only search schema that keeps nested results.
   responseSchema: CPVSearchResponseSchema,
   queryDescription: "Search term (keyword or code prefix)",
   footer: "*Use these codes with the cpvCodes parameter of search_tenders.*",
