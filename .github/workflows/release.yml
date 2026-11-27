@@ -136,7 +136,7 @@ jobs:
           set -euo pipefail
           # Pinned in a shell variable, not an action ref, so Dependabot cannot
           # track it — bump manually. Releases: modelcontextprotocol/registry.
-          MCP_PUBLISHER_VERSION="1.8.6"
+          MCP_PUBLISHER_VERSION="1.8.17"
           ASSET="mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz"
           BASE_URL="https://github.com/modelcontextprotocol/registry/releases/download/v${MCP_PUBLISHER_VERSION}"
           curl -fSL -o "$ASSET" "${BASE_URL}/${ASSET}"
