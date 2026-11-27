@@ -72,13 +72,22 @@ function jsonResponse(body: unknown, status = 200): Response {
   });
 }
 
-/** A two-level code list: one entry with a child, one without. */
+/**
+ * A search answer: the match sits three levels down, under its ancestors, as
+ * simap returns it. A schema that keeps one level of children would drop it.
+ */
 const TREE = {
   codes: [
     {
       code: "100",
       label: { de: "Bau", fr: "Construction" },
-      codes: [{ code: "110", label: { de: "Rohbau", fr: "Gros œuvre" } }],
+      codes: [
+        {
+          code: "110",
+          label: { de: "Rohbau", fr: "Gros œuvre" },
+          codes: [{ code: "111", label: { de: "Betonbau", fr: "Béton" }, codes: [] }],
+        },
+      ],
     },
     { code: "200", label: { de: "Technik", fr: "Technique" }, codes: [] },
   ],
@@ -136,10 +145,11 @@ describe.each(SYSTEMS)("$name code tools", (system) => {
       expect(fetchMock.mock.calls[0][0]).toBe(
         `${API}/codes/v1/${key}/search?query=bau&language=fr`
       );
-      // simap nests the matches under their parents: the child must be listed.
+      // simap nests the matches under their parents: every level must be listed.
       const expected =
-        `# ${name} Codes for \`bau\`\n\n3 result(s) found.\n\n` +
-        `- **100** - Construction\n- **110** - Gros œuvre\n- **200** - Technique\n`;
+        `# ${name} Codes for \`bau\`\n\n4 result(s) found.\n\n` +
+        `- **100** - Construction\n- **110** - Gros œuvre\n- **111** - Béton\n` +
+        `- **200** - Technique\n`;
       expect(text).toBe(`${expected}\n${system.searchFooter}`);
     });
 
