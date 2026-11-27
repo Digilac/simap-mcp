@@ -287,15 +287,10 @@ export interface PastPublicationsResponse {
 }
 
 /**
- * Procurement office type.
+ * Procurement office type. Kept as a plain string because simap adds new
+ * values without notice; the tool labels the ones it knows.
  */
-export type ProcOfficeType =
-  | "federal"
-  | "cantonal"
-  | "inter_cantonal"
-  | "communal"
-  | "other_communal"
-  | "international";
+export type ProcOfficeType = string;
 
 /**
  * Procurement office public data.

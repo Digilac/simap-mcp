@@ -313,14 +313,11 @@ export const PastPublicationsResponseSchema = z.object({
 
 // --- Procurement office schemas ---
 
-export const ProcOfficeTypeSchema = z.enum([
-  "federal",
-  "cantonal",
-  "inter_cantonal",
-  "communal",
-  "other_communal",
-  "international",
-]);
+/**
+ * Accepts any office type: simap adds new values without notice (#144), and
+ * one unknown value must not reject the whole response.
+ */
+export const ProcOfficeTypeSchema = z.string();
 
 export const ProcOfficePublicDataSchema = z.object({
   id: z.string(),

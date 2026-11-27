@@ -1,0 +1,60 @@
+{
+  "procOffices": [
+    {
+      "id": "9f8f97d6-3296-4d7f-bc9c-97567db2654a",
+      "name": "Kanton Zürich Finanzdirektion Amt für Informatik",
+      "type": "cantonal",
+      "institutionId": "6d66e05a-2701-43ac-b528-2b819c9db479",
+      "compCentreId": "dccd88b4-3fb4-4f35-9333-74fa71e56c24"
+    },
+    {
+      "id": "4baf1e53-3e59-413c-8373-ba940389cceb",
+      "name": "PRD - Statistik Stadt Zürich (SSZ)",
+      "type": "communal",
+      "institutionId": "8e77a1a3-f2ea-4aef-a337-0c109846d026",
+      "compCentreId": "1132a907-c12d-459b-bf95-5ec149c8a035"
+    },
+    {
+      "id": "eb40bce3-a1af-4a96-b394-a1fb02a29e1a",
+      "name": "Stiftung Alterswohnungen der Stadt Zürich (SAW)",
+      "type": "other_communal",
+      "institutionId": "90852c96-41bd-4c39-807a-e2b312309c08",
+      "compCentreId": "dccd88b4-3fb4-4f35-9333-74fa71e56c24"
+    },
+    {
+      "id": "434594a2-eeb3-4760-9de6-8d653167fd2f",
+      "name": "Elektrizitätswerke des Kantons Zürich ",
+      "type": "other_cantonal",
+      "institutionId": "ea6e0efb-2195-4afe-ba7a-3a01de015eac",
+      "compCentreId": "dccd88b4-3fb4-4f35-9333-74fa71e56c24"
+    },
+    {
+      "id": "034eee95-aeb1-45b2-b624-afbd2c58fdc6",
+      "name": "Flughafen Zürich AG - PMO",
+      "type": "other_federation",
+      "institutionId": "43b8c108-0ec1-44bb-90d5-fbcc98a82483",
+      "compCentreId": "572e82a9-4095-4435-9241-d5b671c4ed7f"
+    },
+    {
+      "id": "ede58f22-b678-41d7-835b-d37231352360",
+      "name": "Staatssekretariat für Migration SEM - AOZ Zürich",
+      "type": "central_federation",
+      "institutionId": "389ccac9-8ac9-4ecc-ae66-b65a62cd5132",
+      "compCentreId": "572e82a9-4095-4435-9241-d5b671c4ed7f"
+    },
+    {
+      "id": "fdf8e9d4-1a0a-4062-bc43-52e78e03a937",
+      "name": "ETH Zürich - Abt. Procurement & Export Services",
+      "type": "decentral_federation",
+      "institutionId": "94640ab0-24b2-477c-9796-adc1be23002f",
+      "compCentreId": "572e82a9-4095-4435-9241-d5b671c4ed7f"
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000144",
+      "name": "Synthetic office with a type simap may add later",
+      "type": "future_office_type",
+      "institutionId": "00000000-0000-4000-8000-000000000001",
+      "compCentreId": "00000000-0000-4000-8000-000000000002"
+    }
+  ]
+}
