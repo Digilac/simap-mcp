@@ -2,29 +2,22 @@
  * Factories for the nomenclature tools.
  *
  * CPV, BKP, NPK and OAG each have a `search_<x>_codes` and a `browse_<x>_tree`
- * tool that differ only in endpoint, response schema and wording. The logic
- * lives here once; each tool file passes its own configuration and re-exports
- * the resulting schema and `register*()` function.
+ * tool that differ only in endpoint and wording. The logic lives here once;
+ * each tool file passes its own configuration and re-exports the resulting
+ * schema and `register*()` function.
  */
 
 import type { FastMCP } from "@prefecthq/fastmcp-ts/server";
 import { z } from "zod";
 import { REFERENCE_DATA_TTL_MS, simap } from "../../api/client.js";
-import type { Translation } from "../../types/index.js";
+import { CodeTreeResponseSchema } from "../../types/schemas.js";
 import { toToolErrorResult } from "../../utils/errors.js";
 import { formatInlineCode } from "../../utils/formatting.js";
 import { registerTool } from "../../utils/register-tool.js";
 import { getTranslation } from "../../utils/translation.js";
 
-/** A code with its label and, where the endpoint nests them, its children. */
-interface CodeNode {
-  code: string;
-  label: Translation;
-  codes?: CodeNode[] | null;
-}
-
-/** Response schema of a code endpoint. Decides whether children are kept. */
-type CodeListSchema = z.ZodType<{ codes: CodeNode[] }>;
+/** A code with its label and its children. */
+type CodeNode = z.infer<typeof CodeTreeResponseSchema>["codes"][number];
 
 interface CodeToolConfig {
   /** Nomenclature acronym as shown to the user, e.g. `CPV`. */
@@ -33,8 +26,6 @@ interface CodeToolConfig {
   description: string;
   /** simap endpoint, from `ENDPOINTS`. */
   endpoint: string;
-  /** Zod schema for the response. */
-  responseSchema: CodeListSchema;
 }
 
 export interface SearchCodesToolConfig extends CodeToolConfig {
@@ -66,7 +57,8 @@ function flattenCodes(codes: CodeNode[], result: CodeNode[] = []): CodeNode[] {
 
 /**
  * Builds a `search_<acronym>_codes` tool: keyword search in one nomenclature.
- * Nested results are flattened; a flat response schema simply has no children.
+ * simap nests the matches under their parent categories; the tool lists the
+ * whole branch, parents first.
  */
 export function defineSearchCodesTool(config: SearchCodesToolConfig) {
   const { acronym } = config;
@@ -81,7 +73,7 @@ export function defineSearchCodesTool(config: SearchCodesToolConfig) {
     try {
       const data = await simap.get(config.endpoint, {
         params: { query, language: lang },
-        schema: config.responseSchema,
+        schema: CodeTreeResponseSchema,
         cacheTtlMs: REFERENCE_DATA_TTL_MS,
       });
 
@@ -145,7 +137,7 @@ export function defineBrowseTreeTool(config: BrowseTreeToolConfig) {
     try {
       const data = await simap.get(config.endpoint, {
         params: parentCode ? { parentCode } : {},
-        schema: config.responseSchema,
+        schema: CodeTreeResponseSchema,
         cacheTtlMs: REFERENCE_DATA_TTL_MS,
       });
 
@@ -160,7 +152,8 @@ export function defineBrowseTreeTool(config: BrowseTreeToolConfig) {
         : `# Root ${acronym} Categories\n\n`;
       result += `${data.codes.length} category(ies) found.\n\n`;
       for (const item of data.codes) {
-        const hasChildren = item.codes && item.codes.length > 0;
+        // List endpoints flag parents with `hasChildren`; they send no `codes`.
+        const hasChildren = item.hasChildren === true || (item.codes?.length ?? 0) > 0;
         const label = getTranslation(item.label, lang);
         result += `- **${item.code}** - ${label}${hasChildren ? " 📂" : ""}\n`;
       }

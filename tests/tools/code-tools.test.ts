@@ -58,7 +58,7 @@ const SYSTEMS: CodeSystem[] = [
   {
     key: "oag",
     name: "OAG",
-    parentCode: "5",
+    parentCode: "1.10",
     invalidParentCode: "abc",
     searchFooter: "*OAG codes classify objects by type in construction projects.*",
     browseFooter: "*Use browse_oag_tree with a parent code to see its subcategories.*",
@@ -72,15 +72,32 @@ function jsonResponse(body: unknown, status = 200): Response {
   });
 }
 
-/** A two-level code list: one entry with a child, one without. */
+/**
+ * A search answer: the match sits three levels down, under its ancestors, as
+ * simap returns it. A schema that keeps one level of children would drop it.
+ */
 const TREE = {
   codes: [
     {
       code: "100",
       label: { de: "Bau", fr: "Construction" },
-      codes: [{ code: "110", label: { de: "Rohbau", fr: "Gros œuvre" } }],
+      codes: [
+        {
+          code: "110",
+          label: { de: "Rohbau", fr: "Gros œuvre" },
+          codes: [{ code: "111", label: { de: "Betonbau", fr: "Béton" }, codes: [] }],
+        },
+      ],
     },
     { code: "200", label: { de: "Technik", fr: "Technique" }, codes: [] },
+  ],
+};
+
+/** One level, as the list endpoints answer: parents are flagged, not nested. */
+const LIST = {
+  codes: [
+    { code: "100", label: { de: "Bau", fr: "Construction" }, hasChildren: true },
+    { code: "200", label: { de: "Technik", fr: "Technique" }, hasChildren: false },
   ],
 };
 
@@ -128,13 +145,11 @@ describe.each(SYSTEMS)("$name code tools", (system) => {
       expect(fetchMock.mock.calls[0][0]).toBe(
         `${API}/codes/v1/${key}/search?query=bau&language=fr`
       );
-      // Only the CPV search schema keeps nested results; the other three drop them.
+      // simap nests the matches under their parents: every level must be listed.
       const expected =
-        key === "cpv"
-          ? `# CPV Codes for \`bau\`\n\n3 result(s) found.\n\n` +
-            `- **100** - Construction\n- **110** - Gros œuvre\n- **200** - Technique\n`
-          : `# ${name} Codes for \`bau\`\n\n2 result(s) found.\n\n` +
-            `- **100** - Construction\n- **200** - Technique\n`;
+        `# ${name} Codes for \`bau\`\n\n4 result(s) found.\n\n` +
+        `- **100** - Construction\n- **110** - Gros œuvre\n- **111** - Béton\n` +
+        `- **200** - Technique\n`;
       expect(text).toBe(`${expected}\n${system.searchFooter}`);
     });
 
@@ -180,7 +195,7 @@ describe.each(SYSTEMS)("$name code tools", (system) => {
 
   describe(browseTool, () => {
     it("lists the root categories and marks those with children", async () => {
-      fetchMock.mockResolvedValue(jsonResponse(TREE));
+      fetchMock.mockResolvedValue(jsonResponse(LIST));
 
       const { text, isError } = await call(browseTool, { lang: "de" });
 

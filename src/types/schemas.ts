@@ -20,38 +20,32 @@ export const PaginationSchema = z.object({
 
 // --- Code schemas ---
 
-const CPVCodeBaseSchema = z.object({
+const CodeNodeBaseSchema = z.object({
   code: z.string(),
   label: TranslationSchema,
+  /** Set by the list endpoints, which return one level and no `codes`. */
+  hasChildren: z.boolean().nullish(),
 });
 
-type CPVCodeSchema = z.infer<typeof CPVCodeBaseSchema> & {
-  codes?: CPVCodeSchema[] | null;
+type CodeNode = z.infer<typeof CodeNodeBaseSchema> & {
+  codes?: CodeNode[] | null;
 };
 
-export const CPVCodeSchema: z.ZodType<CPVCodeSchema> = CPVCodeBaseSchema.extend({
-  codes: z.lazy(() => z.array(CPVCodeSchema)).nullish(),
+/** A nomenclature code with its children, at any depth. */
+const CodeNodeSchema: z.ZodType<CodeNode> = CodeNodeBaseSchema.extend({
+  codes: z.lazy(() => z.array(CodeNodeSchema)).nullish(),
 });
 
-export const CPVSearchResponseSchema = z.object({
-  codes: z.array(CPVCodeSchema),
-});
-
-export const CodeEntrySchema = z.object({
-  code: z.string(),
-  label: TranslationSchema,
-});
-
-export const CodeSearchResponseSchema = z.object({
-  codes: z.array(CodeEntrySchema),
-});
-
-const CodeEntryWithChildrenSchema = CodeEntrySchema.extend({
-  codes: z.array(CodeEntrySchema).nullish(),
-});
-
+/**
+ * Response of every code endpoint, search and list, for CPV, BKP, NPK and OAG.
+ *
+ * simap answers a search with the matching codes nested under their parent
+ * categories, so the children must be kept: a flat schema would silently
+ * reduce every search to its top-level categories. A list answers with one
+ * level only and flags the codes that have children with `hasChildren`.
+ */
 export const CodeTreeResponseSchema = z.object({
-  codes: z.array(CodeEntryWithChildrenSchema),
+  codes: z.array(CodeNodeSchema),
 });
 
 // --- Canton schemas ---
