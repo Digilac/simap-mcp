@@ -216,9 +216,9 @@ describe.each(SYSTEMS)("$name code tools", (system) => {
       });
 
       expect(isError).toBe(false);
-      // browse_cpv_tree words this message without the acronym.
-      const subject = key === "cpv" ? "subcategories" : `${name} subcategories`;
-      expect(text).toBe(`No ${subject} found for code \`${system.parentCode}\`.`);
+      expect(text).toBe(
+        `No ${name} subcategories found for code \`${system.parentCode}\`.`
+      );
     });
 
     it("says so when there are no root categories", async () => {

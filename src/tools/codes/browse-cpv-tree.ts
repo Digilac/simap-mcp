@@ -3,98 +3,20 @@
  * Browse CPV code hierarchy.
  */
 
-import type { FastMCP } from "@prefecthq/fastmcp-ts/server";
-import { z } from "zod";
-import { REFERENCE_DATA_TTL_MS, simap } from "../../api/client.js";
+import type { z } from "zod";
 import { ENDPOINTS } from "../../api/endpoints.js";
-import type { CPVCode, CPVSearchResponse } from "../../types/api.js";
 import { CPVSearchResponseSchema } from "../../types/schemas.js";
-import { getTranslation } from "../../utils/translation.js";
-import { toToolErrorResult } from "../../utils/errors.js";
-import { registerTool } from "../../utils/register-tool.js";
+import { defineBrowseTreeTool } from "./code-tool-factory.js";
 
-/**
- * Schema for browse_cpv_tree parameters.
- */
-export const browseCpvTreeInputSchema = z.object({
-  parentCode: z
-    .string()
-    .regex(/^[0-9]{8}$/)
-    .optional()
-    .describe("Parent code (8 digits). If omitted, shows root categories"),
-  lang: z.enum(["de", "fr", "it", "en"]).default("en").describe("Display language"),
+const tool = defineBrowseTreeTool({
+  acronym: "CPV",
+  description: "Browse the CPV code hierarchy (shows subcategories of a parent code)",
+  endpoint: ENDPOINTS.CPV_LIST,
+  responseSchema: CPVSearchResponseSchema,
+  parentCodePattern: /^[0-9]{8}$/,
+  parentCodeDescription: "Parent code (8 digits). If omitted, shows root categories",
 });
+
+export const browseCpvTreeInputSchema = tool.inputSchema;
 export type BrowseCpvTreeInput = z.infer<typeof browseCpvTreeInputSchema>;
-
-/**
- * Flattens nested CPV codes structure into a flat array (only first level children).
- */
-function getDirectChildren(codes: CPVCode[]): CPVCode[] {
-  return codes;
-}
-
-/**
- * Handler for browse_cpv_tree.
- */
-async function handler(params: BrowseCpvTreeInput) {
-  const { parentCode, lang } = params;
-
-  try {
-    const queryParams: Record<string, string> = {};
-    if (parentCode) {
-      queryParams.parentCode = parentCode;
-    }
-
-    const data = await simap.get<CPVSearchResponse>(ENDPOINTS.CPV_LIST, {
-      params: queryParams,
-      schema: CPVSearchResponseSchema,
-      cacheTtlMs: REFERENCE_DATA_TTL_MS,
-    });
-
-    if (!data.codes || data.codes.length === 0) {
-      const message = parentCode
-        ? `No subcategories found for code \`${parentCode}\`.`
-        : `No root CPV categories found.`;
-      return message;
-    }
-
-    const codes = getDirectChildren(data.codes);
-
-    let result = parentCode
-      ? `# CPV Subcategories of \`${parentCode}\`\n\n`
-      : `# Root CPV Categories\n\n`;
-
-    result += `${codes.length} category(ies) found.\n\n`;
-
-    for (const item of codes) {
-      const label = getTranslation(item.label, lang);
-      const hasChildren = item.codes && item.codes.length > 0;
-      result += `- **${item.code}** - ${label}${hasChildren ? " 📂" : ""}\n`;
-    }
-
-    result += `\n*Use browse_cpv_tree with a parent code to see its subcategories.*`;
-
-    return result;
-  } catch (error) {
-    return toToolErrorResult(error, {
-      toolName: "browse_cpv_tree",
-      action: "browsing CPV codes",
-    });
-  }
-}
-
-/**
- * Registers the browse_cpv_tree tool.
- */
-export function registerBrowseCpvTree(server: FastMCP): void {
-  registerTool(
-    server,
-    {
-      name: "browse_cpv_tree",
-      title: "Browse CPV Tree",
-      description: "Browse the CPV code hierarchy (shows subcategories of a parent code)",
-      input: browseCpvTreeInputSchema,
-    },
-    handler
-  );
-}
+export const registerBrowseCpvTree = tool.register;
