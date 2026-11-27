@@ -1,0 +1,29 @@
+name: Feature request
+description: A new tool, a new filter, or an improvement to an existing one
+title: "[FEATURE] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: use-case
+    attributes:
+      label: What you are trying to do
+      description: The task, not the solution. For example "find every tender a given office published this year".
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would help
+      description: A new tool, a parameter on an existing tool, a change to the output.
+    validations:
+      required: true
+  - type: input
+    id: endpoint
+    attributes:
+      label: simap API endpoint, if you know it
+      description: See https://www.simap.ch/api-doc/
+      placeholder: "/codes/v1/cpv/search"
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else

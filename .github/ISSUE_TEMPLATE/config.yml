@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/Digilac/simap-mcp/security/advisories/new
+    about: Privately, through GitHub. Please do not open a public issue.
+  - name: simap.ch itself (data, accounts, outages)
+    url: https://www.simap.ch/
+    about: This project only reads the public simap API and cannot fix the platform.

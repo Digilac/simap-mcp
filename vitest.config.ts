@@ -4,6 +4,8 @@ export default defineConfig({
   test: {
     // Not the default `**/*.test.ts`, which also finds nested agent worktrees.
     include: ["tests/**/*.test.ts"],
+    // Live tests need the network: `npm run test:live` (vitest.live.config.ts).
+    exclude: ["tests/live/**"],
     coverage: {
       provider: "v8",
       include: ["src/**/*.ts"],
