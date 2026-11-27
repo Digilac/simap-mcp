@@ -20,6 +20,7 @@ The CLI writes a file like `.changeset/quiet-foxes-spin.md`. Commit it with the 
 When your PR is merged into `main`:
 
 - The `release.yml` workflow opens (or updates) a **Version Packages** PR that bumps `package.json` + `server.json`, refreshes `package-lock.json`, and consumes pending changesets into `CHANGELOG.md`.
+- That PR is opened by `github-actions[bot]`, so its CI does not start on its own: a maintainer clicks **Approve workflows to run** on the PR, each time it is updated.
 - When the maintainer merges that PR, `changesets/action` publishes to npm, creates the git tag and the GitHub Release (with `Thanks @you!` credit), then `mcp-publisher` publishes to the MCP Registry.
 
 ## Dependabot PRs
