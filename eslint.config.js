@@ -20,6 +20,6 @@ export default tseslint.config(
   },
   {
     // ESLint does not read .gitignore: nested agent worktrees must be listed.
-    ignores: ["dist/", "coverage/", "node_modules/", ".claude/"],
+    ignores: ["dist/", "coverage/", "node_modules/", ".claude/worktrees/"],
   }
 );
