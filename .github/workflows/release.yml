@@ -9,10 +9,8 @@ on:
   # the version already committed in `server.json` on the default branch.
   workflow_dispatch:
 
-permissions:
-  contents: write # tags + GitHub Releases
-  pull-requests: write # Version Packages PR
-  id-token: write # OIDC for npm + mcp-publisher
+# No default permissions: each job declares the ones it needs.
+permissions: {}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -22,14 +20,18 @@ jobs:
   release:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # tags + GitHub Releases
+      pull-requests: write # Version Packages PR
+      id-token: write # OIDC for npm
     outputs:
       published: ${{ steps.changesets.outputs.published }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-          # Persist the PAT (instead of the default GITHUB_TOKEN) in
-          # `.git/config`. Since changesets/action@v2 the release
+          # Check out with the PAT (instead of the default GITHUB_TOKEN).
+          # Since changesets/action v2 the release
           # commit and tags are pushed through the GitHub API with the
           # `github-token` input rather than the Git CLI, so this is a
           # fallback for any remaining Git CLI operation in the job —
@@ -38,7 +40,7 @@ jobs:
           # suppresses those for GITHUB_TOKEN to prevent recursion).
           token: ${{ secrets.RELEASE_PAT }}
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
@@ -62,7 +64,7 @@ jobs:
         run: npm test
 
       - id: changesets
-        uses: changesets/action@v2
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
           # Fine-grained PAT (Contents + Pull requests RW) so pushes to
           # `changeset-release/main` trigger downstream `pull_request`
@@ -83,13 +85,24 @@ jobs:
   # own via `workflow_dispatch` without re-running the release.
   publish-registry:
     needs: release
+    # Only ever from `main`: a manual run started on another branch would
+    # otherwise publish that branch's `server.json`.
     if: >-
       always() &&
+      github.ref == 'refs/heads/main' &&
       (github.event_name == 'workflow_dispatch' ||
        needs.release.outputs.published == 'true')
     runs-on: ubuntu-latest
+    permissions:
+      contents: read # checkout
+      id-token: write # OIDC for mcp-publisher
     steps:
-      - uses: actions/checkout@v7
+      # The `if:` above compares without regard to case, so a branch named
+      # `Main` would pass it. The shell comparison is exact.
+      - name: Refuse any ref but main
+        run: test "$GITHUB_REF" = "refs/heads/main"
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # On `push`, the release job has just committed the version bump
           # through the GitHub API, so the checked-out ref is one commit
