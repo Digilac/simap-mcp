@@ -47,7 +47,7 @@ Call \`search_tenders\` with these filters.
 - **Dates.** \`publicationFrom\` and \`publicationUntil\` (\`YYYY-MM-DD\`) filter on the date of the latest publication. With no filter at all, the tool only returns what was published today (Europe/Zurich). Any other filter turns that default off, so a search on a canton or a code alone covers every date. Set \`publicationFrom\` when the user wants recent publications. A recent publication can be an award, and an older call for tenders can still be open: for open calls, add \`pubTypes: ["tender", "correction"]\` (the filter applies to the latest publication, and a corrected call's latest publication is the correction), then check the deadline and status in the details and the history.
 - **Text.** \`search\` needs at least 3 characters.
 - **Language.** \`lang\` (\`de\`, \`fr\`, \`it\`, \`en\`; default \`en\`) picks the language of titles. Use the user's language.
-- **Pages.** When the output ends with "More results available", call again with the same filters and the \`lastItem\` it gives. If the first call had no filter, pass today's date as \`publicationFrom\` on the next pages too: \`lastItem\` counts as a filter and would turn the today-only default off.
+- **Pages.** When the output ends with "More results available", call again with the same filters and the \`lastItem\` it gives. If the first call had no filter, pass the date it covered (today in Europe/Zurich, \`YYYY-MM-DD\`) as \`publicationFrom\` on every next page, and keep that same date even if midnight passes while paging: \`lastItem\` counts as a filter and would turn the today-only default off.
 
 ## 3. Open the results
 
