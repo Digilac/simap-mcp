@@ -27,7 +27,7 @@ npm run tools        # List tools + input schemas via the fastmcp CLI (smoke che
 npm run lint         # ESLint on the whole repo; warnings fail
 npm run format       # Format the whole repo with Prettier
 npm run format:check # Check formatting (used in CI)
-npm run typecheck    # tsc --noEmit on src/ and tests/
+npm run typecheck    # tsc --noEmit on src/, tests/ and scripts/
 npm test             # Run tests with vitest
 npm run test:watch   # Run tests in watch mode
 npm run test:coverage # Tests + coverage thresholds (used in CI)
@@ -101,7 +101,7 @@ Tests mirror this tree under `tests/` (see [ARCHITECTURE.md](./ARCHITECTURE.md) 
 - **Classes / Types**: PascalCase (`SimapClient`, `ProjectSearchEntry`)
 - **MCP tools**: snake_case (`search_tenders`)
 - **Constants**: UPPER_SNAKE (`SIMAP_API_BASE`)
-- **TypeScript**: strict mode is enforced (`tsconfig.json`, which type-checks `src/` and `tests/`; `tsconfig.build.json` emits `src/` only). Never use `any` — prefer `unknown` and narrow; ESLint rejects it.
+- **TypeScript**: strict mode is enforced (`tsconfig.json`, which type-checks `src/`, `tests/` and `scripts/`; `tsconfig.build.json` emits `src/` only). Never use `any` — prefer `unknown` and narrow; ESLint rejects it.
 - **Commits**: Conventional Commits format — `type(scope): short description`. Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`. Example: `feat(tools): add search_xxx tool`.
 
 ## Development Workflow

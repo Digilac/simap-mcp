@@ -56,7 +56,7 @@ npm test
 | `npm run lint:fix`      | Auto-fix lint issues                                      |
 | `npm run format`        | Format the whole repo (Prettier)                          |
 | `npm run format:check`  | Check formatting (used in CI)                             |
-| `npm run typecheck`     | Check types (`src/` and `tests/`)                         |
+| `npm run typecheck`     | Check types (`src/`, `tests/` and `scripts/`)             |
 | `npm test`              | Run tests                                                 |
 | `npm run test:watch`    | Run tests in watch mode                                   |
 | `npm run test:coverage` | Run tests with coverage thresholds (used in CI)           |
