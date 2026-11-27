@@ -7,11 +7,9 @@ Thank you for your interest in this project! This guide will help you contribute
 ### Reporting a Bug
 
 1. Check that the bug hasn't already been reported in the [Issues](../../issues)
-2. Create a new issue with:
-   - Clear description of the problem
-   - Steps to reproduce
-   - Expected vs actual behavior
-   - Node.js version and OS
+2. Open a **Bug report** issue. The form asks for what it needs: the tool and its arguments, the server version and your MCP client.
+
+For a security problem, do not open an issue: use the private report described in [SECURITY.md](./SECURITY.md).
 
 ### Proposing a Feature
 
@@ -60,6 +58,7 @@ npm test
 | `npm test`              | Run tests                                                 |
 | `npm run test:watch`    | Run tests in watch mode                                   |
 | `npm run test:coverage` | Run tests with coverage thresholds (used in CI)           |
+| `npm run test:live`     | Call every tool against the real simap API                |
 
 ## Development Workflow
 
@@ -255,14 +254,16 @@ docs: update README
 
 ## Submitting a Pull Request
 
-### Checklist
+The pull request template asks for four things. CI already checks that the code compiles, lints, is formatted and passes its tests, so the description is for what CI cannot see:
 
-- [ ] Code compiles (`npm run build`)
-- [ ] Tests pass (`npm test`)
-- [ ] Linter passes (`npm run lint`)
-- [ ] Changeset added if the change is user-visible (`npx changeset`)
-- [ ] Documentation updated if necessary
-- [ ] Commits are clean and descriptive
+- **Description:** the problem first, then what the PR does about it.
+- **Evidence:** the command you ran and what it printed. For a tool change, call the tool for real (see [Develop](#3-develop)).
+- **Risk:** who is affected if the change is wrong. [AGENTS.md](./AGENTS.md#risk) lists which paths are high risk.
+- **Checklist:** tests, a changeset if the change is user-visible, documentation.
+
+## Reporting a Problem with simap Data
+
+simap changes its API responses without notice. A weekly job calls every tool against the real API (`npm run test:live`) and fails when a tool can no longer read a response. If a tool suddenly fails for you, run that command: its output names the tool and the error.
 
 ## Questions?
 

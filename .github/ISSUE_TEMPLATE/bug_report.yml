@@ -1,0 +1,65 @@
+name: Bug report
+description: A tool fails, returns wrong data, or the server does not start
+title: "[BUG] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Security problems do not belong here: use the private report linked on the issue chooser.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you asked, which tool ran, and what came back. Paste the error text if there is one.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: The tool name and its arguments are the most useful part. A link to the tender on simap.ch helps too.
+      placeholder: |
+        Tool: search_proc_offices
+        Arguments: { "search": "Zürich" }
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: simap-mcp version
+      description: The server prints it when it starts, in your client's MCP logs (`starting simap v1.7.0`). If you cannot find it, give the command from your client's configuration, or write "unknown".
+      placeholder: "1.7.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: client
+    attributes:
+      label: MCP client
+      options:
+        - Claude Desktop
+        - Claude Code
+        - Cursor
+        - VS Code
+        - Windsurf
+        - LM Studio
+        - Other (name it under "What happened")
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Node.js version and operating system
+      placeholder: "Node 24.1, macOS 15"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Server logs
+      description: The server's stderr, from your client's MCP logs. Setting `SIMAP_MCP_DEBUG=1` adds the request URLs. Check that the logs contain nothing you want to keep private.
+      render: text

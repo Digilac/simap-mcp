@@ -32,57 +32,14 @@ npm run typecheck    # tsc --noEmit on src/, tests/ and scripts/
 npm test             # Run tests with vitest
 npm run test:watch   # Run tests in watch mode
 npm run test:coverage # Tests + coverage thresholds (used in CI)
+npm run test:live    # Every tool against the real simap API (scheduled weekly)
 ```
 
 ## Source Layout
 
-```
-src/
-├── index.ts                          # Entry point
-├── server.ts                         # MCP server config + stdio transport
-├── api/
-│   ├── index.ts                      # Re-exports
-│   ├── client.ts                     # SimapClient + exported buildUrl()
-│   ├── endpoints.ts                  # API endpoint constants
-│   ├── rate-limiter.ts               # SlidingWindowRateLimiter (FIFO)
-│   └── response-cache.ts             # ResponseCache (TTL + LRU) for reference data
-├── tools/
-│   ├── index.ts                      # registerTools()
-│   ├── search-tenders.ts             # search_tenders
-│   ├── search-tenders-params.ts      # SEARCH_TENDERS_PARAM_MAP + buildTenderSearchQuery()
-│   ├── get-tender-details.ts         # get_tender_details
-│   ├── codes/
-│   │   ├── index.ts
-│   │   ├── code-tool-factory.ts      # defineSearchCodesTool() / defineBrowseTreeTool()
-│   │   ├── list-cantons.ts           # list_cantons
-│   │   ├── search-{cpv,bkp,npk,oag}-codes.ts
-│   │   └── browse-{cpv,bkp,npk,oag}-tree.ts
-│   └── organizations/
-│       ├── index.ts
-│       ├── list-institutions.ts
-│       ├── search-proc-offices.ts
-│       └── get-publication-history.ts
-├── prompts/
-│   ├── index.ts                      # registerPrompts()
-│   └── analyze-tender.ts             # analyze_tender + shared analysis sections/rules
-├── skills/
-│   ├── index.ts                      # registerSkills() — server.skills() catalog
-│   └── simap-workflow.ts             # simap-workflow Skill (SKILL.md built in code)
-├── types/
-│   ├── index.ts                      # Re-exports
-│   ├── api.ts                        # API response types (SimapApiError, ...)
-│   ├── common.ts                     # Translation, Language, Pagination
-│   ├── tools.ts                      # Parameter enums
-│   └── schemas.ts                    # Shared Zod primitives
-└── utils/
-    ├── index.ts                      # Re-exports
-    ├── errors.ts                     # toToolErrorResult(), toolErrorResult()
-    ├── register-tool.ts              # registerTool() — FastMCP wrapper
-    ├── translation.ts                # getTranslation() with fallback chain
-    └── formatting.ts                 # Markdown formatting
-```
+The annotated file tree is in [ARCHITECTURE.md](./ARCHITECTURE.md#file-structure). It lives there only, so it cannot drift from a copy here. In short: `src/api/` is the simap HTTP client, `src/tools/` the 14 tools (`codes/` holds the nomenclature and canton tools, `organizations/` the institution, procurement-office and publication-history tools), `src/prompts/` and `src/skills/` the prompt and the Skill, `src/types/` the Zod schemas and types, `src/utils/` the shared helpers.
 
-Tests mirror this tree under `tests/` (see [ARCHITECTURE.md](./ARCHITECTURE.md) for details).
+Tests live under `tests/`, one folder per area (`api/`, `tools/`, `prompts/`, `skills/`, `utils/`) plus `tests/server.test.ts`. Tool tests are flat in `tests/tools/`, whatever the tool's subfolder in `src/`. `tests/live/` holds the live smoke tests, which `npm test` does not run.
 
 ## Key Patterns
 
@@ -115,7 +72,7 @@ Tests mirror this tree under `tests/` (see [ARCHITECTURE.md](./ARCHITECTURE.md) 
 
 ## Testing
 
-- Test files: `tests/{module-path}/{module}.test.ts` — mirror the source structure.
+- Test files: `tests/{area}/{module}.test.ts`, as described under Source Layout.
 - For each tool, cover:
   1. **Schema validation** — Zod accepts valid inputs and rejects invalid ones (import the real schema).
   2. **Query parameter building** — user inputs map correctly to simap API params.
@@ -140,6 +97,7 @@ How to prove a change here. The server only reads the public simap API: there ar
 - **The server, as shipped.** `npx fastmcp call --command "node dist/index.js" list_cantons` starts the real entry point over stdio. Use it to prove a change to `src/index.ts`, `src/server.ts` or the transport.
 - **Live calls reach the production simap API.** It is public and read-only, so a handful of calls is fine. Never loop over it or load-test it.
 - **Regression tests.** `tests/server.test.ts` drives the tools, the prompt and the Skill through an in-process MCP client, with no network.
+- **Live smoke tests.** `npm run test:live` calls every tool against simap (about 16 requests) and fails when a tool can no longer read what simap returns. Run it after changing a response schema in `src/types/schemas.ts`. `.github/workflows/live-smoke.yml` runs it every Monday.
 - **Off limits:** `npm run release`, `npm publish`, `mcp-publisher publish`, and starting `release.yml` by hand. The first two publish to npm, where a version number can never be reused and can rarely be removed; the last two publish to the MCP Registry. To prove a packaging change, run:
   - `npm pack --dry-run`: the tarball it lists must contain only `dist/`, `package.json`, `README.md` and `LICENSE`.
   - `node scripts/sync-server-json.mjs && git diff --exit-code server.json`: it must print `server.json already at <version>` and leave no diff. The script rewrites `server.json` when it is out of sync, so the diff is the check.

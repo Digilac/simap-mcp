@@ -12,6 +12,6 @@
     "checkJs": true,
     "types": ["node"]
   },
-  "include": ["src/**/*", "tests/**/*", "scripts/**/*", "vitest.config.ts"],
+  "include": ["src/**/*", "tests/**/*", "scripts/**/*", "vitest*.config.ts"],
   "exclude": ["node_modules", "dist"]
 }

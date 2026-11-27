@@ -1,8 +1,9 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 reviews:
   auto_review:
     enabled: true
     ignore_title_keywords:
       - "Version Packages"
-  ignore_users:
-    - "dependabot[bot]"
-    - "github-actions[bot]"
+    ignore_usernames:
+      - "dependabot[bot]"
+      - "github-actions[bot]"
