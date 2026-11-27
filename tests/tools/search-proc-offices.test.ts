@@ -14,10 +14,7 @@ import {
   handler,
 } from "../../src/tools/organizations/search-proc-offices.js";
 import type { ProcOfficePublicData } from "../../src/types/api.js";
-import {
-  KNOWN_PROC_OFFICE_TYPES,
-  ProcOfficesPublicResponseSchema,
-} from "../../src/types/schemas.js";
+import { ProcOfficesPublicResponseSchema } from "../../src/types/schemas.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FIXTURE = resolve(__dirname, "../fixtures/proc-offices-mixed-types.json");
@@ -132,12 +129,6 @@ describe("proc office type label mapping", () => {
     expect(getProcOfficeTypeLabel(type)).toBe(label);
   });
 
-  it("should label every known type", () => {
-    for (const type of KNOWN_PROC_OFFICE_TYPES) {
-      expect(getProcOfficeTypeLabel(type)).not.toContain("`");
-    }
-  });
-
   it("should show an unknown type as-is in inline code", () => {
     expect(getProcOfficeTypeLabel("future_office_type")).toBe(
       "`future_office_type`"
@@ -197,7 +188,7 @@ describe("search_proc_offices handler", () => {
   });
 
   it("should list every office when simap returns new or unknown types (#144)", async () => {
-    const fetchMock = vi.fn(async () => jsonResponse(loadFixture()));
+    const fetchMock = vi.fn(async (_input: string | URL) => jsonResponse(loadFixture()));
     vi.stubGlobal("fetch", fetchMock);
 
     const result = await handler({ search: "Zürich" });

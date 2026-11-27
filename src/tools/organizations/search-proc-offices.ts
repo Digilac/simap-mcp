@@ -8,7 +8,6 @@ import { z } from "zod";
 import { simap } from "../../api/client.js";
 import { ENDPOINTS } from "../../api/endpoints.js";
 import type {
-  KnownProcOfficeType,
   ProcOfficePublicData,
   ProcOfficesPublicResponse,
   ProcOfficeType,
@@ -44,7 +43,7 @@ const MAX_RESULTS = 50;
 /**
  * Human-readable English labels for the office types simap is known to return.
  */
-const TYPE_LABELS: Record<KnownProcOfficeType, string> = {
+const TYPE_LABELS: Record<string, string> = {
   federal: "Federal",
   central_federation: "Federal (central administration)",
   decentral_federation: "Federal (decentralised administration)",
@@ -62,9 +61,7 @@ const TYPE_LABELS: Record<KnownProcOfficeType, string> = {
  * added after this list was written is shown as-is, as inline code.
  */
 export function getProcOfficeTypeLabel(type: ProcOfficeType): string {
-  return Object.hasOwn(TYPE_LABELS, type)
-    ? TYPE_LABELS[type as KnownProcOfficeType]
-    : formatInlineCode(type);
+  return Object.hasOwn(TYPE_LABELS, type) ? TYPE_LABELS[type] : formatInlineCode(type);
 }
 
 /**

@@ -314,26 +314,8 @@ export const PastPublicationsResponseSchema = z.object({
 // --- Procurement office schemas ---
 
 /**
- * Procurement office types the server has a label for. simap adds new values
- * without notice (e.g. `central_federation` replaced `federal`), so the
- * response schema accepts any string and this list only drives the labels.
- */
-export const KNOWN_PROC_OFFICE_TYPES = [
-  "federal",
-  "central_federation",
-  "decentral_federation",
-  "other_federation",
-  "cantonal",
-  "other_cantonal",
-  "inter_cantonal",
-  "communal",
-  "other_communal",
-  "international",
-] as const;
-
-/**
- * Accepts any office type so one unknown value doesn't reject the whole
- * response.
+ * Accepts any office type: simap adds new values without notice (#144), and
+ * one unknown value must not reject the whole response.
  */
 export const ProcOfficeTypeSchema = z.string();
 
